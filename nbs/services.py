@@ -1,1 +1,0 @@
-../quick-scrum/services.py
