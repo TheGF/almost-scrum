@@ -3,7 +3,10 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 module.exports = {
     devServer: {
         contentBase: './dist',
-        hot: true
+        hot: true,
+        proxy: {
+            '/api': 'http://127.0.0.1:4444',
+        },         
     },
     module: {
         rules: [
@@ -34,5 +37,5 @@ module.exports = {
             template: "./src/index.html",
             filename: "./index.html"
         })
-    ]
+    ],
 };
