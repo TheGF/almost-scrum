@@ -8,6 +8,7 @@ module.exports = {
             '/api': 'http://127.0.0.1:4444',
         },         
     },
+    devtool: 'inline-source-map',
     module: {
         rules: [
             {

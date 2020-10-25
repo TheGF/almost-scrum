@@ -1,8 +1,8 @@
 import React from 'react';
-import Login from './Login';
+import ProjectsList from './ProjectsList';
 
-function Desktop() {
-    return <Login/>;
+function Desktop(username) {
+    return <ProjectsList/>
 }
 
 export default Desktop;
