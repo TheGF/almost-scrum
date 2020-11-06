@@ -20,7 +20,7 @@ function TopBar() {
 
     return  <Navbar bg="dark" variant="dark">
     <Navbar.Brand href="#home"><GiGrapes/> Almost Scrum 0.1</Navbar.Brand>
-    <Nav className="ml-auto" >
+    <Nav className="c" >
       <Nav.Link href="#">Git Import</Nav.Link>
       <Nav.Link href="#">Features</Nav.Link>
       <Nav.Link href="#" onClick={logout}>Logout <IoMdLogOut/></Nav.Link>
@@ -39,10 +39,10 @@ function Desktop(props) {
             </Col>
         </Row>
         <Row>
-            <Col md="3">
+            <Col style={{flex: 0}}>
                 <ProjectsList onSelect={setProject} />
             </Col>
-            <Col md="9">
+            <Col md>
                 <Project username={props.username} project={project} />
             </Col>
         </Row>

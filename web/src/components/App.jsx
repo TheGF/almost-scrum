@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Desktop from './Desktop';
 import Login from './Login';
+import './custom.css';
 
 const App = () => {
 

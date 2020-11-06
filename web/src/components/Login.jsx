@@ -17,7 +17,7 @@ function Login(props) {
             .then(r => props.onLogin(username, r.data))
             .catch(r => setError(`Invalid Credentials: ${r.message}`));
     }
-    return <Modal show="True">
+    return <Modal show={true}>
         <Modal.Header>
             <Modal.Title>Welcome to A Scrum</Modal.Title>
         </Modal.Header>

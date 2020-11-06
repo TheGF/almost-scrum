@@ -20,6 +20,8 @@ function Project(props) {
     const [projectData, setProjectData] = useState(null);
     const [forbidden, setForbidden] = useState(null);
 
+    
+
     function fetch() {
         project && axios.get(`/api/v1/projects/${project}`, getConfig())
             .then(r => setProjectData(r.data))
@@ -37,11 +39,6 @@ function Project(props) {
         <NoProjectSelected username={props.username} />
         : <ProjectViews project={project}/>
     return content;
-    // return <Card bg="light" border="primary" >
-    //     <Card.Body>
-    //         <div>{content}</div>
-    //     </Card.Body>
-    // </Card>
 }
 
 export default Project;

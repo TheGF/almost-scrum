@@ -1,0 +1,21 @@
+.custom-rotate90{
+    -webkit-transform:rotate(270deg);
+    -moz-transform:rotate(270deg);
+    -o-transform: rotate(270deg);
+    -ms-transform:rotate(270deg);
+    transform: rotate(270deg);
+    white-space:nowrap;
+    display:block;
+    margin: 3em 0em;
+}
+
+.custom-sidebar {
+    -ms-flex: 0 0 70px;
+    flex: 0 0 70px;
+} 
+
+.btn-primary {
+    color: #fff;
+    background-color: gray;
+    border-color: #007bff;
+}

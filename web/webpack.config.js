@@ -1,4 +1,5 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
+const path = require('path');
 
 module.exports = {
     devServer: {
@@ -6,7 +7,13 @@ module.exports = {
         hot: true,
         proxy: {
             '/api': 'http://127.0.0.1:4444',
-        },         
+        },  
+        watchOptions: {
+            ignored: [
+              path.resolve(__dirname, 'dist'),
+              path.resolve(__dirname, 'node_modules')
+            ]
+        }       
     },
     devtool: 'inline-source-map',
     module: {
@@ -27,10 +34,14 @@ module.exports = {
                     }
                 ]
             },
+            // {
+            //     test: /\.css$/i,
+            //     use: ['style-loader', 'css-loader'],
+            // },
             {
-                test: /\.css$/i,
-                use: ['style-loader', 'css-loader'],
-            }
+                test: /\.s[ac]ss$/i,
+                use: ['style-loader', 'css-loader', 'sass-loader'],
+              },
         ]
     },
     plugins: [

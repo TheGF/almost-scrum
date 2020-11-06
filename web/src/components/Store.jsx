@@ -1,29 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import ListGroup from 'react-bootstrap/ListGroup';
-import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-import InputGroup from 'react-bootstrap/InputGroup';
 import Badge from 'react-bootstrap/Badge';
-import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import Card from 'react-bootstrap/Card';
+import Form from 'react-bootstrap/Form';
+import ListGroup from 'react-bootstrap/ListGroup';
 import Modal from 'react-bootstrap/Modal';
-import axios from 'axios';
-import { getConfig, loginWhenUnauthorized } from './axiosUtils';
-import { GrNewWindow } from 'react-icons/gr';
-import { BiArchive} from 'react-icons/bi';
-import { AiOutlineToTop } from 'react-icons/ai';
-import { emptyStory } from './consts';
-
+import { AiOutlineLeftSquare, AiOutlineRightSquare, AiOutlineUpSquare } from 'react-icons/ai';
+import { VscNewFile, VscNewFolder } from 'react-icons/vsc';
+import Server from './Server';
 
 function CreateStory(props) {
-    const { project, store, show, afterCreate } = props;
+    const { project, store, show, setShow } = props;
     const [title, setTitle] = useState('');
 
     function postStory() {
-        axios.post(`/api/v1/projects/${project}/${store}?title=${title}`, emptyStory, getConfig())
-            .then(() => { afterCreate(); setTitle('') })
-            .catch(loginWhenUnauthorized);
+        Server.createStory(project, store, title)
+            .then(setShow)
+            .then(_ => setTitle(''));
     }
 
     return <Modal show={show}>
@@ -32,7 +26,7 @@ function CreateStory(props) {
         </Modal.Header>
         <Modal.Body>
             <Form>
-                <Form.Group controlId="formBasicEmail">
+                <Form.Group controlId="formTitle">
                     <Form.Label>Title</Form.Label>
                     <Form.Control type="text" placeholder="Short title for the story"
                         value={title} onChange={e => setTitle(e.target.value)} />
@@ -43,67 +37,71 @@ function CreateStory(props) {
             <Button variant="primary" onClick={postStory}>
                 Create
             </Button>
+            <Button variant="secondary" onClick={_ => {
+                setShow();
+                setTitle('');
+            }}>
+                Cancel
+            </Button>
         </Modal.Footer>
     </Modal>;
 }
 
 function Store(props) {
-    const { project, store } = props;
+    const { project, store, story, onSelect, toLeft, toRight, reload } = props;
     const [stories, setStories] = useState([]);
-    const [selected, setSelected] = useState(null);
-    const [showNewStory, setShowNewStory] = useState(false);
-
-    function afterCreate() {
-        setShowNewStory(false);
-    }
-
-    function touchStory(s) {
-        axios.post(`/api/v1/projects/${project}/${store}/${s}?touch`, null, getConfig())
-            .then(r => setStories(r.data))
-            .catch(loginWhenUnauthorized)
-    }
-
-    function archiveStory(s) {
-        axios.post(`/api/v1/projects/${project}/${store}/${s}?archive`, null, getConfig())
-            .then(r => setStories(r.data))
-            .catch(loginWhenUnauthorized)
-    }
-
-    function selectStory(s) {
-        props.onSelect && props.onSelect(s);
-        setSelected(s);
-    }
+    const [showCreateStory, setShowCreateStory] = useState(false);
 
     function fetchStories() {
-        axios.get(`/api/v1/projects/${project}/${store}`, getConfig())
-            .then(r => setStories(r.data))
-            .catch(loginWhenUnauthorized)
+        Server.getStoriesList(project, store)
+            .then(setStories);
     }
-    useEffect(fetchStories, [showNewStory]);
+    useEffect(fetchStories, [showCreateStory]);
 
-    const storyList = stories.map(s => <ListGroup.Item 
-            key={s} active={s==selected} onClick={() => selectStory(s)}>
-        {s}
-        <span className="float-right" >
-            <a href="#" onClick={() => archiveStory(s)}>
-                <BiArchive />
-            </a>
-            <a href="#" onClick={() => touchStory(s)}>
-                <AiOutlineToTop />
-            </a>
-        </span>
-    </ListGroup.Item>)
+    const storyList = stories.map(s =>
+        <ListGroup.Item active={s == story} style={{ padding: '0.3em', cursor: 'pointer' }}
+            key={s} onClick={_ => onSelect && onSelect(s)}>
+            {s}
+            <span className="float-right" onClick={e => e.stopPropagation} >
+                {toLeft &&
+                    <a href="#" title={`Move the story to ${toLeft}`}
+                        onClick={_ =>
+                            Server.moveStory(project, store, s, toLeft)
+                                .then(reload)}>
+                        <AiOutlineLeftSquare />
+                    </a>}
+            &nbsp;
+            <a href="#" title="Move the story to the top of the list"
+                    onClick={_ =>
+                        Server.touchStory(project, store, s)
+                            .then(fetchStories)}>
+                    <AiOutlineUpSquare />
+                </a>
+            &nbsp;
+            {toRight &&
+                    <a href="#" title={`Move the story to ${toRight}`}
+                        onClick={_ =>
+                            Server.moveStory(project, store, s, toRight)
+                                .then(reload)}>
+                        <AiOutlineRightSquare />
+                    </a>}
+            </span>
+        </ListGroup.Item>)
 
     return <Form>
         <Card>
-            <Badge>{store}</Badge>
-            <CreateStory show={showNewStory} project={project} store={store}
-                afterCreate={afterCreate} />
-            <Button variant="secondary" onClick={() => setShowNewStory(true)}>
-                <GrNewWindow />
-                New
-            </Button>
-            <ListGroup>
+            <Badge>{project}/{store}</Badge>
+            <CreateStory show={showCreateStory} setShow={setShowCreateStory}
+                project={project} store={store} />
+            <ButtonToolbar className="d-flex">
+                <Button className="ml-1 mb-1" variant="primary" onClick={_ => setShowCreateStory(true)}>
+                    <VscNewFile /> Create Story
+                </Button>
+                <Button className="ml-1 mb-1" variant="primary" onClick={_ => setShowCreateStory(true)}>
+                    <VscNewFolder /> Create Folder
+                </Button>
+            </ButtonToolbar>
+            <ListGroup variant="flush">
                 {storyList}
             </ListGroup>
         </Card>
