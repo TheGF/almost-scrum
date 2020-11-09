@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Navbar from 'react-bootstrap/Navbar';
+import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import {IoMdLogOut} from 'react-icons/io';
-import {GiGrapes} from 'react-icons/gi';
-import ProjectsList from './ProjectsList';
+import Navbar from 'react-bootstrap/Navbar';
+import Row from 'react-bootstrap/Row';
+import { GiGrapes } from 'react-icons/gi';
+import { IoMdLogOut } from 'react-icons/io';
 import Project from './Project';
+import ProjectsList from './ProjectsList';
 
 function TopBar() {
     function logout() {

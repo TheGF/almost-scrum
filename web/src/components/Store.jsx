@@ -8,6 +8,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Modal from 'react-bootstrap/Modal';
 import { AiOutlineLeftSquare, AiOutlineRightSquare, AiOutlineUpSquare } from 'react-icons/ai';
 import { VscNewFile, VscNewFolder } from 'react-icons/vsc';
+import { emptyStory } from './consts';
 import Server from './Server';
 
 function CreateStory(props) {
@@ -15,7 +16,7 @@ function CreateStory(props) {
     const [title, setTitle] = useState('');
 
     function postStory() {
-        Server.createStory(project, store, title)
+        Server.createStory(project, store, title, emptyStory)
             .then(setShow)
             .then(_ => setTitle(''));
     }

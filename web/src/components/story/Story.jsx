@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Badge from 'react-bootstrap/Badge';
 import { useForm } from 'react-hook-form';
-import { lazyCall, sendPendingCalls } from './axiosUtils';
-import Server from './Server';
+import Server from '../Server';
 import StoryForm from './StoryForm';
+import Utils from '../utils';
 
-let lastForm = null;
 
 function Story(props) {
     const { project, store, story } = props;
@@ -14,7 +13,7 @@ function Story(props) {
     function lazySave(values) {
         const key = `/${project}/${store}/${story}`;
         setPendingWrite(true);
-        lazyCall(key, _ =>
+        Utils.lazyCall(key, _ =>
             Server.saveStory(project, store, story, values)
                 .then(_ => setPendingWrite(false)));
         return {
@@ -26,7 +25,7 @@ function Story(props) {
     function fetch() {
         Server.getStory(project, store, story)
             .then(form.reset)
-            .then(sendPendingCalls);
+            .then(Utils.sendPendingCalls);
     }
     useEffect(fetch, [project, store, story]);
 

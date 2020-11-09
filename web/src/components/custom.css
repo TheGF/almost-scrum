@@ -19,3 +19,8 @@
     background-color: gray;
     border-color: #007bff;
 }
+
+.modal-80w {
+    width: 80%;
+    max-width: 80% !important;
+}

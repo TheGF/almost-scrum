@@ -4,7 +4,8 @@ const emptyStory = {
     status: 'Draft',
     owner: '',
     tasks: [],
-    timeline: []
+    timeline: [],
+    attachments: [],
 }
 
 const pointsUnitOptions = {

@@ -1,22 +1,5 @@
 
-function getConfig() {
-    const token = localStorage.token || '';
 
-    return token ? {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        } 
-    }: {}
-}
-
-
-function loginWhenUnauthorized(r) {
-    if (r && r.response && r.response.status == 401) {
-        localStorage.removeItem('username');
-        localStorage.removeItem('token');
-        window.location.assign(window.location.href);
-    }
-}
 
 let pendingCalls = {}
 
@@ -38,4 +21,4 @@ function sendPendingCalls() {
 
 setInterval(sendPendingCalls, 30000);
 
-export { getConfig, loginWhenUnauthorized, lazyCall, sendPendingCalls };
+export { lazyCall, sendPendingCalls };
