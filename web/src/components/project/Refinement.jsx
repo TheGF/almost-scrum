@@ -4,7 +4,7 @@ import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/esm/Card';
 import Row from 'react-bootstrap/Row';
 import Store from './Store';
-import Story from './story/Story';
+import Story from '../story/Story';
 
 function Refinement(props) {
     const { project, reload } = props;

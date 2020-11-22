@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Refinement from './Refinement';
-import Library from './library/Library';
+import Library from '../library/Library';
 
 
 function ProjectViews(props) {

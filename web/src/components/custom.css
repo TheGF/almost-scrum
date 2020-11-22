@@ -14,10 +14,9 @@
     flex: 0 0 70px;
 } 
 
-.btn-primary {
-    color: #fff;
-    background-color: gray;
-    border-color: #007bff;
+
+.btn {
+    margin: 0.1em !important;
 }
 
 .modal-80w {

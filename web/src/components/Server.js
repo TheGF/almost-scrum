@@ -39,40 +39,48 @@ class Server {
     }
 
 
-    static getStoriesList(project, store) {
-        return axios.get(`/api/v1/projects/${project}/stores/${store}`, getConfig())
+    static getStoreList(project, store, path) {
+        return axios.get(`/api/v1/projects/${project}/stores/${store}${path}`, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
 
-    static getStory(project, store, story) {
-        return axios.get(`/api/v1/projects/${project}/stores/${store}/${story}`, getConfig())
-            .then(r => r.data)
-            .catch(loginWhenUnauthorized);
-    }
-
-    static createStory(project, store, title, content) {
-        return axios.post(`/api/v1/projects/${project}/stores/${store}?title=${title}`, content, getConfig())
+    static getStory(project, store, path) {
+        return axios.get(`/api/v1/projects/${project}/stores/${store}${path}`, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
 
 
-    static saveStory(project, store, story, content) {
-        return axios.post(`/api/v1/projects/${project}/stores/${store}/${story}`, content, getConfig())
+    static createStory(project, store, path, title, content) {
+        return axios.post(`/api/v1/projects/${project}/stores/${store}${path}?title=${title}`, content, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
+
+
+    static saveStory(project, store, path, content) {
+        return axios.put(`/api/v1/projects/${project}/stores/${store}${path}`, content, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static createFolder(project, store, path) {
+        return axios.put(`/api/v1/projects/${project}/stores/${store}${path}`, null, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
 
     static moveStory(project, store, story, target) {
-        return axios.post(`/api/v1/projects/${project}/stores/${target}?from=${store}/${story}`,
+        return axios.post(`/api/v1/projects/${project}/stores/${target}?from=${store}${story}`,
             null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
 
     static touchStory(project, store, story) {
-        return axios.post(`/api/v1/projects/${project}/stores/${store}/${story}?touch`, null, getConfig())
+        return axios.post(`/api/v1/projects/${project}/stores/${store}${story}?touch`, null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized)
     }

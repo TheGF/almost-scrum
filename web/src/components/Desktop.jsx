@@ -6,8 +6,8 @@ import Navbar from 'react-bootstrap/Navbar';
 import Row from 'react-bootstrap/Row';
 import { GiGrapes } from 'react-icons/gi';
 import { IoMdLogOut } from 'react-icons/io';
-import Project from './Project';
-import ProjectsList from './ProjectsList';
+import Project from './project/Project';
+import ProjectsList from './project/ProjectsList';
 
 function TopBar() {
     function logout() {

@@ -1,6 +1,4 @@
-/* === Import Bootstrap functions and variables === */
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
+
 /*-------------------------------------------------------------------*/
 /* Change theme-colors */
 $theme-colors: (
@@ -11,8 +9,8 @@ $theme-colors: (
                 warning: #f5e74a,
                 danger: #820410
                 );
-        
-/*-------------------------------------------------------------------*/
-/* === Boostrap Main SCSS === */
+
+$spacer: 1.2em;
+
+
 @import "~bootstrap/scss/bootstrap";
-/*-------------------------------------------------------------------*/>

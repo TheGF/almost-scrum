@@ -9,7 +9,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import { CgPushLeft, CgPushRight } from 'react-icons/cg';
 import { MdFavorite, MdFavoriteBorder, MdSearch } from 'react-icons/md';
-import Server from './Server';
+import Server from '../Server';
 
 function ProjectsList(props) {
     const [activeOption, setActiveOption] = useState('All');

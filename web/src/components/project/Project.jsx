@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ProjectViews from './ProjectViews';
-import Server from './Server';
+import Server from '../Server';
 
 function NoProjectSelected(props) {
     return <div style={{ marginTop: '50px' }}>
