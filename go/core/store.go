@@ -3,31 +3,35 @@ package core
 
 import (
 	"fmt"
-	"log"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
+
+	log "github.com/sirupsen/logrus"
+
+	"gopkg.in/yaml.v2"
 )
 
 // Store structure
 type Store struct {
-	path string
+	Path string
 }
 
 // StoreItem is the result of List operation
 type StoreItem struct {
-	path    string
-	modtime time.Time
-	dir     bool
+	Path    string    `json:"path"`
+	ModTime time.Time `json:"modTime"`
+	Dir     bool      `json:"dir"`
 }
 
 // List the content of a store
 func List(s Store) []StoreItem {
-	log.Printf("List content of store at %s", s.path)
+	log.Printf("List content of store at %s", s.Path)
 	var list []StoreItem = make([]StoreItem, 0, 100)
 
-	rootLen := len(s.path)
-	filepath.Walk(s.path, func(parent string, info os.FileInfo, err error) error {
+	rootLen := len(s.Path)
+	filepath.Walk(s.Path, func(parent string, info os.FileInfo, err error) error {
 		if err != nil {
 			log.Print(err)
 			return nil
@@ -40,18 +44,45 @@ func List(s Store) []StoreItem {
 		}
 
 		list = append(list, StoreItem{
-			path:    path,
-			modtime: info.ModTime(),
-			dir:     dir,
+			Path:    path,
+			ModTime: info.ModTime(),
+			Dir:     dir,
 		})
-		log.Printf("List lenght: %d", len(list))
 		return nil
 	})
-	log.Printf("Final list lenght: %d", len(list))
 	return list
 }
 
-// Set a story in the Store
-func Set(s Store, path string, story Story) {
+// Get a story in the Store
+func Get(s Store, path string) (story Story, err error) {
+	path = fmt.Sprintf("%s/%s", s.Path, path)
+	d, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Infof("Invalid file %s: %v", path, err)
+		return
+	}
 
+	err = yaml.Unmarshal(d, &story)
+	if err != nil {
+		log.Infof("Invalid file %s: %v", path, err)
+		return
+	}
+	return
+}
+
+//Set a story in the Store
+func Set(s Store, path string, story *Story) (err error) {
+	d, err := yaml.Marshal(&story)
+	if err != nil {
+		log.Infof("Cannot marshal story %s: %v", path, err)
+		return
+	}
+	path = filepath.Join(s.Path, path)
+	err = ioutil.WriteFile(path, d, 0644)
+	if err != nil {
+		log.Infof("Cannot save story %s: %v", path, err)
+		return
+	}
+	log.Infof("Story saved to %s", path)
+	return
 }
