@@ -1,5 +1,8 @@
 package main
 
+import "almost-scrum/core"
+
 func main() {
-	Store{"."}
+	store := core.Store{Path: "."}
+	core.ListStore(store)
 }

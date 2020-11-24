@@ -23,28 +23,28 @@ var story = Story{
 	Attachments: []string{},
 }
 
-func TestStoreList(t *testing.T) {
+func TestListStore(t *testing.T) {
 	store := Store{Path: ".."}
-	list := List(store)
+	list := ListStore(store)
 	assert.GreaterOrEqual(t, len(list), 1)
 }
 
-func TestStoreSet(t *testing.T) {
+func TestSetStory(t *testing.T) {
 
 	store := Store{Path: "../test-data"}
-	assert.Nilf(t, Set(store, "1.Hello.story", &story), "Cannot write to store")
+	assert.Nilf(t, SetStory(store, "1.Hello.story", &story), "Cannot write to store")
 }
 
-func TestStoreGet(t *testing.T) {
+func TestGetStory(t *testing.T) {
 	store := Store{Path: "../test-data"}
-	s, _ := Get(store, "1.Hello.story")
+	s, _ := GetStory(store, "1.Hello.story")
 	assert.Equal(t, story, s, "Mismatch in story read")
 }
 
 func BenchmarkGet(b *testing.B) {
 	store := Store{Path: "../test-data"}
 	for i := 0; i < b.N; i++ {
-		Get(store, "1.Hello.story")
+		GetStory(store, "1.Hello.story")
 	}
 
 }

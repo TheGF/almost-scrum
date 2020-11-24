@@ -3,14 +3,11 @@ package core
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
 
 	log "github.com/sirupsen/logrus"
-
-	"gopkg.in/yaml.v2"
 )
 
 // Store structure
@@ -25,9 +22,9 @@ type StoreItem struct {
 	Dir     bool      `json:"dir"`
 }
 
-// List the content of a store
-func List(s Store) []StoreItem {
-	log.Printf("List content of store at %s", s.Path)
+// ListStore the content of a store
+func ListStore(s Store) []StoreItem {
+	log.Debugf("ListStore - List content of store at %s", s.Path)
 	var list []StoreItem = make([]StoreItem, 0, 100)
 
 	rootLen := len(s.Path)
@@ -50,39 +47,30 @@ func List(s Store) []StoreItem {
 		})
 		return nil
 	})
+	log.Debugf("ListStore - Found items: %v", list)
 	return list
 }
 
-// Get a story in the Store
-func Get(s Store, path string) (story Story, err error) {
-	path = fmt.Sprintf("%s/%s", s.Path, path)
-	d, err := ioutil.ReadFile(path)
+// GetStory a story in the Store
+func GetStory(s Store, path string) (story Story, err error) {
+	path = filepath.Join(s.Path, path)
+	err = ReadYaml(path, &story)
 	if err != nil {
-		log.Infof("Invalid file %s: %v", path, err)
-		return
-	}
-
-	err = yaml.Unmarshal(d, &story)
-	if err != nil {
-		log.Infof("Invalid file %s: %v", path, err)
-		return
+		log.Errorf("Cannot read story %s: %v", path, err)
+	} else {
+		log.Debugf("Story %s read %+v", path, story)
 	}
 	return
 }
 
-//Set a story in the Store
-func Set(s Store, path string, story *Story) (err error) {
-	d, err := yaml.Marshal(&story)
-	if err != nil {
-		log.Infof("Cannot marshal story %s: %v", path, err)
-		return
-	}
+//SetStory a story in the Store
+func SetStory(s Store, path string, story *Story) (err error) {
 	path = filepath.Join(s.Path, path)
-	err = ioutil.WriteFile(path, d, 0644)
+	err = WriteYaml(path, story)
 	if err != nil {
-		log.Infof("Cannot save story %s: %v", path, err)
-		return
+		log.Errorf("Cannot write story %s: %v", path, err)
+	} else {
+		log.Debugf("Story saved to %s", path)
 	}
-	log.Infof("Story saved to %s", path)
 	return
 }
