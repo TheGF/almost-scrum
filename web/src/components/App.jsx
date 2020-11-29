@@ -5,8 +5,8 @@ import './custom.css';
 
 const App = () => {
 
-    function handleLogin(username, token) {
-        localStorage.token = token;
+    function handleLogin(username, data) {
+        localStorage.token = data.token;
         localStorage.username = username;
         setUsername(username)
     }

@@ -6,7 +6,8 @@ module.exports = {
         contentBase: './dist',
         hot: true,
         proxy: {
-            '/api': 'http://127.0.0.1:4444',
+            '/api': 'http://127.0.0.1:8375',
+            '/auth': 'http://127.0.0.1:8375',
         },  
         watchOptions: {
             ignored: [

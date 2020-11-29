@@ -44,8 +44,8 @@ function Library(props) {
     }
 
     function fileView(file) {
-        const { name, dir, mime, mtime, creator } = file;
-        const time = Utils.getFriendlyDate(mtime * 1000);
+        const { name, dir, mime, modTime, creator } = file;
+        const time = Utils.getFriendlyDate(modTime);
 
         return <Row>
             <Col md="5">

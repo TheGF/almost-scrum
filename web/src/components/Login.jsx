@@ -13,7 +13,7 @@ function Login(props) {
 
     function handleAuthenticate() {
         const data = { username: username, password: password };
-        axios.post("/api/v1/login", data)
+        axios.post("/auth/login", data)
             .then(r => props.onLogin(username, r.data))
             .catch(r => setError(`Invalid Credentials: ${r.message}`));
     }

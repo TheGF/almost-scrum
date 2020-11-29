@@ -1,8 +1,9 @@
 package main
 
-import "almost-scrum/core"
+import (
+	"almost-scrum/cli"
+)
 
 func main() {
-	store := core.Store{Path: "."}
-	core.ListStore(store)
+	cli.ProcessArgs()
 }

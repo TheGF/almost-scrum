@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -66,6 +68,16 @@ func FindProject(path, root string) (Project, error) {
 	return findProjectOutside(path, root)
 }
 
+// OpenProject checks if the given path contains a project and creates an instance of Project.
+func OpenProject(path string) (Project, error) {
+	fileInfo, err := os.Stat(filepath.Join(path, ProjectConfigFile))
+	if err != nil || fileInfo.IsDir() {
+		return Project{}, ErrNoFound
+	}
+	log.Debugf("FindProject - Project found in %s", path)
+	return Project{Path: path}, nil
+}
+
 // InitProject initializes a new project in the specified directory
 func InitProject(path string) (Project, error) {
 	path, err := filepath.Abs(path)
@@ -103,6 +115,28 @@ func InitProject(path string) (Project, error) {
 	return Project{path}, nil
 }
 
+//GetNextID browses all stories in all stores and returns the next possible id.
+func GetNextID(project Project) int {
+	path := filepath.Join(project.Path, "stores")
+	id := 1
+
+	filepath.Walk(path, func(path string, fileInfo os.FileInfo, err error) error {
+		if fileInfo.IsDir() {
+			return nil
+		}
+		name := fileInfo.Name()
+		firstDot := strings.IndexByte(name, '.')
+		if firstDot > 0 {
+			fileID, _ := strconv.Atoi(name[:firstDot])
+			if id <= fileID {
+				id = fileID + 1
+			}
+		}
+		return nil
+	})
+	return id
+}
+
 // ShredProject fully deletes all files in a project. Use with caution!
 func ShredProject(project Project) error {
 	files := append([]string{}, ProjectFolders...)
@@ -129,11 +163,18 @@ func ShredProject(project Project) error {
 	return nil
 }
 
-// GetStore returns the specified store
-func GetStore(project Project, store string) (Store, error) {
-	path := filepath.Join(project.Path, "stores", store)
-	if fileInfo, err := os.Stat(path); err != nil || !fileInfo.IsDir() {
-		return Store{}, ErrNoFound
+// ListStores returns the stores in the project
+func ListStores(project Project) ([]string, error) {
+	storesPath := filepath.Join(project.Path, "stores")
+	infos, err := ioutil.ReadDir(storesPath)
+	if err != nil {
+		log.Warnf("Cannot list store folder: %v", err)
+		return nil, err
 	}
-	return Store{Path: path}, nil
+
+	stores := make([]string, 0, len(infos))
+	for _, info := range infos {
+		stores = append(stores, info.Name())
+	}
+	return stores, nil
 }

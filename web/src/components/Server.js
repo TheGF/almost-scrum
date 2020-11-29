@@ -110,7 +110,8 @@ class Server {
 //        return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
 
         const link = document.createElement("a");
-        link.href = `/api/v1/projects/${project}/library${path}`;
+        link.href = `/api/v1/projects/${project}/library${path}?token=${localStorage.token}`;
+        link.target = '_';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

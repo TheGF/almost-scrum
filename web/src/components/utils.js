@@ -29,7 +29,8 @@ const mime2icons = [
 
 
 class Utils {
-    static getFriendlyDate(unixtime) {
+    static getFriendlyDate(utcTime) {        
+        const unixtime = Date.parse(utcTime)
         const dateTime = new Date(unixtime);
         let today = new Date()
         today.setHours(0,0,0,0)

@@ -10,8 +10,11 @@ const ProjectConfigFile = ".almost-scrum"
 // ProjectUsersFolder the folder containing users
 const ProjectUsersFolder = "users"
 
+// ProjectUsersFolder the folder containing users
+const ProjectLibraryFolder = "library"
+
 // ProjectFolders is the required folders in the project
-var ProjectFolders = []string{"stores/backlog", "stores/sandbox", "library", "tags",
+var ProjectFolders = []string{"stores/backlog", "stores/sandbox", ProjectLibraryFolder, "tags",
 	ProjectUsersFolder}
 
 // ErrNoFound occurs when an item is not found
