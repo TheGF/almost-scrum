@@ -13,15 +13,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var config *core.Config
+
 func usage() {
 	fmt.Printf("usage: ash [-p <project-path>] <command> [<args>]\n\n" +
 		"These are the common Ash commands used in various situations.\n" +
 		"\tinit              Initialize a project in the project path\n" +
 		"\ttop [n]           Show top stories in current store\n" +
+		"\tnew [title]       Create a story\n" +
 		"\tedit [name]       Edit a story\n" +
-		"\tstores            List the stores and set the default\n" +
-		"\tstores new        Create a new store\n" +
-		"\tpwd <user>    	 Set the user's password globally\n" +
+		"\tdone [name]       Change a story status to Done\n" +
+		"\tstore             List the stores and set the default\n" +
+		"\tstore new         Create a new store\n" +
+		"\tpwd <user>        Set the user's password globally\n" +
 		"\tusers add <id>    Add a user to current project\n" +
 		"\tusers rm <id>     Remove a user to current project\n" +
 		"\tweb               Start the Web UI\n\n" +
@@ -60,6 +64,8 @@ func ProcessArgs() {
 	var logLevel string
 	var port string
 
+	config = core.LoadConfig()
+
 	flag.Usage = usage
 	flag.StringVar(&projectPath, "p", ".",
 		"Path where the project is. Default is current folder")
@@ -82,16 +88,22 @@ func ProcessArgs() {
 	switch commands[0] {
 	case "init":
 		processInit(projectPath, commands[1:])
-	case "stores":
-		processStores(projectPath, commands[1:])
+	case "store":
+		processStore(projectPath, commands[1:])
 	case "users":
 		processUsers(projectPath, commands[1:])
 	case "pwd":
 		processPwd(commands[1:])
 	case "top":
 		processTop(projectPath, commands[1:])
+	case "new":
+		processNew(projectPath, commands[1:])
+	case "edit":
+		processEdit(projectPath, commands[1:])
+	// case "done":
+	// 	processDone(projectPath, commands[1:])
 	case "web":
-		web.StartServer(port, commands[1:])
+		web.StartServer(port, logLevel, commands[1:])
 	default:
 		flag.Usage()
 	}

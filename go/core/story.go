@@ -20,8 +20,8 @@ type TimeEntry struct {
 type Story struct {
 	Description string      `json:"description" yaml:"description"`
 	Points      int         `json:"points" yaml:"points"`
+	Owner       string      `json:"owner" yaml:"owner"`
 	Tasks       []Task      `json:"tasks" yaml:"tasks"`
 	TimeEntries []TimeEntry `json:"timeEntries" yaml:"timeEntries"`
 	Attachments []string    `json:"attachments" yaml:"attachments"`
-	Users       []string    `json:"users" yaml:"users,flow"`
 }

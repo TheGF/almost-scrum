@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -10,7 +11,7 @@ import (
 
 func staticHandler(c *gin.Context) {
 	p := c.Param("name")
-	p = fmt.Sprintf("%s%s", "data", p)
+	//	p = fmt.Sprintf("%s%s", "data", p)
 	log.Debugf("Static request %s", p)
 	data, err := Asset(p)
 	if err != nil {
@@ -22,7 +23,7 @@ func staticHandler(c *gin.Context) {
 
 func loadStaticContent(router *gin.Engine) {
 	for _, name := range AssetNames() {
-		path := name[len("static"):]
+		path := fmt.Sprintf("/%s", name)
 		data, err := Asset(name)
 		if err != nil {
 			log.Errorf("Cannot read asset %s: %s", name, err)
@@ -32,12 +33,19 @@ func loadStaticContent(router *gin.Engine) {
 			c.Writer.Write(data)
 		})
 		log.Debugf("Bound resource %s to %s", name, path)
-
 	}
+	router.GET("/", func(c *gin.Context) {
+		data, _ := Asset("index.html")
+		c.Writer.Write(data)
+	})
+
 }
 
 //StartServer starts the embedded server.
-func StartServer(port string, args []string) {
+func StartServer(port string, logLevel string, args []string) {
+	if strings.ToUpper(logLevel) != "DEBUG" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.Default()
 	loadStaticContent(r)
 
@@ -50,6 +58,7 @@ func StartServer(port string, args []string) {
 	projectRoute(v1)
 	storeRoute(v1)
 	libraryRoute(v1)
+	userRoute(v1)
 
 	r.Run(fmt.Sprintf(":%s", port))
 }

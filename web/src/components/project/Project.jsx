@@ -17,8 +17,8 @@ function Project(props) {
 
 
     function fetch() {
-        project && Server.getProject(project)
-                        .then(setProjectData);
+    //     project && Server.getProject(project)
+    //                     .then(setProjectData);
     }
     useEffect(fetch, [project]);
 

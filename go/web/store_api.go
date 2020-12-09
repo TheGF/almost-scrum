@@ -12,7 +12,7 @@ import (
 
 func storeRoute(group *gin.RouterGroup) {
 	group.GET("/projects/:project/stores", listStoresAPI)
-	group.GET("/projects/:project/stores/:store", listStoreAPI)
+	group.GET("/projects/:project/stores/:store", getStoryAPI)
 	group.GET("/projects/:project/stores/:store/*path", getStoryAPI)
 	group.POST("/projects/:project/stores/:store", postStoryAPI)
 	group.POST("/projects/:project/stores/:store/*path", postStoryAPI)
@@ -59,19 +59,19 @@ func listStoresAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, stores)
 }
 
-func listStoreAPI(c *gin.Context) {
-	var p core.Project
-	var s core.Store
+// func listStoreAPI(c *gin.Context) {
+// 	var p core.Project
+// 	var s core.Store
 
-	err := getProjectAndStore(c, &p, &s)
-	if err != nil {
-		return
-	}
+// 	err := getProjectAndStore(c, &p, &s)
+// 	if err != nil {
+// 		return
+// 	}
 
-	stores := core.ListStore(s)
-	log.Debugf("listStoreAPI - List stores: %v", stores)
-	c.JSON(http.StatusOK, stores)
-}
+// 	stores := core.ListStore(s)
+// 	log.Debugf("listStoreAPI - List stores: %v", stores)
+// 	c.JSON(http.StatusOK, stores)
+// }
 
 func getStoryAPI(c *gin.Context) {
 	var p core.Project
@@ -84,7 +84,15 @@ func getStoryAPI(c *gin.Context) {
 
 	path := c.Param("path")
 	if !strings.HasSuffix(path, ".story") {
-		c.String(http.StatusNotFound, "Story %s does not exist", path)
+		list, err := core.ListStore(s, path)
+		if err != nil {
+			c.Error(err)
+			c.String(http.StatusInternalServerError, "Cannot list store")
+			return
+		}
+
+		log.Debugf("listStoreAPI - List stores: %v", list)
+		c.JSON(http.StatusOK, list)
 		return
 	}
 
@@ -120,8 +128,8 @@ func postStoryAPI(c *gin.Context) {
 		return
 	}
 
-	id := core.GetNextID(p)
-	path = fmt.Sprintf("%s/%d. %s.story", path, id, title)
+	name := core.GetStoryName(p, title)
+	path = fmt.Sprintf("%s/%s", path, name)
 	err = core.SetStory(s, path, &story)
 	if err != nil {
 		log.Warnf("createStory - Cannot save story to %s: %v", path, err)

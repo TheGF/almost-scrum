@@ -12,7 +12,7 @@ function CreateStory(props) {
     function postStory() {
         const path = folders.join('/');
         Server.createStory(project, store, path, title, emptyStory)
-            .then(setShow)
+            .then(_ => setShow(false))
             .then(_ => setTitle(''));
     }
 

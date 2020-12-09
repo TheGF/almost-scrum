@@ -1,13 +1,14 @@
 package core
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Project is the basic information about a scrum project.
@@ -22,7 +23,7 @@ func findProjectInside(path string) (Project, error) {
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err == nil && !info.IsDir() && info.Name() == ProjectConfigFile {
 			parent := filepath.Dir(path)
-			log.Debugf("FindProject - Project found in %s", parent)
+			logrus.Debugf("FindProject - Project found in %s", parent)
 			foundPaths = append(foundPaths, parent)
 		}
 		return nil
@@ -30,13 +31,13 @@ func findProjectInside(path string) (Project, error) {
 
 	switch len(foundPaths) {
 	case 0:
-		log.Infof("No projects found in %s", path)
+		logrus.Infof("No projects found in %s", path)
 		return Project{}, ErrNoFound
 	case 1:
-		log.Infof("Project found in %s", foundPaths[0])
+		logrus.Infof("Project found in %s", foundPaths[0])
 		return Project{Path: foundPaths[0]}, nil
 	default:
-		log.Infof("Multiple projects found in %s", path)
+		logrus.Infof("Multiple projects found in %s", path)
 		return Project{}, ErrTooMany
 	}
 }
@@ -45,12 +46,12 @@ func findProjectOutside(path, root string) (Project, error) {
 	path, _ = filepath.Abs(path)
 	fileInfo, err := os.Stat(filepath.Join(path, ProjectConfigFile))
 	if err == nil && !fileInfo.IsDir() {
-		log.Debugf("FindProject - Project found in %s", path)
+		logrus.Debugf("FindProject - Project found in %s", path)
 		return Project{Path: path}, nil
 	}
 
 	if parent := filepath.Dir(path); parent != root && parent != path {
-		log.Debugf("FindProject - Check in %s", parent)
+		logrus.Debugf("FindProject - Check in %s", parent)
 		return findProjectOutside(parent, root)
 	}
 
@@ -74,7 +75,7 @@ func OpenProject(path string) (Project, error) {
 	if err != nil || fileInfo.IsDir() {
 		return Project{}, ErrNoFound
 	}
-	log.Debugf("FindProject - Project found in %s", path)
+	logrus.Debugf("FindProject - Project found in %s", path)
 	return Project{Path: path}, nil
 }
 
@@ -88,7 +89,7 @@ func InitProject(path string) (Project, error) {
 	configPath := filepath.Join(path, ProjectConfigFile)
 	// Check that no project is already initialized
 	if _, err := os.Stat(configPath); err == nil {
-		log.Errorf("InitProject - Cannot initialize project. Project %s already exists", path)
+		logrus.Errorf("InitProject - Cannot initialize project. Project %s already exists", path)
 		return Project{}, ErrExists
 	}
 
@@ -96,14 +97,14 @@ func InitProject(path string) (Project, error) {
 	for _, folder := range ProjectFolders {
 		folder = filepath.Join(path, folder)
 		if err := os.MkdirAll(folder, 0755); err != nil {
-			log.Errorf("InitProject - Cannot create folder %s", folder)
+			logrus.Errorf("InitProject - Cannot create folder %s", folder)
 			return Project{}, err
 		}
 	}
 
 	// Create the project configuration
 	if err := ioutil.WriteFile(configPath, []byte("version: 1.0"), 0644); err != nil {
-		log.Errorf("InitProject - Cannot create file %s", configPath)
+		logrus.Errorf("InitProject - Cannot create file %s", configPath)
 		return Project{}, err
 	}
 
@@ -115,8 +116,8 @@ func InitProject(path string) (Project, error) {
 	return Project{path}, nil
 }
 
-//GetNextID browses all stories in all stores and returns the next possible id.
-func GetNextID(project Project) int {
+//GetStoryName browses all stories in all stores and returns the next possible id.
+func GetStoryName(project Project, title string) string {
 	path := filepath.Join(project.Path, "stores")
 	id := 1
 
@@ -134,7 +135,7 @@ func GetNextID(project Project) int {
 		}
 		return nil
 	})
-	return id
+	return fmt.Sprintf("%d.%s.story", id, title)
 }
 
 // ShredProject fully deletes all files in a project. Use with caution!
@@ -144,11 +145,11 @@ func ShredProject(project Project) error {
 
 	projectPath, err := filepath.Abs(project.Path)
 	if err != nil {
-		log.Errorf("ShredProject - Cannot resolve path %s", project.Path)
+		logrus.Errorf("ShredProject - Cannot resolve path %s", project.Path)
 	}
 	for _, file := range files {
 		path := filepath.Join(projectPath, file)
-		log.Debugf("ShredProject - Going to remove %s", path)
+		logrus.Debugf("ShredProject - Going to remove %s", path)
 		err := os.RemoveAll(path)
 		if err != nil {
 			return err
@@ -168,7 +169,7 @@ func ListStores(project Project) ([]string, error) {
 	storesPath := filepath.Join(project.Path, "stores")
 	infos, err := ioutil.ReadDir(storesPath)
 	if err != nil {
-		log.Warnf("Cannot list store folder: %v", err)
+		logrus.Warnf("Cannot list store folder: %v", err)
 		return nil, err
 	}
 

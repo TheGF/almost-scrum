@@ -2,11 +2,14 @@
 package core
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,7 +20,7 @@ type Store struct {
 
 // StoreItem is the result of List operation
 type StoreItem struct {
-	Path    string    `json:"path"`
+	Name    string    `json:"name"`
 	ModTime time.Time `json:"modTime"`
 	Dir     bool      `json:"dir"`
 }
@@ -72,41 +75,73 @@ func CreateFolder(s Store, path string) error {
 }
 
 // ListStore the content of a store
-func ListStore(s Store) []StoreItem {
-	log.Debugf("ListStore - List content of store at %s", s.Path)
-	var list []StoreItem = make([]StoreItem, 0, 100)
+func ListStore(s Store, path string) ([]StoreItem, error) {
 
-	rootLen := len(s.Path)
+	path = filepath.Join(s.Path, path)
+	fileInfos, err := ioutil.ReadDir(path)
+	if err != nil {
+		log.Warnf("Error reading path store")
+		return nil, err
+	}
 
-	filepath.Walk(s.Path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			log.Print(err)
-			return nil
-		}
-
-		if len(path) == rootLen {
-			return nil
-		}
-		path = path[rootLen:]
-		log.Debugf("Check %s, %s", path, info.Name())
-		if path == ".." {
-			return nil
-		}
-
+	var list []StoreItem = make([]StoreItem, 0, len(fileInfos))
+	for _, fileInfo := range fileInfos {
 		list = append(list, StoreItem{
-			Path:    path,
-			ModTime: info.ModTime(),
-			Dir:     info.IsDir(),
+			Name:    fileInfo.Name(),
+			ModTime: fileInfo.ModTime(),
+			Dir:     fileInfo.IsDir(),
 		})
-		return nil
-	})
+	}
 
 	sort.Slice(list, func(i, j int) bool {
 		return list[i].ModTime.After(list[j].ModTime)
 	})
 
 	log.Debugf("ListStore - Found items: %v", list)
-	return list
+	return list, nil
+}
+
+func walkIn(root string, path string) ([]StoreItem, error) {
+	items := make([]StoreItem, 0)
+	logrus.Debugf("Walk into %s/%s", root, path)
+	fileInfos, err := ioutil.ReadDir(filepath.Join(root, path))
+	if err != nil {
+		log.Warnf("Error reading path store")
+		return nil, err
+	}
+
+	for _, fileInfo := range fileInfos {
+		name := filepath.Join(path, fileInfo.Name())
+		if fileInfo.IsDir() {
+			subFolderItems, err := walkIn(root, name)
+			if err != nil {
+				return nil, err
+			}
+			items = append(items, subFolderItems...)
+		} else {
+			logrus.Debugf("Adding item %s to result", name)
+			items = append(items, StoreItem{
+				Name:    name,
+				ModTime: fileInfo.ModTime(),
+				Dir:     false,
+			})
+		}
+	}
+	return items, nil
+}
+
+// WalkStore returns the c the content of a store
+func WalkStore(s Store) ([]StoreItem, error) {
+	items, err := walkIn(s.Path, "")
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].ModTime.After(items[j].ModTime)
+	})
+
+	return items, nil
 }
 
 // GetStory a story in the Store
@@ -119,6 +154,29 @@ func GetStory(s Store, path string) (story Story, err error) {
 		log.Debugf("Story %s read %+v", path, story)
 	}
 	return
+}
+
+// GetStoryAbsPath returns the absolute path of a story
+func GetStoryAbsPath(s Store, path string) string {
+	p, _ := filepath.Abs(filepath.Join(s.Path, path))
+	return p
+}
+
+type _Ownership map[string][]string
+
+// SetOwner sets the owner of the specified story
+func setOwnership(s Store, path string, owner string) error {
+	path = filepath.Join(s.Path, path)
+	folder := filepath.Dir(path)
+	file := filepath.Join(folder, ".owners.json")
+
+	var ownership _Ownership
+	err := ReadJSON(file, &ownership)
+	if err != nil {
+		ownership = map[string][]string{}
+	}
+
+	json.Unmarshal([]byte(owner), &ownership)
 }
 
 //SetStory a story in the Store

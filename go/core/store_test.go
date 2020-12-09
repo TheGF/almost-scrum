@@ -25,7 +25,7 @@ var story = Story{
 
 func TestListStore(t *testing.T) {
 	store := Store{Path: ".."}
-	list := ListStore(store)
+	list := ListStore(store, "")
 	assert.GreaterOrEqual(t, len(list), 1)
 }
 

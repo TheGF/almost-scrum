@@ -4,23 +4,27 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"os"
+	"os/user"
 	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
 
 //Config is the global configuration stored in the user's home directory.
 type Config struct {
 	Editor       string
+	User         string
 	Passwords    map[string]string
 	Projects     map[string]string
 	Secret       string
 	CurrentStore string
+	OwnerLock    bool
 }
 
 var defaultConfig = Config{
 	Editor:       "",
+	User:         "",
 	Passwords:    map[string]string{},
 	Projects:     map[string]string{},
 	Secret:       getSecret(),
@@ -55,12 +59,12 @@ func SetPassword(user, password string) error {
 
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
-		log.Errorf("SetUser - Cannot save user %s and password %s: %v", user, err)
+		logrus.Errorf("SetUser - Cannot save user %s and password %s: %v", user, err)
 		return err
 	}
 	config.Passwords[user] = hex.EncodeToString(bytes)
 	SaveConfig(config)
-	log.Debugf("SetPassword - set password for user %s", user)
+	logrus.Debugf("SetPassword - set password for user %s", user)
 	return nil
 }
 
@@ -80,9 +84,15 @@ func LoadConfig() *Config {
 	var config Config
 	err := ReadYaml(configPath, &config)
 	if err != nil {
-		log.Warnf("Cannot read global configuration %s: %v", configPath, err)
+		logrus.Warnf("Cannot read global configuration %s: %v", configPath, err)
+		user, err := user.Current()
+		if err != nil {
+			defaultConfig.User = user.Name
+		}
 		SaveConfig(&defaultConfig)
 		return &defaultConfig
+	} else {
+		logrus.Debugf("Successfully loaded config from %s: %v", configPath, config)
 	}
 	return &config
 }
@@ -92,8 +102,8 @@ func SaveConfig(config *Config) {
 	configPath := getConfigPath()
 	err := WriteYaml(configPath, config)
 	if err != nil {
-		log.Panicf("Cannot save global configuration in %s: %v", configPath, err)
+		logrus.Panicf("Cannot save global configuration in %s: %v", configPath, err)
 		panic(err)
 	}
-	log.Debugf("Config saved to %s", configPath, config)
+	logrus.Debugf("Config saved to %s", configPath, config)
 }

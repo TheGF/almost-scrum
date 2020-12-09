@@ -26,11 +26,11 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
-    static getProject(project) {
-        return axios.get(`/api/v1/projects/${project}`, getConfig())
-            .then(r => r.data)
-            .catch(loginWhenUnauthorized);
-    }
+    // static getProject(project) {
+    //     return axios.get(`/api/v1/projects/${project}`, getConfig())
+    //         .then(r => r.data)
+    //         .catch(loginWhenUnauthorized);
+    // }
 
     static getUsers(project) {
         return axios.get(`/api/v1/projects/${project}/users`, getConfig())
@@ -53,7 +53,7 @@ class Server {
 
 
     static createStory(project, store, path, title, content) {
-        return axios.post(`/api/v1/projects/${project}/stores/${store}${path}?title=${title}`, content, getConfig())
+        return axios.post(`/api/v1/projects/${project}/stores/${store}/${path}?title=${title}`, content, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
@@ -66,7 +66,7 @@ class Server {
     }
 
     static createFolder(project, store, path) {
-        return axios.put(`/api/v1/projects/${project}/stores/${store}${path}`, null, getConfig())
+        return axios.put(`/api/v1/projects/${project}/stores/${store}/${path}`, null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
