@@ -162,21 +162,28 @@ func GetStoryAbsPath(s Store, path string) string {
 	return p
 }
 
-type _Ownership map[string][]string
+type _MetaItem struct {
+	Owner string `json:"owner"`
+}
+
+type _Meta map[string]_MetaItem
 
 // SetOwner sets the owner of the specified story
 func setOwnership(s Store, path string, owner string) error {
 	path = filepath.Join(s.Path, path)
+	name := filepath.Base(path)
 	folder := filepath.Dir(path)
-	file := filepath.Join(folder, ".owners.json")
+	file := filepath.Join(folder, ".ash-meta.json")
 
-	var ownership _Ownership
-	err := ReadJSON(file, &ownership)
+	var meta _Meta
+	err := ReadJSON(file, &meta)
 	if err != nil {
-		ownership = map[string][]string{}
+		meta = map[string]_MetaItem{}
 	}
-
-	json.Unmarshal([]byte(owner), &ownership)
+	meta[name] = _MetaItem{
+		Owner: owner,
+	}
+	return json.Unmarshal([]byte(owner), &meta)
 }
 
 //SetStory a story in the Store

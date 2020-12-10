@@ -145,7 +145,12 @@ web/package-lock.json
 
 # test data
 data
+sample
 nbs/qs-proj
 
 #generated code
 ascrum
+
+#binary 
+go
+ash
