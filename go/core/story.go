@@ -24,4 +24,5 @@ type Story struct {
 	Tasks       []Task      `json:"tasks" yaml:"tasks"`
 	TimeEntries []TimeEntry `json:"timeEntries" yaml:"timeEntries"`
 	Attachments []string    `json:"attachments" yaml:"attachments"`
+	Tags        []string    `json:"tags" yaml:"tags"`
 }

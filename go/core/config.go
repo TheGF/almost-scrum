@@ -59,7 +59,7 @@ func SetPassword(user, password string) error {
 
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
-		logrus.Errorf("SetUser - Cannot save user %s and password %s: %v", user, err)
+		logrus.Errorf("SetUser - Cannot save user %s and password: %v", user, err)
 		return err
 	}
 	config.Passwords[user] = hex.EncodeToString(bytes)
@@ -105,5 +105,5 @@ func SaveConfig(config *Config) {
 		logrus.Panicf("Cannot save global configuration in %s: %v", configPath, err)
 		panic(err)
 	}
-	logrus.Debugf("Config saved to %s", configPath, config)
+	logrus.Debugf("Config saved to %s", configPath)
 }

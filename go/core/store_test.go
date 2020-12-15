@@ -9,7 +9,6 @@ import (
 var story = Story{
 	Description: "Test of a story",
 	Points:      12,
-	Users:       []string{"mp", "mol"},
 	Tasks: []Task{{
 		Description: "Test of a task",
 		Done:        true,
@@ -25,7 +24,7 @@ var story = Story{
 
 func TestListStore(t *testing.T) {
 	store := Store{Path: ".."}
-	list := ListStore(store, "")
+	list, _ := ListStore(store, "")
 	assert.GreaterOrEqual(t, len(list), 1)
 }
 

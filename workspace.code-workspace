@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "go/core"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}

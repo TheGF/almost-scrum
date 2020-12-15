@@ -1,5 +1,6 @@
 description: Test of a story
 points: 12
+owner: ""
 tasks:
 - description: Test of a task
   done: true
@@ -7,4 +8,3 @@ tasks:
   done: false
 timeEntries: []
 attachments: []
-users: [mp, mol]

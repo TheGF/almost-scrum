@@ -2,7 +2,6 @@
 package core
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -15,7 +14,8 @@ import (
 
 // Store structure
 type Store struct {
-	Path string
+	Project Project
+	Path    string
 }
 
 // StoreItem is the result of List operation
@@ -31,7 +31,7 @@ func GetStore(project Project, store string) (Store, error) {
 	if fileInfo, err := os.Stat(path); err != nil || !fileInfo.IsDir() {
 		return Store{}, ErrNoFound
 	}
-	return Store{Path: path}, nil
+	return Store{project, path}, nil
 }
 
 // CreateStore creates a new store inside a project
@@ -41,7 +41,7 @@ func CreateStore(project Project, name string) (Store, error) {
 	if err != nil {
 		return Store{}, err
 	}
-	return Store{path}, nil
+	return Store{project, path}, nil
 }
 
 // CreateSprint creates a new store with name sprint-n, where n is next available integer.
@@ -168,24 +168,6 @@ type _MetaItem struct {
 
 type _Meta map[string]_MetaItem
 
-// SetOwner sets the owner of the specified story
-func setOwnership(s Store, path string, owner string) error {
-	path = filepath.Join(s.Path, path)
-	name := filepath.Base(path)
-	folder := filepath.Dir(path)
-	file := filepath.Join(folder, ".ash-meta.json")
-
-	var meta _Meta
-	err := ReadJSON(file, &meta)
-	if err != nil {
-		meta = map[string]_MetaItem{}
-	}
-	meta[name] = _MetaItem{
-		Owner: owner,
-	}
-	return json.Unmarshal([]byte(owner), &meta)
-}
-
 //SetStory a story in the Store
 func SetStory(s Store, path string, story *Story) (err error) {
 	path = filepath.Join(s.Path, path)
@@ -195,5 +177,6 @@ func SetStory(s Store, path string, story *Story) (err error) {
 	} else {
 		log.Debugf("Story saved to %s", path)
 	}
+	LinkTagsFromStory(s, path, story)
 	return
 }

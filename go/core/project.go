@@ -13,7 +13,8 @@ import (
 
 // Project is the basic information about a scrum project.
 type Project struct {
-	Path string
+	Path         string
+	CurrentStore string
 }
 
 func findProjectInside(path string) (Project, error) {
@@ -90,7 +91,7 @@ func InitProject(path string) (Project, error) {
 	// Check that no project is already initialized
 	if _, err := os.Stat(configPath); err == nil {
 		logrus.Errorf("InitProject - Cannot initialize project. Project %s already exists", path)
-		return Project{}, ErrExists
+		return Project{Path: path}, ErrExists
 	}
 
 	// Create required folders
@@ -113,7 +114,7 @@ func InitProject(path string) (Project, error) {
 	gconfig.Projects[filepath.Base(path)] = path
 	SaveConfig(gconfig)
 
-	return Project{path}, nil
+	return Project{path, "backlog"}, nil
 }
 
 //GetStoryName browses all stories in all stores and returns the next possible id.

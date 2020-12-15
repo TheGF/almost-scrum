@@ -47,5 +47,8 @@ func processEdit(projectPath string, args []string) {
 	if selected != "" {
 		path := core.GetStoryAbsPath(store, selected)
 		openEditor(path)
+		if story, err := core.GetStory(store, selected); err == nil {
+			core.LinkTagsFromStory(store, path, story)
+		}
 	}
 }
