@@ -34,8 +34,7 @@ func processEdit(projectPath string, args []string) {
 		os.Exit(1)
 	}
 	if len(names) == 1 {
-		path := core.GetStoryAbsPath(store, names[0])
-		openEditor(path)
+		openEditor(store, names[0])
 		return
 	}
 
@@ -45,10 +44,6 @@ func processEdit(projectPath string, args []string) {
 	}
 	_, selected, _ := prompt.Run()
 	if selected != "" {
-		path := core.GetStoryAbsPath(store, selected)
-		openEditor(path)
-		if story, err := core.GetStory(store, selected); err == nil {
-			core.LinkTagsFromStory(store, path, story)
-		}
+		openEditor(store, selected)
 	}
 }

@@ -10,12 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func openEditor(path string) {
-	var editor string = config.Editor
-	if editor == "" {
-		editor = "nano"
-	}
-
+func openExternalEditor(editor string, path string) {
 	cmd := exec.Command(editor, path)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

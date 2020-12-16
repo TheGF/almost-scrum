@@ -17,6 +17,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/rivo/tview v0.0.0-20201204190810-5406288b8e4e
 	github.com/silenceper/gowatch v0.0.0-20201011022207-2725a3e5b521 // indirect
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.6.1

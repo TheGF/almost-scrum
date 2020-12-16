@@ -53,6 +53,5 @@ func processNew(projectPath string, args []string) {
 	story.Owner = user.Name
 
 	core.SetStory(store, name, &story)
-	path := core.GetStoryAbsPath(store, name)
-	openEditor(path)
+	openEditor(store, name)
 }
