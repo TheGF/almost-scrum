@@ -22,7 +22,9 @@ func usage() {
 		"\ttop [n]           Show top stories in current store\n" +
 		"\tnew [title]       Create a story\n" +
 		"\tedit [name]       Edit a story\n" +
+		"\tgrant [name]      Assign the story to another user\n" +
 		"\tdone [name]       Change a story status to Done\n" +
+		"\tcommit            Commit changes to the git repository\n" +
 		"\tstore             List the stores and set the default\n" +
 		"\tstore new         Create a new store\n" +
 		"\tpwd <user>        Set the user's password globally\n" +
@@ -100,6 +102,8 @@ func ProcessArgs() {
 		processNew(projectPath, commands[1:])
 	case "edit":
 		processEdit(projectPath, commands[1:])
+	case "grant":
+		processGrant(projectPath, commands[1:])
 	// case "done":
 	// 	processDone(projectPath, commands[1:])
 	case "web":

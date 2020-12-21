@@ -15,69 +15,56 @@ import (
 type Project struct {
 	Path         string
 	CurrentStore string
+	Users        []string
 }
 
-func findProjectInside(path string) (Project, error) {
-	path, _ = filepath.Abs(path)
-	foundPaths := make([]string, 0, 1)
-
-	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err == nil && !info.IsDir() && info.Name() == ProjectConfigFile {
-			parent := filepath.Dir(path)
-			logrus.Debugf("FindProject - Project found in %s", parent)
-			foundPaths = append(foundPaths, parent)
-		}
-		return nil
-	})
-
-	switch len(foundPaths) {
-	case 0:
-		logrus.Infof("No projects found in %s", path)
-		return Project{}, ErrNoFound
-	case 1:
-		logrus.Infof("Project found in %s", foundPaths[0])
-		return Project{Path: foundPaths[0]}, nil
-	default:
-		logrus.Infof("Multiple projects found in %s", path)
-		return Project{}, ErrTooMany
-	}
+type ProjectConfig struct {
+	CurrentStore string   `yaml:"currentStore"`
+	Users        []string `yaml:"users"`
 }
 
-func findProjectOutside(path, root string) (Project, error) {
-	path, _ = filepath.Abs(path)
-	fileInfo, err := os.Stat(filepath.Join(path, ProjectConfigFile))
-	if err == nil && !fileInfo.IsDir() {
-		logrus.Debugf("FindProject - Project found in %s", path)
-		return Project{Path: path}, nil
-	}
+// LoadTheProjectConfig
+func ReadProjectConfig(path string) (ProjectConfig, error) {
+	var projectConfig ProjectConfig
+	err := ReadYaml(filepath.Join(path, ProjectConfigFile), &projectConfig)
+	return projectConfig, err
+}
 
-	if parent := filepath.Dir(path); parent != root && parent != path {
-		logrus.Debugf("FindProject - Check in %s", parent)
-		return findProjectOutside(parent, root)
-	}
-
-	return Project{}, ErrNoFound
-
+func WriteProjectConfig(path string, config *ProjectConfig) error {
+	return WriteYaml(filepath.Join(path, ProjectConfigFile), config)
 }
 
 // FindProject searches for a project inside path and its parents up to root.
 // Usually, root can be an empty string.
-func FindProject(path, root string) (Project, error) {
-	if project, err := findProjectInside(path); err == nil {
-		return project, nil
+func FindProject(path string) (Project, error) {
+	p, _ := FindFileUpwards(path, GitFolder)
+	if p != "" {
+		_, err := os.Stat(filepath.Join(p, ProjectFolder))
+		if err == nil {
+			return OpenProject(filepath.Join(p, ProjectFolder))
+		}
 	}
 
-	return findProjectOutside(path, root)
+	p, _ = FindFileUpwards(path, ProjectConfigFile)
+	if p != "" {
+		return OpenProject(p)
+	}
+	return Project{}, ErrNoFound
 }
 
 // OpenProject checks if the given path contains a project and creates an instance of Project.
 func OpenProject(path string) (Project, error) {
-	fileInfo, err := os.Stat(filepath.Join(path, ProjectConfigFile))
-	if err != nil || fileInfo.IsDir() {
+	projectConfig, err := ReadProjectConfig(path)
+	if err != nil {
 		return Project{}, ErrNoFound
 	}
+
 	logrus.Debugf("FindProject - Project found in %s", path)
-	return Project{Path: path}, nil
+	return Project{
+		Path:         path,
+		CurrentStore: projectConfig.CurrentStore,
+		Users:        projectConfig.Users,
+	}, nil
 }
 
 // InitProject initializes a new project in the specified directory
@@ -87,10 +74,8 @@ func InitProject(path string) (Project, error) {
 		return Project{}, err
 	}
 
-	configPath := filepath.Join(path, ProjectConfigFile)
-	// Check that no project is already initialized
-	if _, err := os.Stat(configPath); err == nil {
-		logrus.Errorf("InitProject - Cannot initialize project. Project %s already exists", path)
+	if _, err := ReadProjectConfig(path); err == nil {
+		logrus.Warnf("InitProject - Cannot initialize project. Project %s already exists", path)
 		return Project{Path: path}, ErrExists
 	}
 
@@ -104,17 +89,25 @@ func InitProject(path string) (Project, error) {
 	}
 
 	// Create the project configuration
-	if err := ioutil.WriteFile(configPath, []byte("version: 1.0"), 0644); err != nil {
-		logrus.Errorf("InitProject - Cannot create file %s", configPath)
+	projectConfig := ProjectConfig{
+		CurrentStore: "backlog",
+		Users:        []string{GetCurrentUser()},
+	}
+	if err := WriteProjectConfig(path, &projectConfig); err != nil {
+		logrus.Errorf("InitProject - Cannot create config file in %s", path)
 		return Project{}, err
 	}
 
 	// Store a reference to the project in the global configuration
-	gconfig := LoadConfig()
-	gconfig.Projects[filepath.Base(path)] = path
-	SaveConfig(gconfig)
+	globalConfig := LoadConfig()
+	globalConfig.Projects[filepath.Base(path)] = path
+	SaveConfig(globalConfig)
 
-	return Project{path, "backlog"}, nil
+	return Project{
+		Path:         path,
+		CurrentStore: projectConfig.CurrentStore,
+		Users:        projectConfig.Users,
+	}, nil
 }
 
 //GetStoryName browses all stories in all stores and returns the next possible id.
@@ -158,9 +151,9 @@ func ShredProject(project Project) error {
 	}
 
 	// Remove a reference to the project from the global configuration
-	gconfig := LoadConfig()
-	delete(gconfig.Projects, filepath.Base(project.Path))
-	SaveConfig(gconfig)
+	globalConfig := LoadConfig()
+	delete(globalConfig.Projects, filepath.Base(project.Path))
+	SaveConfig(globalConfig)
 
 	return nil
 }

@@ -6,9 +6,12 @@ require (
 	github.com/appleboy/gin-jwt/v2 v2.6.4
 	github.com/fatih/color v1.10.0
 	github.com/gabriel-vasile/mimetype v1.1.2
+	github.com/gdamore/tcell v1.4.0 // indirect
+	github.com/gdamore/tcell/v2 v2.0.1-0.20201017141208-acf90d56d591
 	github.com/gin-contrib/static v0.0.0-20200916080430-d45d9a37d28e // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
+	github.com/go-delve/delve v1.5.1 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
@@ -17,6 +20,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/pgavlin/femto v0.0.0-20191028012355-31a9964a50b5 // indirect
 	github.com/rivo/tview v0.0.0-20201204190810-5406288b8e4e
 	github.com/silenceper/gowatch v0.0.0-20201011022207-2725a3e5b521 // indirect
 	github.com/sirupsen/logrus v1.7.0

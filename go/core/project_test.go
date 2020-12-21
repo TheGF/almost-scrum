@@ -21,7 +21,7 @@ func TestInitProject(t *testing.T) {
 	_, err := InitProject("../test-data/my-scrum")
 	assert.Nilf(t, err, "Cannot initialize project: %w", err)
 
-	project, err := FindProject("..", "")
+	project, err := FindProject("../test-data/my-scrum")
 	assert.Nilf(t, err, "Cannot find expected project: %w", err)
 	assert.DirExistsf(t, project.Path, "Expected project but none found: %w", err)
 

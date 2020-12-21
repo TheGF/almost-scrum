@@ -3,17 +3,24 @@ package cli
 import (
 	"almost-scrum/core"
 	"os"
+	"sort"
 
 	"github.com/fatih/color"
 )
 
 func getProject(projectPath string) core.Project {
-	project, err := core.FindProject(projectPath, "")
+	project, err := core.FindProject(projectPath)
 	if err != nil {
 		color.Red("No project found. Make sure a project exists in current directory" +
 			" or specify a project location with the parameter -p")
 		os.Exit(1)
 	}
+
+	if sort.SearchStrings(project.Users, core.GetCurrentUser()) == len(project.Users) {
+		color.Red("I found the project but you are not a user. Bye")
+		os.Exit(1)
+	}
+
 	return project
 }
 

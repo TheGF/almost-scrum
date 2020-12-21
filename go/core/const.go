@@ -4,8 +4,14 @@ import (
 	"errors"
 )
 
+// GitFolder is the default folder where git info is stored
+const GitFolder = ".git"
+
+// ProjectFolder is the default folder name when the Ash is used inside a Git repository
+const ProjectFolder = ".ash"
+
 // ProjectConfigFile is a configuration file for the project
-const ProjectConfigFile = ".almost-scrum"
+const ProjectConfigFile = "ash.yaml"
 
 // ProjectUsersFolder the folder containing users
 const ProjectUsersFolder = "users"
