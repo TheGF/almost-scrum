@@ -38,7 +38,7 @@ func getProject(c *gin.Context, p *core.Project) error {
 	config := core.LoadConfig()
 	path := config.Projects[project]
 	if path == "" {
-		c.Error(core.ErrNoFound)
+		_ = c.Error(core.ErrNoFound)
 		c.String(http.StatusNotFound, "Project %s not found in configuration",
 			project)
 		return core.ErrNoFound
@@ -47,7 +47,7 @@ func getProject(c *gin.Context, p *core.Project) error {
 	var err error
 	*p, err = core.OpenProject(path)
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		c.String(http.StatusNotFound, "Project %s not found at %s: %v",
 			project, path, err)
 		return err

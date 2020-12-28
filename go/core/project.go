@@ -11,16 +11,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Project is the basic information about a scrum project.
-type Project struct {
-	Path         string
-	CurrentStore string
-	Users        []string
+type ProjectConfig struct {
+	CurrentBoard string   `yaml:"current_store"`
+	Users        []string `yaml:"users"`
 }
 
-type ProjectConfig struct {
-	CurrentStore string   `yaml:"currentStore"`
-	Users        []string `yaml:"users"`
+// Project is the basic information about a scrum project.
+type Project struct {
+	Path   string
+	Config ProjectConfig
+	Index  *Index
 }
 
 // LoadTheProjectConfig
@@ -61,9 +61,8 @@ func OpenProject(path string) (Project, error) {
 
 	logrus.Debugf("FindProject - Project found in %s", path)
 	return Project{
-		Path:         path,
-		CurrentStore: projectConfig.CurrentStore,
-		Users:        projectConfig.Users,
+		Path:   path,
+		Config: projectConfig,
 	}, nil
 }
 
@@ -90,32 +89,31 @@ func InitProject(path string) (Project, error) {
 
 	// Create the project configuration
 	projectConfig := ProjectConfig{
-		CurrentStore: "backlog",
-		Users:        []string{GetCurrentUser()},
+		CurrentBoard: "backlog",
+		Users:        []string{},
 	}
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {
 		logrus.Errorf("InitProject - Cannot create config file in %s", path)
 		return Project{}, err
 	}
 
-	// Store a reference to the project in the global configuration
+	// Board a reference to the project in the global configuration
 	globalConfig := LoadConfig()
 	globalConfig.Projects[filepath.Base(path)] = path
 	SaveConfig(globalConfig)
 
 	return Project{
-		Path:         path,
-		CurrentStore: projectConfig.CurrentStore,
-		Users:        projectConfig.Users,
+		Path:   path,
+		Config: projectConfig,
 	}, nil
 }
 
-//GetStoryName browses all stories in all stores and returns the next possible id.
-func GetStoryName(project Project, title string) string {
-	path := filepath.Join(project.Path, "stores")
+//NewTaskName browses all stories in all boards and returns the next possible id.
+func NewTaskName(project Project, title string) string {
+	path := filepath.Join(project.Path, "boards")
 	id := 1
 
-	filepath.Walk(path, func(path string, fileInfo os.FileInfo, err error) error {
+	_ = filepath.Walk(path, func(path string, fileInfo os.FileInfo, err error) error {
 		if fileInfo.IsDir() {
 			return nil
 		}
@@ -129,7 +127,7 @@ func GetStoryName(project Project, title string) string {
 		}
 		return nil
 	})
-	return fmt.Sprintf("%d.%s.story", id, title)
+	return fmt.Sprintf("%d.%s", id, title)
 }
 
 // ShredProject fully deletes all files in a project. Use with caution!
@@ -158,10 +156,10 @@ func ShredProject(project Project) error {
 	return nil
 }
 
-// ListStores returns the stores in the project
-func ListStores(project Project) ([]string, error) {
-	storesPath := filepath.Join(project.Path, "stores")
-	infos, err := ioutil.ReadDir(storesPath)
+// ListBoards returns the boards in the project
+func ListBoards(project Project) ([]string, error) {
+	p := filepath.Join(project.Path, "boards")
+	infos, err := ioutil.ReadDir(p)
 	if err != nil {
 		logrus.Warnf("Cannot list store folder: %v", err)
 		return nil, err
@@ -172,4 +170,10 @@ func ListStores(project Project) ([]string, error) {
 		stores = append(stores, info.Name())
 	}
 	return stores, nil
+}
+
+// CreateBoard creates a new store inside a project
+func CreateBoard(project Project, name string) error {
+	p := filepath.Join(project.Path, "boards", name)
+	return os.MkdirAll(p, 0777)
 }

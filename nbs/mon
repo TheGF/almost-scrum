@@ -1,1 +1,0 @@
-while inotifywait . -e modify; do nbdev_build_lib; done

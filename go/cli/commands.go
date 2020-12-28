@@ -8,8 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/fatih/color"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -20,29 +18,36 @@ func usage() {
 		"These are the common Ash commands used in various situations.\n" +
 		"\tinit              Initialize a project in the project path\n" +
 		"\ttop [n]           Show top stories in current store\n" +
-		"\tnew [title]       Create a story\n" +
-		"\tedit [name]       Edit a story\n" +
-		"\tgrant [name]      Assign the story to another user\n" +
-		"\tdone [name]       Change a story status to Done\n" +
+		"\tnew [title]       Create a task\n" +
+		"\tedit [name]       Edit a task\n" +
+		"\tdel [name]        Delete a task\n" +
+		"\ttouch [name]      Focus on a task\n" +
+		"\towner [name]      Assign the story to another user\n" +
 		"\tcommit            Commit changes to the git repository\n" +
-		"\tstore             List the stores and set the default\n" +
-		"\tstore new         Create a new store\n" +
-		"\tpwd <user>        Set the user's password globally\n" +
+		"\tboard             List the boards and set the default\n" +
+		"\tboard new <name>  Create a board with the provided name\n" +
 		"\tusers add <id>    Add a user to current project\n" +
-		"\tusers rm <id>     Remove a user to current project\n" +
+		"\tusers del <id>     Remove a user to current project\n" +
 		"\tweb               Start the Web UI\n\n" +
+		"\treindex [full]    Rebuild the search index \n\n" +
 		"",
 	)
 }
 
-func processInit(projectPath string, args []string) {
-	_, err := core.InitProject(projectPath)
-	if err != nil {
-		color.Red("Wow. Something went wrong: %v", err)
-	} else {
-		color.Green("Project initialized successfully in %s", projectPath)
-	}
+var shortcuts = map[byte]string{
+	'i': "init",
+	't': "top",
+	'n': "new",
+	'e': "edit",
+	'd': "del",
+	'o': "owner",
+	'c': "commit",
+	'b': "board",
+	'u': "users",
+	'a': "a",
+	'r': "reindex",
 }
+
 
 func setLogLevel(logLevel string) {
 	logLevel = strings.ToUpper(logLevel)
@@ -58,6 +63,25 @@ func setLogLevel(logLevel string) {
 	case "FATAL":
 		log.SetLevel(log.FatalLevel)
 	}
+}
+
+func replaceShortcuts(commands []string) []string {
+
+	switch len(commands[0]) {
+	case 1:
+		if a := shortcuts[commands[0][0]]; a != "" {
+			return append([]string{a}, commands[1:]...)
+		}
+	case 2:
+		a := shortcuts[commands[0][0]]
+		b := shortcuts[commands[0][1]]
+
+		if a != "" && b != "" {
+			return append([]string{a, b}, commands[1:]...)
+		}
+	}
+	return commands
+
 }
 
 // ProcessArgs analyze the
@@ -79,7 +103,6 @@ func ProcessArgs() {
 		"HTTP port for the embedded web server")
 
 	flag.Parse()
-
 	setLogLevel(logLevel)
 
 	commands := os.Args[1+2*flag.NFlag():]
@@ -87,11 +110,13 @@ func ProcessArgs() {
 		flag.Usage()
 		return
 	}
+
+	commands = replaceShortcuts(commands)
 	switch commands[0] {
 	case "init":
 		processInit(projectPath, commands[1:])
-	case "store":
-		processStore(projectPath, commands[1:])
+	case "board":
+		processBoard(projectPath, commands[1:])
 	case "users":
 		processUsers(projectPath, commands[1:])
 	case "pwd":
@@ -102,12 +127,16 @@ func ProcessArgs() {
 		processNew(projectPath, commands[1:])
 	case "edit":
 		processEdit(projectPath, commands[1:])
-	case "grant":
-		processGrant(projectPath, commands[1:])
+	case "touch":
+		processTouch(projectPath, commands[1:])
+	case "owner":
+		processOwner(projectPath, commands[1:])
 	// case "done":
 	// 	processDone(projectPath, commands[1:])
 	case "web":
 		web.StartServer(port, logLevel, commands[1:])
+	case "reindex":
+		processReIndex(projectPath, commands[1:])
 	default:
 		flag.Usage()
 	}

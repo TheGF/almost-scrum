@@ -3,6 +3,7 @@ package web
 import (
 	"almost-scrum/core"
 	"encoding/hex"
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -50,12 +51,12 @@ func getJWTMiddleware() *jwt.GinJWTMiddleware {
 			}
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
-			var loginVals login
-			if err := c.ShouldBind(&loginVals); err != nil {
+			var login login
+			if err := c.ShouldBind(&login); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
-			userID := loginVals.Username
-			password := loginVals.Password
+			userID := login.Username
+			password := login.Password
 
 			if core.CheckUser(userID, password) {
 				return &User{
@@ -86,6 +87,7 @@ func getJWTMiddleware() *jwt.GinJWTMiddleware {
 	middleware, err := jwt.New(&c)
 	if err != nil {
 		log.Fatal("JWT Error:" + err.Error())
+		os.Exit(1)
 	}
 
 	err = middleware.MiddlewareInit()

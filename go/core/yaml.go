@@ -11,13 +11,13 @@ import (
 func ReadYaml(path string, out interface{}) (err error) {
 	d, err := ioutil.ReadFile(path)
 	if err != nil {
-		logrus.Errorf("ReadYaml - Invalid file %s: %v", path, err)
+		logrus.Warnf("ReadYaml - Invalid file %s: %v", path, err)
 		return
 	}
 
 	err = yaml.Unmarshal(d, out)
 	if err != nil {
-		logrus.Errorf("ReadYaml - Invalid file %s: %v", path, err)
+		logrus.Warnf("ReadYaml - Invalid file %s: %v", path, err)
 		return
 	}
 	return
@@ -27,12 +27,12 @@ func ReadYaml(path string, out interface{}) (err error) {
 func WriteYaml(path string, in interface{}) (err error) {
 	d, err := yaml.Marshal(in)
 	if err != nil {
-		logrus.Errorf("WriteYaml - Cannot marshal to file %s: %v", path, err)
+		logrus.Warnf("WriteYaml - Cannot marshal to file %s: %v", path, err)
 		return
 	}
 	err = ioutil.WriteFile(path, d, 0644)
 	if err != nil {
-		logrus.Errorf("WriteYaml - Cannot save file %s: %v", path, err)
+		logrus.Warnf("WriteYaml - Cannot save file %s: %v", path, err)
 		return
 	}
 	return

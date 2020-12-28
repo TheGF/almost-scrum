@@ -26,6 +26,6 @@ func TestInitProject(t *testing.T) {
 	assert.DirExistsf(t, project.Path, "Expected project but none found: %w", err)
 
 	err = ShredProject(project)
-	assert.Nilf(t, err, "Cannot shread project: %w", err)
+	assert.Nilf(t, err, "Cannot shred project: %w", err)
 
 }

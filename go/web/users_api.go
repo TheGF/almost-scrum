@@ -36,7 +36,7 @@ func getUserAPI(c *gin.Context) {
 	userInfo, err := core.GetUserInfo(p, user)
 	if err != nil {
 		log.Warnf("Cannot get user %s info: %v", user, err)
-		c.Error(err)
+		_ = c.Error(err)
 		c.JSON(http.StatusInternalServerError, "Cannot get user info")
 		return
 	}
@@ -52,12 +52,12 @@ func putUserAPI(c *gin.Context) {
 
 	var userInfo core.UserInfo
 	user := c.Param("user")
-	c.BindJSON(&userInfo)
+	_ = c.BindJSON(&userInfo)
 
 	err = core.SetUserInfo(p, user, &userInfo)
 	if err != nil {
 		log.Warnf("Cannot set user %s info: %v", user, err)
-		c.Error(err)
+		_ = c.Error(err)
 		c.JSON(http.StatusInternalServerError, "Cannot get user info")
 		return
 	}

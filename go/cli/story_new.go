@@ -3,7 +3,6 @@ package cli
 import (
 	"almost-scrum/core"
 	"errors"
-	"os/user"
 	"unicode"
 
 	"github.com/manifoldco/promptui"
@@ -11,8 +10,8 @@ import (
 
 func validateTitle(s string) error {
 	for _, r := range s {
-		if !unicode.IsLetter(r) {
-			return errors.New("Title can only contain letters (no digits, no specials)")
+		if !unicode.IsLetter(r) && r != ' '{
+			return errors.New("title can only contain letters (no digits, no specials)")
 		}
 	}
 	return nil
@@ -33,25 +32,32 @@ func getTitle(args []string) string {
 	return title
 }
 
-var emptyStory = core.Story{
-	Description: "",
-	Points:      0,
-	Owner:       "",
-	Tasks:       []core.Task{},
+var emptyTask = core.Task{
+	Description: "Replace with the task description",
+	Features:    map[string]string {
+		"points": "0",
+		"owner": "",
+	},
+	Tasks:       []core.Step{},
 	TimeEntries: []core.TimeEntry{},
 	Attachments: []string{},
 }
 
 func processNew(projectPath string, args []string) {
-	title := getTitle(args)
 	project := getProject(projectPath)
-	store := getCurrentStore(project)
-	name := core.GetStoryName(project, title)
+	board := chooseBoard(project)
 
-	user, _ := user.Current()
-	story := emptyStory
-	story.Owner = user.Name
+	title := getTitle(args)
+	if title == "" {
+		return
+	}
 
-	core.SetStory(store, name, &story)
-	openEditor(store, name)
+	name := core.NewTaskName(project, title)
+	user := getCurrentUser()
+	task := emptyTask
+	task.Features["owner"] = "@"+user
+
+	err := core.SetTask(project, board, name, &task)
+	abortIf(err)
+	openEditor(project, board, name)
 }

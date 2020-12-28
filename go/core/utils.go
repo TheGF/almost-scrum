@@ -1,11 +1,9 @@
 package core
 
 import (
-	"os"
-	"os/user"
-	"path/filepath"
-
 	"github.com/sirupsen/logrus"
+	"os"
+	"path/filepath"
 )
 
 // FindFileUpwards looks for the folder where a file with the specified name is present.
@@ -28,12 +26,17 @@ func FindFileUpwards(path string, name string) (string, os.FileInfo) {
 	return "", nil
 }
 
-func GetCurrentUser() string {
-	user, err := user.Current()
+func IsErr(err error, msg string, args ... interface{}) bool {
 	if err != nil {
-		logrus.Fatalf("Cannot get current user: %v", err)
-		os.Exit(1)
+		if msg == "" {
+			logrus.Warnf("Unexpected error: %v", err)
+		} else {
+			args = append(args, err)
+			msg = msg + ":%v"
+			logrus.Warnf(msg, args...)
+		}
+		return true
+	} else {
+		return false
 	}
-
-	return user.Username
 }

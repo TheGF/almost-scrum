@@ -2,34 +2,44 @@ package cli
 
 import (
 	"almost-scrum/core"
+	"fmt"
 	"github.com/fatih/color"
-	"sort"
+	"github.com/manifoldco/promptui"
 )
+
 
 func processUsers(projectPath string, args []string) {
 	project := getProject(projectPath)
-	config, _ := core.ReadProjectConfig(project.Path)
 
-	switch len(args) {
-	case 0:
-		for _, user :=  range config.Users {
-			color.Green(user)
+	if len(args) == 0 {
+		for _, user := range project.Config.Users {
+			fmt.Print(color.GreenString("%s ", user))
 		}
-		return
-	case 1:
+		fmt.Println()
 		return
 	}
 
 	cmd := args[0]
-	user := args[1]
-
 	switch cmd {
 	case "add":
-		if idx := sort.SearchStrings(config.Users, user); idx == len(config.Users) {
-			config.Users = append(config.Users, user)
-			if err := core.WriteProjectConfig(project.Path, &config); err != nil {
-				color.Red("Something went write while saving the project config: %v", err)
-			}
+		user := ""
+		if len(args) == 2 {
+			user = args[1]
+		} else {
+			prompt := promptui.Prompt{Label: "Enter the new user"}
+			user, _ = prompt.Run()
 		}
+		project.Config.Users = append(project.Config.Users, user)
+	case "del":
+		prompt := promptui.Select{
+			Label: "Choose the user to remove (CTRL+C to exit)",
+			Items: project.Config.Users,
+		}
+		selected, _, _ := prompt.Run()
+		project.Config.Users = append(project.Config.Users[0:selected], project.Config.Users[selected+1:]...)
 	}
+
+	err := core.WriteProjectConfig(project.Path, &project.Config)
+	abortIf(err)
+	color.Green("Users updated!")
 }

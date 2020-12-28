@@ -2,105 +2,54 @@ package web
 
 import (
 	"almost-scrum/core"
-	"fmt"
-	"net/http"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 func storeRoute(group *gin.RouterGroup) {
-	group.GET("/projects/:project/stores", listStoresAPI)
-	group.GET("/projects/:project/stores/:store", getStoryAPI)
-	group.GET("/projects/:project/stores/:store/*path", getStoryAPI)
-	group.POST("/projects/:project/stores/:store", postStoryAPI)
-	group.POST("/projects/:project/stores/:store/*path", postStoryAPI)
-	group.PUT("/projects/:project/stores/:store/*path", putStoryAPI)
+	group.GET("/projects/:project/boards", listStoresAPI)
+	group.GET("/projects/:project/boards/:board", getStoryAPI)
+	group.GET("/projects/:project/boards/:board/:name", getStoryAPI)
+	group.POST("/projects/:project/boards/:board", postStoryAPI)
+	group.POST("/projects/:project/boards/:board/:name", postStoryAPI)
+	group.PUT("/projects/:project/boards/:board/:name", putStoryAPI)
 }
 
-// GetProjectStore resolves the URL parameters
-func getProjectAndStore(c *gin.Context, p *core.Project, s *core.Store) error {
-	err := getProject(c, p)
-	if err != nil {
-		return err
-	}
-	if s == nil {
-		return nil
-	}
-	store := c.Param("store")
-	*s, err = core.GetStore(*p, store)
-	if err != nil {
-		c.Error(err)
-		c.String(http.StatusNotFound, "Store %s not found in project: %v",
-			store, err)
-		return err
-	}
-
-	return nil
-}
 
 func listStoresAPI(c *gin.Context) {
 	var p core.Project
-	project := c.Param("project")
 
-	err := getProjectAndStore(c, &p, nil)
+	err := getProject(c, &p)
 	if err != nil {
 		return
 	}
 
-	stores, err := core.ListStores(p)
+	boards, err := core.ListBoards(p)
 	if err != nil {
-		c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot list stores: %v", err)
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "Cannot list boards: %v", err)
 		return
 	}
-	log.Debugf("listStoresAPI - List stores in project %v: %v", project, stores)
-	c.JSON(http.StatusOK, stores)
+	log.Debugf("listStoresAPI - List boards in project: %v", boards)
+	c.JSON(http.StatusOK, boards)
 }
 
-// func listStoreAPI(c *gin.Context) {
-// 	var p core.Project
-// 	var s core.Store
-
-// 	err := getProjectAndStore(c, &p, &s)
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	stores := core.ListStore(s)
-// 	log.Debugf("listStoreAPI - List stores: %v", stores)
-// 	c.JSON(http.StatusOK, stores)
-// }
-
 func getStoryAPI(c *gin.Context) {
-	var p core.Project
-	var s core.Store
+	var project core.Project
 
-	err := getProjectAndStore(c, &p, &s)
+	err := getProject(c, &project)
 	if err != nil {
 		return
 	}
 
-	path := c.Param("path")
-	if !strings.HasSuffix(path, ".story") {
-		list, err := core.ListStore(s, path)
-		if err != nil {
-			c.Error(err)
-			c.String(http.StatusInternalServerError, "Cannot list store")
-			return
-		}
-
-		log.Debugf("listStoreAPI - List stores: %v", list)
-		c.JSON(http.StatusOK, list)
-		return
-	}
-
-	story, err := core.GetStory(s, path)
+	board := c.Param("board")
+	name := c.Param("name")
+	story, err := core.GetTask(project, board, name)
 	switch err {
 	case core.ErrNoFound:
-		c.Error(err)
-		c.String(http.StatusNotFound, "Story %s does not exist", path)
+		_ = c.Error(err)
+		c.String(http.StatusNotFound, "Task %s/%s does not exist", board, name)
 	case nil:
 		c.JSON(http.StatusOK, story)
 	default:
@@ -109,66 +58,49 @@ func getStoryAPI(c *gin.Context) {
 }
 
 func postStoryAPI(c *gin.Context) {
-	var p core.Project
-	var s core.Store
+	var project core.Project
 
-	err := getProjectAndStore(c, &p, &s)
-	if err != nil {
+	if err := getProject(c, &project); err != nil {
 		return
 	}
+	board := c.Param("board")
 
-	var story core.Story
-	path := c.Param("path")
+	var story core.Task
 	title := c.DefaultQuery("title", "noname")
 
-	err = c.BindJSON(&story)
-	if err != nil {
+	if err := c.BindJSON(&story); err != nil {
 		log.Warnf("Invalid JSON in request: %v", err)
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	name := core.GetStoryName(p, title)
-	path = fmt.Sprintf("%s/%s", path, name)
-	err = core.SetStory(s, path, &story)
-	if err != nil {
-		log.Warnf("createStory - Cannot save story to %s: %v", path, err)
-		c.AbortWithError(http.StatusInternalServerError, err)
+	name := core.NewTaskName(project, title)
+	if err := core.SetTask(project, board, name, &story); core.IsErr(err, "cannot save story to %s", name) {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.String(http.StatusOK, path)
+	c.String(http.StatusOK, name)
 }
 
 func putStoryAPI(c *gin.Context) {
-	var p core.Project
-	var s core.Store
+	var project core.Project
 
-	err := getProjectAndStore(c, &p, &s)
+	err := getProject(c, &project)
 	if err != nil {
 		return
 	}
 
-	var story core.Story
-	path := c.Param("path")
-	if strings.HasSuffix(path, ".story") {
-		err = c.BindJSON(&story)
-		if err != nil {
-			log.Warnf("Invalid JSON in request: %v", err)
-			c.AbortWithError(http.StatusBadRequest, err)
-			return
-		}
-		err = core.SetStory(s, path, &story)
-		if err != nil {
-			c.Error(err)
-			c.String(http.StatusInternalServerError, "Cannot update story %s", path)
-		}
-		c.String(http.StatusOK, "")
-	} else {
-		err = core.CreateFolder(s, path)
-		if err != nil {
-			c.Error(err)
-			c.String(http.StatusInternalServerError, "Cannot create folder %s", path)
-		}
-		c.String(http.StatusOK, "")
+	var task core.Task
+	name := c.Param("name")
+	board := c.Param("board")
+	if err = c.BindJSON(&task); core.IsErr(err, "Invalid JSON") {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
+	if err = core.SetTask(project, board, name, &task); err != nil {
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "Cannot update task %s", name)
+		return
+	}
+	c.String(http.StatusOK, "")
 }

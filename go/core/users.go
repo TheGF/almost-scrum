@@ -53,6 +53,6 @@ func SetUserInfo(project Project, user string, userInfo *UserInfo) (err error) {
 		log.Errorf("Cannot save info for user %s: %v", user, err)
 		return
 	}
-	log.Infof("Story saved to %s", path)
+	log.Infof("Task saved to %s", path)
 	return
 }

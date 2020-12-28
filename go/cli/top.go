@@ -13,15 +13,13 @@ func processTop(projectPath string, args []string) {
 		n, _ = strconv.Atoi(args[0])
 	}
 
-	store := getCurrentStore(getProject(projectPath))
-	items, err := core.WalkStore(store)
-	if err != nil {
-		color.Red("Something went wrong while readind store '%s': %v",
-			config.CurrentStore, err)
-	}
+	project := getProject(projectPath)
+	board := project.Config.CurrentBoard
+	infos, err := core.SearchTask(project, board, true, args...)
+	abortIf(err)
 
-	for i, item := range items {
-		color.Yellow(item.Name)
+	for i, info := range infos {
+		color.Yellow(info.Name)
 		if i > n {
 			break
 		}

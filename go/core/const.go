@@ -1,8 +1,6 @@
 package core
 
-import (
-	"errors"
-)
+import "errors"
 
 // GitFolder is the default folder where git info is stored
 const GitFolder = ".git"
@@ -19,17 +17,25 @@ const ProjectUsersFolder = "users"
 // ProjectUsersFolder the folder containing users
 const ProjectLibraryFolder = "library"
 
-const ProjectTagsFolder = "tags"
+// ProjectBoardsFolder the folder containing boards
+const ProjectBoardsFolder = "boards"
 
+const TaskFileExt = ".md"
+
+const IndexFile = "no-git-index.json"
+
+const AshStopWords = "features,owner,points,-"
+
+var (
 // ProjectFolders is the required folders in the project
-var ProjectFolders = []string{"stores/backlog", "stores/sandbox", ProjectLibraryFolder,
-	ProjectTagsFolder, ProjectUsersFolder}
+ProjectFolders = []string{"boards/backlog", "boards/scratches", ProjectLibraryFolder, ProjectUsersFolder}
 
 // ErrNoFound occurs when an item is not found
-var ErrNoFound = errors.New("No such item")
+ErrNoFound = errors.New("no such item")
 
 // ErrTooMany occurs when too many items are found
-var ErrTooMany = errors.New("Too many items")
+ErrTooMany = errors.New("too many items")
 
 // ErrExists occurs when an item exists even though it should not exist
-var ErrExists = errors.New("Already exists")
+ErrExists = errors.New("already exists")
+)

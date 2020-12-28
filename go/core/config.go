@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"os"
-	"os/user"
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
@@ -18,7 +17,6 @@ type Config struct {
 	Passwords    map[string]string
 	Projects     map[string]string
 	Secret       string
-	CurrentStore string
 	OwnerLock    bool
 }
 
@@ -28,7 +26,6 @@ var defaultConfig = Config{
 	Passwords:    map[string]string{},
 	Projects:     map[string]string{},
 	Secret:       getSecret(),
-	CurrentStore: "backlog",
 }
 
 func getSecret() string {
@@ -43,7 +40,7 @@ func getSecret() string {
 func getConfigPath() string {
 	home, _ := os.UserHomeDir()
 	configFolder := filepath.Join(home, ".config")
-	os.MkdirAll(configFolder, os.FileMode(0755))
+	_ = os.MkdirAll(configFolder, os.FileMode(0755))
 	return filepath.Join(configFolder, "almost-scrum.yaml")
 }
 
@@ -85,10 +82,6 @@ func LoadConfig() *Config {
 	err := ReadYaml(configPath, &config)
 	if err != nil {
 		logrus.Warnf("Cannot read global configuration %s: %v", configPath, err)
-		user, err := user.Current()
-		if err != nil {
-			defaultConfig.User = user.Name
-		}
 		SaveConfig(&defaultConfig)
 		return &defaultConfig
 	} else {
