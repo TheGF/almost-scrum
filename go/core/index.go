@@ -205,13 +205,14 @@ func mergeStopWords(index *Index) {
 	}
 }
 
-func indexTask(project Project, board string, path string) (normal []string, special []string) {
-	p := filepath.Join(project.Path, "boards", board, path+TaskFileExt)
+func indexTask(project Project, board string, name string) (normal []string, special []string) {
+	p := filepath.Join(project.Path, "boards", board, name+TaskFileExt)
 	data, err := ioutil.ReadFile(p)
 	if err != nil {
 		logrus.Errorf("Cannot read task file %s: %v", p, err)
 		return []string{}, []string{}
 	}
+	data = append(data, []byte(name)...)
 
 	return cleanText(data)
 }

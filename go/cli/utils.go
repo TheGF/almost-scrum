@@ -47,6 +47,14 @@ func getProjectConfig(project core.Project) core.ProjectConfig {
 	return config
 }
 
+func getBoard(project core.Project, global bool) string {
+	if global {
+		return ""
+	} else {
+		return project.Config.CurrentBoard
+	}
+}
+
 func getCurrentUser() string {
 	u, err := user.Current()
 	abortIf(err)

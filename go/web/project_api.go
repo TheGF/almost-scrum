@@ -8,6 +8,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type ProjectMapping map[string]core.Project
+var projectMapping = make(ProjectMapping)
+
+
+func openProject(name string, path string) error {
+	project, err := core.FindProject(path)
+	if core.IsErr(err, "cannot open project %s from %s", name, path) {
+		return err
+	}
+
+	projectMapping[name] = project
+	return nil
+}
+
 //projectRoute add projects related api routes
 func projectRoute(group *gin.RouterGroup) {
 	group.GET("/projects", listProjectsAPI)
@@ -31,26 +45,16 @@ func listProjectsAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, keys)
 }
 
-// GetProjectStore resolves the URL parameters
+// getProject resolves the URL parameters
 func getProject(c *gin.Context, p *core.Project) error {
-	project := c.Param("project")
+	name := c.Param("project")
 
-	config := core.LoadConfig()
-	path := config.Projects[project]
-	if path == "" {
+	if project, found := projectMapping[name]; found {
+		*p = project
+		return nil
+	} else {
 		_ = c.Error(core.ErrNoFound)
-		c.String(http.StatusNotFound, "Project %s not found in configuration",
-			project)
+		c.String(http.StatusNotFound, "Project %s not found in configuration", name)
 		return core.ErrNoFound
 	}
-
-	var err error
-	*p, err = core.OpenProject(path)
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusNotFound, "Project %s not found at %s: %v",
-			project, path, err)
-		return err
-	}
-	return nil
 }

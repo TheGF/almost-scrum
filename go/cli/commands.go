@@ -46,6 +46,7 @@ var shortcuts = map[byte]string{
 	'u': "users",
 	'a': "a",
 	'r': "reindex",
+	's': "server",
 }
 
 
@@ -84,6 +85,17 @@ func replaceShortcuts(commands []string) []string {
 
 }
 
+func matchGlobal(commands []string) bool {
+	cmd := commands[0]
+	if strings.HasSuffix(cmd, "!") {
+		commands[0] = cmd[0:len(cmd)-1]
+		return true
+	} else {
+		return false
+	}
+
+}
+
 // ProcessArgs analyze the
 func ProcessArgs() {
 	var projectPath string
@@ -111,6 +123,7 @@ func ProcessArgs() {
 		return
 	}
 
+	global := matchGlobal(commands)
 	commands = replaceShortcuts(commands)
 	switch commands[0] {
 	case "init":
@@ -122,21 +135,22 @@ func ProcessArgs() {
 	case "pwd":
 		processPwd(commands[1:])
 	case "top":
-		processTop(projectPath, commands[1:])
+		processTop(projectPath, global, commands[1:])
 	case "new":
 		processNew(projectPath, commands[1:])
 	case "edit":
-		processEdit(projectPath, commands[1:])
+		processEdit(projectPath, global, commands[1:])
 	case "touch":
-		processTouch(projectPath, commands[1:])
+		processTouch(projectPath, global, commands[1:])
 	case "owner":
-		processOwner(projectPath, commands[1:])
-	// case "done":
-	// 	processDone(projectPath, commands[1:])
-	case "web":
-		web.StartServer(port, logLevel, commands[1:])
+		processOwner(projectPath, global, commands[1:])
 	case "reindex":
 		processReIndex(projectPath, commands[1:])
+	case "web":
+		web.StartWeb(projectPath, port, logLevel, commands[1:])
+	case "server":
+		web.StartServer(projectPath, port, logLevel, commands[1:])
+
 	default:
 		flag.Usage()
 	}

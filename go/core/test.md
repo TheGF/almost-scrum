@@ -5,9 +5,11 @@ This is just a document for test purposes
 - points: 12
 - tags: integration, instruments
 
-#### Actions
-- ~~first step *with italics*~~
-- second step
+### Parts
+- [x] GFM task list 1
+- [x] GFM task list 2
+- [ ] GFM task list 3
 
-#### Diary
-- 2h mp: 
+### Attachments
+- [Agenda](http:/localhost/planning/agenda.docx)
+

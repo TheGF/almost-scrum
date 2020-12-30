@@ -2,6 +2,8 @@ package web
 
 import (
 	"fmt"
+	"github.com/fatih/color"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -41,8 +43,31 @@ func loadStaticContent(router *gin.Engine) {
 
 }
 
-//StartServer starts the embedded server.
-func StartServer(port string, logLevel string, args []string) {
+//StartWeb starts the embedded web UI. Only for local usage
+func StartWeb(projectPath string, port string, logLevel string, args []string) {
+	if strings.ToUpper(logLevel) != "DEBUG" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	r := gin.Default()
+
+	if err := openProject("~", projectPath); err != nil {
+		color.Red("cannot open a project in %s: %v", projectPath, err)
+		os.Exit(1)
+	}
+
+	loadStaticContent(r)
+	v1 := r.Group("/api/v1")
+	tasksRoute(v1)
+	libraryRoute(v1)
+	userRoute(v1)
+
+	r.Run(fmt.Sprintf(":%s", port))
+}
+
+
+
+//StartServer starts the embedded server portal.
+func StartServer(projectPath string, port string, logLevel string, args []string) {
 	if strings.ToUpper(logLevel) != "DEBUG" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -56,7 +81,7 @@ func StartServer(port string, logLevel string, args []string) {
 	v1.GET("/refresh_token", authMiddleware.RefreshHandler)
 	v1.Use(authMiddleware.MiddlewareFunc())
 	projectRoute(v1)
-	storeRoute(v1)
+	tasksRoute(v1)
 	libraryRoute(v1)
 	userRoute(v1)
 

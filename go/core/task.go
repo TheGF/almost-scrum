@@ -14,11 +14,11 @@ import (
 )
 
 var (
-	idMatch = regexp.MustCompile(`^([\pN])\.`)
+	idMatch = regexp.MustCompile(`^([\pN]+)\.`)
 )
 
-// Step to complete the story and its status
-type Step struct {
+// Part to complete the story and its status
+type Part struct {
 	Description string `json:"description" yaml:"description"`
 	Done        bool   `json:"done" yaml:"done"`
 }
@@ -40,12 +40,10 @@ type TaskInfo struct {
 
 // Task contains attributes that define a story
 type Task struct {
-	Description string            `json:"description" yaml:"description"`
-	Features    map[string]string `json:"features" yaml:"features"`
-	Tasks       []Step            `json:"tasks" yaml:"tasks"`
-	TimeEntries []TimeEntry       `json:"timeEntries" yaml:"timeEntries"`
-	Attachments []string          `json:"attachments" yaml:"attachments"`
-	Tags        []string          `json:"tags" yaml:"tags"`
+	Description string            `json:"description"`
+	Properties  map[string]string `json:"properties"`
+	Parts       []Part            `json:"parts"`
+	Attachments []string          `json:"attachments"`
 }
 
 // ListBoardTasks list the tasks in the board

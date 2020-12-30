@@ -7,14 +7,54 @@ import (
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"regexp"
-	"strings"
 )
 
 var (
-	paragraphMatch = regexp.MustCompile("#+\\s+(\\S+)[^#]+")
+	paragraphMatch  = regexp.MustCompile(`#+\s+(\S+)[^#]+`)
+	propertyMatch   = regexp.MustCompile(`\s*([^:]*):\s+(.*)`)
+	partMatch       = regexp.MustCompile(`\[([x ])]\s+(.+)`)
+	attachmentMatch = regexp.MustCompile(`\[[^]]*]\([^\)]+\)`)
 )
 
-func parseFeatures(input []byte, task *Task) {
+func parseProperties(node *blackfriday.Node, task *Task) {
+	t := string(node.Literal)
+	match := propertyMatch.FindStringSubmatch(t)
+	if len(match) != 3 {
+		return
+	}
+	key := match[1]
+	val := match[2]
+	task.Properties[key] = val
+	logrus.Debugf("ParseTask - found feature %s: %s", key, val)
+}
+
+func parseParts(node *blackfriday.Node, task *Task) {
+	t := string(node.Literal)
+	match := partMatch.FindStringSubmatch(t)
+	if len(match) != 3 {
+		return
+	}
+	done := match[1] == "x"
+	description := match[2]
+	task.Parts = append(task.Parts, Part{
+		Description: description,
+		Done:        done,
+	})
+	logrus.Debugf("ParseTask - found part %s [done = %t]", description, done)
+}
+
+func parseAttachments(node *blackfriday.Node, task *Task) {
+	if node.Next == nil || node.Next.LinkData.Destination == nil {
+		return
+	}
+
+	link := string(node.Next.LinkData.Destination)
+	task.Attachments = append(task.Attachments, link)
+	logrus.Debugf("ParseTask - found attachment %s", link)
+}
+
+
+func parseList(input []byte, title string, task *Task) {
 	parser := blackfriday.New()
 	node := parser.Parse(input)
 
@@ -24,29 +64,28 @@ func parseFeatures(input []byte, task *Task) {
 		}
 	}
 
-	task.Features = map[string]string{}
+	task.Properties = map[string]string{}
 	for listItem := node.FirstChild; listItem != nil; listItem = listItem.Next {
 		text := listItem
 		for ; text != nil; text = text.FirstChild {
 			if text.Type == blackfriday.Text {
-				t := string(text.Literal)
-				parts := strings.Split(t, ":")
-				if len(parts) != 2 {
-					continue
+				switch title {
+				case "Properties":
+					parseProperties(text, task)
+				case "Parts":
+					parseParts(text, task)
+				case "Attachments":
+					parseAttachments(text, task)
 				}
-				key := strings.ToLower(strings.TrimSpace(parts[0]))
-				val := strings.TrimSpace(parts[1])
-				logrus.Debugf("ParseTask - found feature %s: %s", key, val)
-				task.Features[key] = val
 			}
 		}
 	}
 }
 
 func renderFeatures(task *Task, output *bytes.Buffer) {
-	output.WriteString("\n\n### Features\n")
+	output.WriteString("\n\n### Properties\n")
 
-	for key, val := range task.Features {
+	for key, val := range task.Properties {
 		output.WriteString("- ")
 		output.WriteString(key)
 		output.WriteString(": ")
@@ -87,11 +126,11 @@ func ParseTask(input []byte, task *Task) error {
 
 	for _, loc := range locS {
 		paragraph := input[loc[0]:loc[1]]
-		title := input[loc[2]:loc[3]]
+		title := string(input[loc[2]:loc[3]])
 
-		switch string(title) {
-		case "Features":
-			parseFeatures(paragraph, task)
+		switch title {
+		case "Properties", "Parts", "Attachments":
+			parseList(paragraph, title, task)
 		default:
 			description.Write(paragraph)
 		}

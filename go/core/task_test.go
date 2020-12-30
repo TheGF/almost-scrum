@@ -8,19 +8,19 @@ import (
 
 var story = Task{
 	Description: "Test of a story",
-	Features: map[string]string{
+	Properties: map[string]string{
 		"points": "12",
 	},
-	Tasks: []Step{{
-		Description: "Test of a task",
-		Done:        true,
-	},
+	Parts: []Part{
+		{
+			Description: "Test of a task",
+			Done:        true,
+		},
 		{
 			Description: "Test of a task2",
 			Done:        false,
 		},
 	},
-	TimeEntries: []TimeEntry{},
 	Attachments: []string{},
 }
 
@@ -35,7 +35,7 @@ func TestSetStory(t *testing.T) {
 	project, _ := OpenProject(".")
 	id := "1.Hello.story"
 	err := SetTask(project, "backlog", id, &story)
-	assert.NotNilf(t, err, "cannot write backlog/%s in project %s: %v", id, err )
+	assert.NotNilf(t, err, "cannot write backlog/%s in project %s: %v", id, err)
 }
 
 func TestGetStory(t *testing.T) {
@@ -53,7 +53,6 @@ func BenchmarkGet(b *testing.B) {
 	}
 }
 
-
 func TestMarkdown(t *testing.T) {
 	data, err := ioutil.ReadFile("test.md")
 	assert.Nilf(t, err, "Cannot open markdown file: %w", err)
@@ -63,9 +62,8 @@ func TestMarkdown(t *testing.T) {
 	assert.Nilf(t, err, "Cannot parse markdown data: %w", err)
 
 	out := string(RenderTask(&task))
-	for k,v := range task.Features {
+	for k, v := range task.Properties {
 		assert.Contains(t, out, k)
 		assert.Contains(t, out, v)
 	}
 }
-

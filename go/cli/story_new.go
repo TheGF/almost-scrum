@@ -34,12 +34,11 @@ func getTitle(args []string) string {
 
 var emptyTask = core.Task{
 	Description: "Replace with the task description",
-	Features:    map[string]string {
+	Properties:    map[string]string {
 		"points": "0",
 		"owner": "",
 	},
-	Tasks:       []core.Step{},
-	TimeEntries: []core.TimeEntry{},
+	Parts:       []core.Part{},
 	Attachments: []string{},
 }
 
@@ -55,7 +54,7 @@ func processNew(projectPath string, args []string) {
 	name := core.NewTaskName(project, title)
 	user := getCurrentUser()
 	task := emptyTask
-	task.Features["owner"] = "@"+user
+	task.Properties["owner"] = "@"+user
 
 	err := core.SetTask(project, board, name, &task)
 	abortIf(err)

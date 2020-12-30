@@ -26,6 +26,7 @@ func FindFileUpwards(path string, name string) (string, os.FileInfo) {
 	return "", nil
 }
 
+
 func IsErr(err error, msg string, args ... interface{}) bool {
 	if err != nil {
 		if msg == "" {

@@ -2,34 +2,36 @@ package cli
 
 import (
 	"almost-scrum/core"
+	"fmt"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"os"
+	"time"
 )
 
-func chooseTask(project core.Project, board string, keys... string) string {
+func chooseTask(project core.Project, board string, keys... string) core.TaskInfo {
 	infos, err := core.SearchTask(project, board, true, keys...)
 	abortIf(err)
 
-	names := make([]string, 0, len(infos))
+	choices := make([]string, 0, len(infos))
 	for _, info := range infos {
-		names = append(names, info.Name)
+		tm := info.ModTime.Format(time.RFC822)
+		choice := fmt.Sprintf("  %-40v%-20v%s", info.Name, info.Board, tm)
+		choices = append(choices, choice)
 	}
-	if len(names) == 0 {
+	if len(choices) == 0 {
 		color.Yellow("Ops. Look like there are no tasks you can edit")
-		return ""
+		return core.TaskInfo{}
 	}
-	if len(names) == 1 {
-		color.Yellow("Only one task found: %s. Taking you there", names[0])
-		return names[0]
-	}
-
 	prompt := promptui.Select{
 		Label: "Select the task (CTRL+C to exit)",
-		Items: names,
+		Items: choices,
 	}
-	_, selected, _ := prompt.Run()
-	return selected
+	selected, _, err := prompt.Run()
+	if err != nil {
+		return core.TaskInfo{}
+	}
+	return infos[selected]
 }
 
 func chooseUser(project core.Project) string {
@@ -41,18 +43,18 @@ func chooseUser(project core.Project) string {
 	return selected
 }
 
-func processEdit(projectPath string, args []string) {
+func processEdit(projectPath string, global bool, args []string) {
 	project := getProject(projectPath)
 	user := getCurrentUser()
-	board := project.Config.CurrentBoard
-	
+	board := getBoard(project, global)
+
 	filter := append(args, "@"+user)
-	name := chooseTask(project, project.Config.CurrentBoard, filter...)
-	if name == "" {
+	info := chooseTask(project, board, filter...)
+	if info.Name == "" {
 		return
 	}
 
-	if _, err := core.GetTask(project, board, name); err != nil {
+	if _, err := core.GetTask(project, info.Board, info.Name); err != nil {
 		color.Red( "The story is corrupted. This may happen after a Git pull." +
 			" Do you want to continue and open an editor?")
 		prompt := promptui.Prompt{
@@ -64,22 +66,22 @@ func processEdit(projectPath string, args []string) {
 		}
 	}
 
-	if name != "" {
-		openEditor(project, board, name)
+	if info.Name != "" {
+		openEditor(project, info.Board, info.Name)
 	}
 }
 
-func processOwner(projectPath string, args []string) {
+func processOwner(projectPath string, global bool, args []string) {
 	project := getProject(projectPath)
-	board := project.Config.CurrentBoard
+	board := getBoard(project, global)
 
-	name := chooseTask(project, board, args...)
-	if name == "" {
+	info := chooseTask(project, board, args...)
+	if info.Name == "" {
 		return
 	}
 
 	user := getCurrentUser()
-	task, err := core.GetTask(project, board, name)
+	task, err := core.GetTask(project, info.Board, info.Name)
 	if err != nil {
 		color.Red( "The task is corrupted. This may happen after a Git pull." +
 			" Do you want to fix manually in an editor?")
@@ -88,12 +90,12 @@ func processOwner(projectPath string, args []string) {
 		}
 		answer, _ := prompt.Run()
 		if answer == "yes" {
-			openEditor(project, board, name)
+			openEditor(project, info.Board, info.Name)
 		}
 		return
 	}
 
-	owner := task.Features["owner"]
+	owner := task.Properties["owner"]
 	if owner != "@"+user && owner != ""{
 		prompt := promptui.Prompt{
 			Label: "You are not the owner of the task and you should not change ownership." +
@@ -112,25 +114,22 @@ func processOwner(projectPath string, args []string) {
 	if owner == "" {
 		return
 	}
-	task.Features["owner"] = "@"+owner
-	err = core.SetTask(project, board, name, &task)
-	abortIf(err)
-	err = core.ReIndex(project)
-	abortIf(err)
-
-	color.Green("Task %s assigned to %s", name, owner)
+	task.Properties["owner"] = "@"+owner
+	abortIf(core.SetTask(project, info.Board, info.Name, &task))
+	abortIf(core.ReIndex(project))
+	color.Green("Task %s assigned to %s", info.Name, owner)
 }
 
-func processTouch(projectPath string, args []string) {
+func processTouch(projectPath string, global bool, args []string) {
 	project := getProject(projectPath)
-	board := project.Config.CurrentBoard
+	board := getBoard(project, global)
 
-	name := chooseTask(project, board, args...)
-	if name == "" {
+	info := chooseTask(project, board, args...)
+	if info.Name == "" {
 		return
 	}
 
-	if _, err := core.GetTask(project, board, name); err != nil {
+	if _, err := core.GetTask(project, info.Board, info.Name); err != nil {
 		color.Red( "The story is corrupted. This may happen after a Git pull." +
 			" Do you want to continue and open an editor?")
 		prompt := promptui.Prompt{
@@ -142,8 +141,8 @@ func processTouch(projectPath string, args []string) {
 		}
 	}
 
-	if name != "" {
-		err := core.TouchTask(project, board, name)
+	if info.Name != "" {
+		err := core.TouchTask(project, info.Board, info.Name)
 		abortIf(err)
 	}
 }
