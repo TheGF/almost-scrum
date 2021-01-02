@@ -37,7 +37,7 @@ func chooseTask(project core.Project, board string, keys... string) core.TaskInf
 func chooseUser(project core.Project) string {
 	prompt := promptui.Select{
 		Label: "Select a user (CTRL+C to exit)",
-		Items: project.Config.Users,
+		Items: core.GetUserList(project),
 	}
 	_, selected, _ := prompt.Run()
 	return selected
@@ -45,7 +45,7 @@ func chooseUser(project core.Project) string {
 
 func processEdit(projectPath string, global bool, args []string) {
 	project := getProject(projectPath)
-	user := getCurrentUser()
+	user := core.GetSystemUser()
 	board := getBoard(project, global)
 
 	filter := append(args, "@"+user)
@@ -71,6 +71,31 @@ func processEdit(projectPath string, global bool, args []string) {
 	}
 }
 
+func processMove(projectPath string, global bool, args []string) {
+	project := getProject(projectPath)
+	user := core.GetSystemUser()
+	board := getBoard(project, global)
+
+	filter := append(args, "@"+user)
+	info := chooseTask(project, board, filter...)
+	if info.Name == "" {
+		return
+	}
+
+	color.Green("Choose the target")
+	board = chooseBoard(project)
+
+	id, title := core.ExtractTaskId(info.Name)
+	title = chooseTitle(title)
+	if title == "" {
+		return
+	}
+	name := fmt.Sprintf("%d.%s", id, title)
+	abortIf(core.MoveTask(project, info.Board, info.Name, board, name))
+	color.Green("Task #%d moved to %s/%s", id, board, name)
+}
+
+
 func processOwner(projectPath string, global bool, args []string) {
 	project := getProject(projectPath)
 	board := getBoard(project, global)
@@ -80,7 +105,7 @@ func processOwner(projectPath string, global bool, args []string) {
 		return
 	}
 
-	user := getCurrentUser()
+	user := core.GetSystemUser()
 	task, err := core.GetTask(project, info.Board, info.Name)
 	if err != nil {
 		color.Red( "The task is corrupted. This may happen after a Git pull." +

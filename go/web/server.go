@@ -57,6 +57,7 @@ func StartWeb(projectPath string, port string, logLevel string, args []string) {
 
 	loadStaticContent(r)
 	v1 := r.Group("/api/v1")
+	projectRoute(v1)
 	tasksRoute(v1)
 	libraryRoute(v1)
 	userRoute(v1)
@@ -80,6 +81,8 @@ func StartServer(projectPath string, port string, logLevel string, args []string
 	v1 := r.Group("/api/v1")
 	v1.GET("/refresh_token", authMiddleware.RefreshHandler)
 	v1.Use(authMiddleware.MiddlewareFunc())
+
+	serverRoute(v1)
 	projectRoute(v1)
 	tasksRoute(v1)
 	libraryRoute(v1)

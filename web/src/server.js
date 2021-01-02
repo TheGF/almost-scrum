@@ -18,6 +18,25 @@ function getConfig() {
     } : {}
 }
 
+const pendingSet = {}
+const setDelay = 5 * 1000
+let pendingInterval = null
+
+function setPendingTasks() {
+    if (pendingSet.length == 0) {
+        const interval = pendingInterval
+        pendingInterval = null
+        cancelInterval(interval)
+    }
+    for (const k in pendingSet) {
+        const [tm, project, board, name, content] = pendingSet[k];
+        if (tm < Date.now()) {
+            delete pendingSet[k];
+            Server.setTask(project, board, name, content);
+        }
+    }
+}
+
 class Server {
 
     static getProjectsList() {
@@ -26,13 +45,13 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
-    // static getProject(project) {
-    //     return axios.get(`/api/v1/projects/${project}`, getConfig())
-    //         .then(r => r.data)
-    //         .catch(loginWhenUnauthorized);
-    // }
+    static getProjectInfo(project) {
+        return axios.get(`/api/v1/projects/${project}/info`, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
 
-    static getUsers(project) {
+    static listUsers(project) {
         return axios.get(`/api/v1/projects/${project}/users`, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
@@ -40,6 +59,12 @@ class Server {
 
     static listBoards(project) {
         return axios.get(`/api/v1/projects/${project}/boards`, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+    
+    static createBoard(project, board) {
+        return axios.put(`/api/v1/projects/${project}/boards/${board}`, null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
@@ -68,6 +93,13 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
+    static setTaskLater(project, board, name, content) {
+        const k = `${project}/${board}/${name}`
+        pendingSet[k] = [Date.now()+setDelay, project, board, name, content]
+        if (pendingInterval == null) {
+            pendingInterval = setInterval(setPendingTasks, setDelay)
+        }
+    }
 
     static setTask(project, board, name, content) {
         return axios.put(`/api/v1/projects/${project}/boards/${board}/${name}`, content, getConfig())
@@ -75,8 +107,12 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
-    static moveTask(project, board, source) {
-        return axios.post(`/api/v1/projects/${project}/boards/${board}?from=${source}`,
+    static moveTask(project, board, name, newBoard, title) {
+        let url = `/api/v1/projects/${project}/boards/${newBoard}?move=${board}/${name}`
+        if (title) {
+            url += `&title=${title}`;
+        } 
+        return axios.post(url,
             null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);

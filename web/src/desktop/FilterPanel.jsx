@@ -3,6 +3,7 @@ import { React, useEffect, useState, useContext } from "react";
 import { BsSearch, BsViewStacked, MdViewHeadline } from 'react-icons/all';
 
 function FilterPanel(props) {
+    const {compact, setCompact} = props;
 
     return <HStack spacing={3}>
         <InputGroup>
@@ -13,9 +14,13 @@ function FilterPanel(props) {
             <Input type="phone" placeholder="Search Filter" />
         </InputGroup>
         <Spacer />
-        <Button size="sm"><MdViewHeadline/></Button>
-        <Button size="sm"><BsViewStacked /></Button>
-    </HStack>
+        <Button size="sm" onClick={_ => setCompact(true)} isActive={compact}>
+            <MdViewHeadline />
+        </Button>
+        <Button size="sm" onClick={_ => setCompact(false)} isActive={!compact}>
+            <BsViewStacked />
+        </Button>
+    </HStack >
 }
 
 export default FilterPanel

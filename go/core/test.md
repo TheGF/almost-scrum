@@ -1,11 +1,11 @@
 This is just a document for test purposes
 
-### Features
+### Properties
 - owner: mp
 - points: 12
 - tags: integration, instruments
 
-### Parts
+### Progress
 - [x] GFM task list 1
 - [x] GFM task list 2
 - [ ] GFM task list 3
@@ -13,3 +13,10 @@ This is just a document for test purposes
 ### Attachments
 - [Agenda](http:/localhost/planning/agenda.docx)
 
+### Comments
+``` 
+[mp] 
+```
+```
+[molepo] okoeko3
+```

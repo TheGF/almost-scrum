@@ -59,9 +59,8 @@ function TaskEditor(props) {
     return true;
   };
 
-  const { task } = props
+  const { task, saveTask } = props
   const [value, setValue] = useState(task && task.description);
-  const [selectedTab, setSelectedTab] = useState("write");
 
   const features = {
     name: "features",
@@ -73,31 +72,20 @@ function TaskEditor(props) {
     }
   };
   
+  function onChange(value) {
+    setValue(value);
+    if (task) {
+      task.description = value;
+      saveTask(task);
+    }
+  }
 
-  return (<Box h="500">
+  return (<Box>
     <ReactMde
       value={value}
-      onChange={setValue}
+      onChange={onChange}
       disablePreview={true}
-      selectedTab={selectedTab}
-      onTabChange={setSelectedTab}
-      minEditorHeight={500}
-      maxEditorHeight={800}
-      generateMarkdownPreview={(markdown) =>
-        Promise.resolve(<ReactMarkdown source={markdown} />)
-      }
       loadSuggestions={loadSuggestions}
-      childProps={
-        {
-          writeButton: {
-            tabIndex: -1
-          }
-        }, {
-          previewButton: {
-            maxHeight: 200,
-            overflow: 'auto',
-          }
-        }}
       paste={{
         saveImage: save
       }}

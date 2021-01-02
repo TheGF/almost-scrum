@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -53,18 +54,20 @@ func parseAttachments(node *blackfriday.Node, task *Task) {
 	logrus.Debugf("ParseTask - found attachment %s", link)
 }
 
-
 func parseList(input []byte, title string, task *Task) {
+	var node *blackfriday.Node
 	parser := blackfriday.New()
-	node := parser.Parse(input)
-
-	for node = node.FirstChild; node.Type != blackfriday.List; node = node.Next {
-		if node == nil {
-			return
-		}
+	node = parser.Parse(input)
+	if node == nil || node.FirstChild == nil {
+		return
 	}
 
-	task.Properties = map[string]string{}
+	for node = node.FirstChild; node != nil && node.Type != blackfriday.List; node = node.Next {
+	}
+	if node == nil {
+		return
+	}
+
 	for listItem := node.FirstChild; listItem != nil; listItem = listItem.Next {
 		text := listItem
 		for ; text != nil; text = text.FirstChild {
@@ -72,7 +75,7 @@ func parseList(input []byte, title string, task *Task) {
 				switch title {
 				case "Properties":
 					parseProperties(text, task)
-				case "Parts":
+				case "Progress":
 					parseParts(text, task)
 				case "Attachments":
 					parseAttachments(text, task)
@@ -82,14 +85,35 @@ func parseList(input []byte, title string, task *Task) {
 	}
 }
 
-func renderFeatures(task *Task, output *bytes.Buffer) {
-	output.WriteString("\n\n### Properties\n")
+func renderProperties(task *Task, output *bytes.Buffer) {
+	if task.Properties == nil {
+		return
+	}
+	output.WriteString("### Properties\n")
 
 	for key, val := range task.Properties {
 		output.WriteString("- ")
 		output.WriteString(key)
 		output.WriteString(": ")
 		output.WriteString(val)
+		output.WriteString("\n")
+	}
+}
+
+func renderParts(task *Task, output *bytes.Buffer) {
+	if task.Parts == nil {
+		return
+	}
+	output.WriteString("### Progress\n")
+
+	for _, part := range task.Parts {
+		output.WriteString("- ")
+		if part.Done {
+			output.WriteString("[x] ")
+		} else {
+			output.WriteString("[ ] ")
+		}
+		output.WriteString(part.Description)
 		output.WriteString("\n")
 	}
 }
@@ -111,13 +135,22 @@ func RenderTask(task *Task) []byte {
 	var output bytes.Buffer
 
 	output.WriteString(task.Description)
-	renderFeatures(task, &output)
+	if !strings.HasSuffix(task.Description, "\n") {
+		output.WriteString("\n")
+	}
+	renderProperties(task, &output)
+	renderParts(task, &output)
 
 	return output.Bytes()
 }
 
 func ParseTask(input []byte, task *Task) error {
 	var description bytes.Buffer
+
+	task.Properties = map[string]string{}
+	task.Parts = []Part{}
+	task.Attachments = []string{}
+
 	locS := paragraphMatch.FindAllSubmatchIndex(input, -1)
 
 	if len(locS) > 0 {
@@ -129,7 +162,7 @@ func ParseTask(input []byte, task *Task) error {
 		title := string(input[loc[2]:loc[3]])
 
 		switch title {
-		case "Properties", "Parts", "Attachments":
+		case "Properties", "Progress", "Attachments":
 			parseList(paragraph, title, task)
 		default:
 			description.Write(paragraph)

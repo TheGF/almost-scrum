@@ -2,14 +2,15 @@ package web
 
 import (
 	"almost-scrum/core"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func tasksRoute(group *gin.RouterGroup) {
-	group.GET("/projects/:project/boards", listBoardsAPI)
 	group.GET("/projects/:project/boards/:board", listStoryAPI)
 	group.GET("/projects/:project/boards/:board/:name", getStoryAPI)
 	group.POST("/projects/:project/boards/:board", postStoryAPI)
@@ -17,26 +18,7 @@ func tasksRoute(group *gin.RouterGroup) {
 	group.PUT("/projects/:project/boards/:board/:name", putStoryAPI)
 }
 
-
-func listBoardsAPI(c *gin.Context) {
-	var p core.Project
-
-	err := getProject(c, &p)
-	if err != nil {
-		return
-	}
-
-	boards, err := core.ListBoards(p)
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot list boards: %v", err)
-		return
-	}
-	log.Debugf("listBoardsAPI - List boards in project: %v", boards)
-	c.JSON(http.StatusOK, boards)
-}
-
-func getRange(c *gin.Context, max int) (start int, end int){
+func getRange(c *gin.Context, max int) (start int, end int) {
 	startParam := c.DefaultQuery("start", "")
 	endParam := c.DefaultQuery("end", "")
 
@@ -92,8 +74,6 @@ func listStoryAPI(c *gin.Context) {
 	}
 }
 
-
-
 func getStoryAPI(c *gin.Context) {
 	var project core.Project
 
@@ -116,7 +96,6 @@ func getStoryAPI(c *gin.Context) {
 	}
 }
 
-
 func postStoryAPI(c *gin.Context) {
 	var project core.Project
 
@@ -126,20 +105,43 @@ func postStoryAPI(c *gin.Context) {
 	board := c.Param("board")
 
 	var story core.Task
-	title := c.DefaultQuery("title", "noname")
+	title := c.DefaultQuery("title", "")
+	move := c.DefaultQuery("move", "")
 
-	if err := c.BindJSON(&story); err != nil {
-		log.Warnf("Invalid JSON in request: %v", err)
-		_ = c.AbortWithError(http.StatusBadRequest, err)
+	if move == "" {
+		if err := c.BindJSON(&story); err != nil {
+			log.Warnf("Invalid JSON in request: %v", err)
+			_ = c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		name := core.NewTaskName(project, title)
+		if err := core.SetTask(project, board, name, &story); core.IsErr(err, "cannot save story to %s", name) {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		c.String(http.StatusOK, name)
 		return
 	}
 
-	name := core.NewTaskName(project, title)
-	if err := core.SetTask(project, board, name, &story); core.IsErr(err, "cannot save story to %s", name) {
+	parts := strings.Split(move, "/")
+	if len(parts) != 2 {
+		c.String(http.StatusBadRequest, "parameter move is invalid")
+		return
+	}
+	oldBoard := parts[0]
+	oldName := parts[1]
+	id, _ := core.ExtractTaskId(oldName)
+	name := oldName
+	if title != "" {
+		name = fmt.Sprintf("%d.%s", id, title)
+	}
+
+	if err := core.MoveTask(project, oldBoard, oldName, board, name);
+		core.IsErr(err, "cannot move story %s/%s to %s/%s",
+			oldBoard, oldName, board, name ) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
 	}
-	c.String(http.StatusOK, name)
 }
 
 func putStoryAPI(c *gin.Context) {

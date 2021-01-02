@@ -11,11 +11,11 @@ import T from "../core/T"
 const visibleBoards = 5
 
 function Boards(props) {
-    const [boards, setBoards] = useState([]);
+    const { boards, active, onSelectBoard, onSelectLibrary } = props;
+    const [recentBoards, setRecentBoards] = useState([]);
     const [more, setMore] = useState([]);
-    const [active, setActive] = useState('backlog');
 
-    function splitBoards(boards) {
+    function splitBoards() {
         function addTimeInfo(b) {
             if (b == 'backlog') {
                 return {
@@ -29,49 +29,35 @@ function Boards(props) {
                 }
             }
         }
-        boards = boards.map(addTimeInfo)
+        const sorted = boards.map(addTimeInfo)
             .sort((a, b) => b.tm - a.tm)
             .map(s => s.name)
 
-        setBoards(boards.slice(0, 5))
-        setMore(boards.slice(5))
+        setRecentBoards(sorted.slice(0, 5))
+        setMore(sorted.slice(5))
     }
+    useEffect(splitBoards, [boards])
 
     function clickBoard(board) {
-        setActive(board)
         localStorage.setItem(`ash-board-${board}`, `${Date.now()}`)
-        if (props.onSelectBoard) {
-            props.onSelectBoard(board)
-        }
-        splitBoards(boards)
+        onSelectBoard && onSelectBoard(board)
+        splitBoards(recentBoards)
     }
 
     function clickAll() {
-        setActive('all')
-        if (props.onSelectBoard) {
-            props.onSelectBoard('')
-        }
+        onSelectBoard && onSelectBoard("")
     }
 
     function clickLibrary() {
-        setActive('library')
-        if (props.onSelectLibrary) {
-            props.onSelectLibrary()
-        }
+        onSelectLibrary && onSelectLibrary()
     }
-
-    function listBoards() {
-        Server.listBoards("~")
-            .then(splitBoards)
-    }
-    useEffect(listBoards, []);
 
     const all = <Button key="all" colorScheme="blue"
-        isActive={active == 'all'} onClick={clickAll}>
+        isActive={active == ''} onClick={clickAll}>
         <T>all</T>
     </Button>
 
-    const buttons = boards.map(
+    const buttons = recentBoards.map(
         b => <Button key={b} colorScheme="blue" isActive={active == b}
             onClick={_ => clickBoard(b)} >
             <T>{b}</T>
@@ -106,9 +92,15 @@ function Boards(props) {
     </>
 }
 
-
 function Header(props) {
-    const { project } = useContext(UserContext);
+    const [activeBoard, setActiveBoard] = useState('backlog');
+    const [boardKey, setBoardKey] = useState(0);
+    const {onNewTask, onNewBoard} = props;
+
+    function onSelectBoard(board) {
+        setActiveBoard(board);
+        props.setActiveBoard && props.setActiveBoard(board);
+    }
 
     return <Stack spacing={4} direction="row" align="center">
         <Menu>
@@ -116,8 +108,8 @@ function Header(props) {
                 Actions
                 </MenuButton>
             <MenuList>
-                <MenuItem>New Task</MenuItem>
-                <MenuItem>New Board</MenuItem>
+                <MenuItem onClick={onNewTask}>New Task</MenuItem>
+                <MenuItem onClick={onNewBoard}>New Board</MenuItem>
                 <MenuDivider />
                 <MenuOptionGroup title="Look & Feel" type="checkbox">
                     <MenuItemOption value="asc">Dark Mode</MenuItemOption>
@@ -127,7 +119,8 @@ function Header(props) {
                 <MenuItem>Git Pull</MenuItem>
             </MenuList>
         </Menu>
-        <Boards {...props} />
+        <Boards key={boardKey} {...props}
+            active={activeBoard} setActiveBoard={setActiveBoard} />
     </Stack>
 }
 

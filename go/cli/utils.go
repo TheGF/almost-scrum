@@ -4,7 +4,6 @@ import (
 	"almost-scrum/core"
 	"github.com/manifoldco/promptui"
 	"os"
-	"os/user"
 	"sort"
 
 	"github.com/fatih/color"
@@ -25,8 +24,8 @@ func getProject(projectPath string) core.Project {
 		os.Exit(1)
 	}
 
-	current := getCurrentUser()
-	for _, user := range project.Config.Users {
+	current := core.GetSystemUser()
+	for _, user := range core.GetUserList(project){
 		if user == current {
 			return project
 		}
@@ -53,12 +52,6 @@ func getBoard(project core.Project, global bool) string {
 	} else {
 		return project.Config.CurrentBoard
 	}
-}
-
-func getCurrentUser() string {
-	u, err := user.Current()
-	abortIf(err)
-	return u.Username
 }
 
 func chooseBoard(project core.Project) string {

@@ -22,6 +22,7 @@ func usage() {
 		"\tedit [name]       Edit a task\n" +
 		"\tdel [name]        Delete a task\n" +
 		"\ttouch [name]      Focus on a task\n" +
+		"\tmove [name]       Rename or move a task to a different board\n" +
 		"\towner [name]      Assign the story to another user\n" +
 		"\tcommit            Commit changes to the git repository\n" +
 		"\tboard             List the boards and set the default\n" +
@@ -144,6 +145,8 @@ func ProcessArgs() {
 		processTouch(projectPath, global, commands[1:])
 	case "owner":
 		processOwner(projectPath, global, commands[1:])
+	case "move":
+		processMove(projectPath, global, commands[1:])
 	case "reindex":
 		processReIndex(projectPath, commands[1:])
 	case "web":

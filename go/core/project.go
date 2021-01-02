@@ -12,8 +12,14 @@ import (
 )
 
 type ProjectConfig struct {
-	CurrentBoard string   `yaml:"current_store"`
-	Users        []string `yaml:"users"`
+	CurrentBoard  string   `yaml:"current_store"`
+	PropertyModel []PropertyDef
+}
+
+type PropertyDef struct {
+	Name   string   `json:"name" yaml:"name"`
+	Kind   string   `json:"kind" yaml:"kind"`
+	Values []string `json:"values" yaml:"values"`
 }
 
 // Project is the basic information about a scrum project.
@@ -90,7 +96,12 @@ func InitProject(path string) (Project, error) {
 	// Create the project configuration
 	projectConfig := ProjectConfig{
 		CurrentBoard: "backlog",
-		Users:        []string{},
+		PropertyModel: []PropertyDef{
+			{"Owner", "User", nil},
+			{"Status", "Enum", []string{"Draft", "Started", "Done"}},
+			{"Points", "Enum", []string{"1","2","3","5","7","9","12", "15", "21"}},
+			{"Epic", "Tag", nil},
+		},
 	}
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {
 		logrus.Errorf("InitProject - Cannot create config file in %s", path)

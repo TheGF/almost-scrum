@@ -22,14 +22,16 @@ func processInit(projectPath string, _ []string) {
 	if !confirmAction("Do you want to create a project in %s", projectPath) {
 		return
 	}
-	_, err = core.InitProject(projectPath)
+	project, err := core.InitProject(projectPath)
 	abortIf(err)
 
 	config, err := core.ReadProjectConfig(projectPath)
 	abortIf(err)
 
-	config.Users = []string{getCurrentUser()}
 	err = core.WriteProjectConfig(projectPath, &config)
+	abortIf(err)
+
+	err = core.SetUserInfo(project, core.GetSystemUser(), &core.UserInfo{})
 	abortIf(err)
 
 	color.Green("Project initialized successfully in %s", projectPath)

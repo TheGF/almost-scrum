@@ -17,18 +17,14 @@ func validateTitle(s string) error {
 	return nil
 }
 
-func getTitle(args []string) string {
-	var title string
-	if len(args) > 0 {
-		title = args[0]
-	} else {
-		prompt := promptui.Prompt{
-			Label:    "Title",
-			Validate: validateTitle,
-		}
-
-		title, _ = prompt.Run()
+func chooseTitle(title string) string {
+	prompt := promptui.Prompt{
+		Label:    "Title",
+		Validate: validateTitle,
+		Default: title,
 	}
+
+	title, _ = prompt.Run()
 	return title
 }
 
@@ -46,13 +42,18 @@ func processNew(projectPath string, args []string) {
 	project := getProject(projectPath)
 	board := chooseBoard(project)
 
-	title := getTitle(args)
+	var title string
+	if len(args) > 0 {
+		title = args[0]
+	} else {
+		title = chooseTitle("")
+	}
 	if title == "" {
 		return
 	}
 
 	name := core.NewTaskName(project, title)
-	user := getCurrentUser()
+	user := core.GetSystemUser()
 	task := emptyTask
 	task.Properties["owner"] = "@"+user
 

@@ -41,6 +41,18 @@ func GetUserInfo(project Project, user string) (userInfo UserInfo, err error) {
 }
 
 //SetUserInfo saves the user info
+func DelUserInfo(project Project, user string) (err error) {
+	path := filepath.Join(project.Path, ProjectUsersFolder, user)
+	if err = os.Remove(path); err != nil {
+		log.Errorf("Cannot remove info for user %s: %v", user, err)
+		return
+	}
+	log.Infof("User %s removed", user)
+	return
+}
+
+
+//SetUserInfo saves the user info
 func SetUserInfo(project Project, user string, userInfo *UserInfo) (err error) {
 	d, err := yaml.Marshal(userInfo)
 	if err != nil {

@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/sirupsen/logrus"
 	"os"
+	"os/user"
 	"path/filepath"
 )
 
@@ -41,3 +42,9 @@ func IsErr(err error, msg string, args ... interface{}) bool {
 		return false
 	}
 }
+
+func GetSystemUser() string {
+	u, _ := user.Current()
+	return u.Username
+}
+

@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	idMatch = regexp.MustCompile(`^([\pN]+)\.`)
+	idMatch = regexp.MustCompile(`^([\pN]+)\.(.*)`)
 )
 
 // Part to complete the story and its status
@@ -92,7 +92,7 @@ func listTasksForBoard(project Project, board string, filter string, infos *[]Ta
 		if filter != "" && !strings.Contains(name, filter) {
 			continue
 		}
-		id := ExtractTaskId(name)
+		id, _ := ExtractTaskId(name)
 		if id == 0 {
 			continue
 		}
@@ -123,13 +123,13 @@ func GetTaskPath(project Project, board string, name string) string {
 	return p
 }
 
-func ExtractTaskId(name string) uint16 {
+func ExtractTaskId(name string) (uint16, string) {
 	match := idMatch.FindStringSubmatch(name)
-	if len(match) < 2 {
-		return 0
+	if len(match) < 3 {
+		return 0, ""
 	}
 	id, _ := strconv.Atoi(match[1])
-	return uint16(id)
+	return uint16(id), match[2]
 }
 
 //SetTask a story in the Board
@@ -142,11 +142,24 @@ func SetTask(project Project, board string, id string, task *Task) error {
 }
 
 // TouchTask set the modified time to current time. It applies to stories and folders
-func TouchTask(project Project, board string, id string) error {
+func TouchTask(project Project, board string, name string) error {
 	currentTime := time.Now().Local()
-	p := filepath.Join(project.Path, ProjectBoardsFolder, board, id+TaskFileExt)
-	if err := os.Chtimes(p, currentTime, currentTime); IsErr(err, "cannot touch %s/%s", board, id) {
+	p := filepath.Join(project.Path, ProjectBoardsFolder, board, name+TaskFileExt)
+	if err := os.Chtimes(p, currentTime, currentTime); IsErr(err, "cannot touch %s/%s", board, name) {
 		return err
 	}
+	return nil
+}
+
+func MoveTask(project Project, oldBoard string, oldName string, board string, name string) error {
+	source := filepath.Join(project.Path, ProjectBoardsFolder, oldBoard, oldName+TaskFileExt)
+	target := filepath.Join(project.Path, ProjectBoardsFolder, board, name+TaskFileExt)
+
+	if err := os.Rename(source, target); err != nil {
+		return err
+	}
+
+	currentTime := time.Now().Local()
+	os.Chtimes(target, currentTime, currentTime)
 	return nil
 }
