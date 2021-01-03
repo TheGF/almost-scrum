@@ -9,5 +9,5 @@ func openEditor(project core.Project, board string, name string) {
 
 	p := core.GetTaskPath(project, board, name)
 	openExternalEditor(editor, p)
-	core.ReIndex(project)
+	core.ReIndex(&project)
 }

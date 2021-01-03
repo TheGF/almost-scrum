@@ -1,12 +1,14 @@
 import {
-    Button, Container, Menu, MenuButton, MenuItem, MenuList,
-    MenuOptionGroup, MenuItemOption, MenuDivider, Stack, Select, MenuGroup
+    Button, Menu, MenuButton,
+    MenuDivider, MenuItem,
+    MenuItemOption, MenuList,
+    MenuOptionGroup,
+    Stack,
+    useColorMode
 } from "@chakra-ui/react";
-import { React, useEffect, useState, useContext } from "react";
+import { React, useEffect, useState } from "react";
 import { BiChevronDown } from "react-icons/all";
-import UserContext from '../UserContext'
-import Server from "../server";
-import T from "../core/T"
+import T from "../core/T";
 
 const visibleBoards = 5
 
@@ -29,9 +31,9 @@ function Boards(props) {
                 }
             }
         }
-        const sorted = boards.map(addTimeInfo)
+        const sorted = boards && boards.map(addTimeInfo)
             .sort((a, b) => b.tm - a.tm)
-            .map(s => s.name)
+            .map(s => s.name) || []
 
         setRecentBoards(sorted.slice(0, 5))
         setMore(sorted.slice(5))
@@ -95,7 +97,8 @@ function Boards(props) {
 function Header(props) {
     const [activeBoard, setActiveBoard] = useState('backlog');
     const [boardKey, setBoardKey] = useState(0);
-    const {onNewTask, onNewBoard} = props;
+    const { onNewTask, onNewBoard } = props;
+    const { colorMode, toggleColorMode } = useColorMode()
 
     function onSelectBoard(board) {
         setActiveBoard(board);
@@ -111,9 +114,9 @@ function Header(props) {
                 <MenuItem onClick={onNewTask}>New Task</MenuItem>
                 <MenuItem onClick={onNewBoard}>New Board</MenuItem>
                 <MenuDivider />
-                <MenuOptionGroup title="Look & Feel" type="checkbox">
-                    <MenuItemOption value="asc">Dark Mode</MenuItemOption>
-                </MenuOptionGroup>
+                <MenuItem onClick={toggleColorMode}>
+                    Toggle {colorMode === "light" ? "Dark" : "Light"}
+                </MenuItem>
                 <MenuDivider />
                 <MenuItem>Git Push</MenuItem>
                 <MenuItem>Git Pull</MenuItem>

@@ -141,7 +141,7 @@ func processOwner(projectPath string, global bool, args []string) {
 	}
 	task.Properties["owner"] = "@"+owner
 	abortIf(core.SetTask(project, info.Board, info.Name, &task))
-	abortIf(core.ReIndex(project))
+	abortIf(core.ReIndex(&project))
 	color.Green("Task %s assigned to %s", info.Name, owner)
 }
 

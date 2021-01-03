@@ -1,18 +1,18 @@
 package core
 
 import (
-	"bytes"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/text/unicode/norm"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 )
 
 var (
-	wordSegment = regexp.MustCompile(`[#@]?[\pL\p{Mc}\p{Mn}_']+`)
+	wordSegment = regexp.MustCompile(`[#@]?[\pL\p{Mc}\p{Mn}']+`)
 	//	wordSegment = regexp.MustCompile(`([^\n][#@])?[\pNL\p{Mc}\p{Mn}_']+`)
 	stopWords = english
 )
@@ -34,7 +34,7 @@ type Index struct {
 	Ids       map[string]Ids `json:"ids"`
 }
 
-func SearchTask(project Project, board string, matchAll bool,  keys ...string) ([]TaskInfo, error) {
+func SearchTask(project Project, board string, matchAll bool, keys ...string) ([]TaskInfo, error) {
 	infos, err := ListTasks(project, board, "")
 	if IsErr(err, "cannot list tasks during search in %s/%s", project.Path, board) {
 		return []TaskInfo{}, err
@@ -50,7 +50,7 @@ func SearchTask(project Project, board string, matchAll bool,  keys ...string) (
 	}
 
 	l := len(infos)
-	for i:=0 ; i < l; {
+	for i := 0; i < l; {
 		cnt := idsSet[infos[i].ID]
 		logrus.Infof("Task %s/%s matches on %d keys", infos[i].Board, infos[i].Name, cnt)
 		if matchAll && cnt < len(keys) || cnt == 0 {
@@ -88,6 +88,9 @@ func lookupTaskIds(project Project, keys ...string) (map[uint16]int, error) {
 
 	idsSet := make(map[uint16]int)
 	for _, key := range keys {
+		if !strings.HasPrefix(key, "@") && !strings.HasPrefix(key, "#") {
+			key = strings.ToLower(key)
+		}
 		ids, ok := project.Index.Ids[key]
 		if ok {
 			for _, id := range ids {
@@ -112,22 +115,48 @@ func ClearIndex(project Project) error {
 	return os.Remove(p)
 }
 
-func ReIndex(project Project) error {
+func containId(ids Ids, id uint16) bool {
+	for _, _id := range ids {
+		if _id == id {
+			return true
+		}
+	}
+	return false
+}
+
+func diffIds(a Ids, b Ids) (removed Ids, added Ids) {
+	removed = Ids{}
+	added = Ids{}
+
+	for _, id := range a {
+		if !containId(b, id) {
+			removed = append(removed, id)
+		}
+	}
+	for _, id := range b {
+		if !containId(a, id) {
+			added = append(added, id)
+		}
+	}
+	return
+}
+
+func ReIndex(project *Project) error {
 	logrus.Debugf("Reindex project %s", project.Path)
 
-	index, modTime, err := ReadIndex(project)
+	index, modTime, err := ReadIndex(*project)
 	if err != nil {
 		return err
 	}
 
-	infos, err := ListTasks(project, "", "")
+	infos, err := ListTasks(*project, "", "")
 	if err != nil {
 		return err
 	}
 
 	mergeStopWords(index)
 	newStopWords := make([]string, 0)
-	idsLimit := len(infos) / 20
+	idsLimit := len(infos) / 10
 	if idsLimit < 10 {
 		idsLimit = 10
 	}
@@ -135,28 +164,56 @@ func ReIndex(project Project) error {
 	for _, info := range infos {
 		if info.ModTime.Sub(modTime) > 0 {
 			logrus.Debugf("ReIndex task %s/%s", info.Board, info.Name)
-			normal, special := indexTask(project, info.Board, info.Name)
+			normal, special := indexTask(*project, info.Board, info.Name)
 			clearIndex(info.ID, index)
 			mergeToIndex(info.ID, normal, index, idsLimit, &newStopWords)
 			mergeToIndex(info.ID, special, index, -1, nil)
 		}
 	}
 
+	logrus.Debugf("New stop words: %v", newStopWords)
 	for _, word := range newStopWords {
 		delete(index.Ids, word)
 	}
 	index.StopWords = append(index.StopWords, newStopWords...)
 	project.Index = index
-	return WriteIndex(project, index)
+
+	if logrus.GetLevel() == logrus.DebugLevel {
+		oldIndex, _, err := ReadIndex(*project)
+		if err == nil {
+			for key, value := range index.Ids {
+				oldValue, found := oldIndex.Ids[key]
+				if found {
+					removed, added := diffIds(oldValue, value)
+					if len(added) > 0 || len(removed) > 0 {
+						logrus.Debugf("Index %s has been updated: %v\n"+
+							"Added: %v\nRemoved: %v\n",
+							key, value, added, removed)
+
+					}
+					if len(added) > 0 {
+						logrus.Debugf("Added references: %v", removed)
+					}
+					if len(removed) > 0 {
+						logrus.Debugf("Removed references: %v", removed)
+					}
+				} else {
+					logrus.Debugf("New index %s: %v", key, value)
+				}
+			}
+
+		}
+
+	}
+
+	return WriteIndex(*project, index)
 }
 
 func clearIndex(id uint16, index *Index) {
 	for key, ids := range index.Ids {
 		l := len(ids)
-		logrus.Debugf("Word %s has %d references: %v", key, l, ids)
 		for i := 0; i < l; {
 			if ids[i] == id {
-				logrus.Debugf("Remove reference to task %d in word %s", id, key)
 				ids[i] = ids[l-1]
 				l -= 1
 			} else {
@@ -167,7 +224,6 @@ func clearIndex(id uint16, index *Index) {
 			ids = ids[0:l]
 			index.Ids[key] = ids
 		}
-		logrus.Debugf("After clean-up word %s has %d references: %v", key, l, ids)
 	}
 }
 
@@ -176,16 +232,21 @@ func mergeToIndex(id uint16, words []string, index *Index, limit int, newStopWor
 		if ids, found := index.Ids[word]; found {
 			if isMissing(id, ids) {
 				if limit > 0 && len(ids) > limit && newStopWords != nil {
-					*newStopWords = append(*newStopWords, word)
-					logrus.Debugf("Add word %s to Stop Words", word)
+					found := false
+					for _, w := range *newStopWords {
+						if w == word {
+							found = true
+						}
+					}
+					if !found {
+						*newStopWords = append(*newStopWords, word)
+					}
 				} else {
 					index.Ids[word] = append(ids, id)
-					logrus.Debugf("Add reference to task %d in word %s", id, word)
 				}
 			}
 		} else {
 			index.Ids[word] = Ids{id}
-			logrus.Debugf("Add reference to task %d in word %s", id, word)
 		}
 	}
 }
@@ -212,9 +273,13 @@ func indexTask(project Project, board string, name string) (normal []string, spe
 		logrus.Errorf("Cannot read task file %s: %v", p, err)
 		return []string{}, []string{}
 	}
-	data = append(data, []byte(name)...)
+	_, title := ExtractTaskId(name)
+	data = append(data, []byte(title)...)
 
-	return cleanText(data)
+	normal, special = cleanText(data)
+	logrus.Debugf("Indexing %s/%s\n Normal Words: %v\n Special Words %v\n",
+		board, name, normal, special)
+	return
 }
 
 func cleanText(text []byte) (normal []string, special []string) {
@@ -222,7 +287,6 @@ func cleanText(text []byte) (normal []string, special []string) {
 	special = make([]string, 0)
 
 	text = norm.NFC.Bytes(text)
-	text = bytes.ToLower(text)
 	words := wordSegment.FindAll(text, -1)
 	for _, w := range words {
 		s := string(w)
@@ -230,7 +294,7 @@ func cleanText(text []byte) (normal []string, special []string) {
 			if s[0] == '@' || s[0] == '#' {
 				special = append(special, s)
 			} else {
-				normal = append(normal, s)
+				normal = append(normal, strings.ToLower(s))
 			}
 		}
 	}

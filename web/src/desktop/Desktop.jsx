@@ -53,7 +53,7 @@ function Desktop() {
     return <Flex
         direction="column"
         align="center"
-        w={{ xl: "1400px" }}
+        w={{ xl: "83%" }}
         m="0 auto">
         
         <AskBoardName {...askBoardName} boards={boards} onCreate={createBoard} />

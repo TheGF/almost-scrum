@@ -1,12 +1,10 @@
 package core
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 )
 
 // UserInfo contains information about a user.
@@ -19,22 +17,23 @@ type UserInfo struct {
 func GetUserList(project Project) []string {
 	path := filepath.Join(project.Path, ProjectUsersFolder)
 	file, _ := os.Open(path)
-	users, _ := file.Readdirnames(0)
+	names, _ := file.Readdirnames(0)
+	users := make([]string, 0, len(names))
+	for _, name := range names {
+		ext := filepath.Ext(name)
+		if ext == ".yaml" {
+			users = append(users, name[0:len(name)-len(ext)])
+		}
+	}
+
 	return users
 }
 
 // GetUserInfo returns information about the specified user
 func GetUserInfo(project Project, user string) (userInfo UserInfo, err error) {
-	path := filepath.Join(project.Path, ProjectUsersFolder, user)
-	d, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Infof("Invalid file %s: %v", path, err)
-		return
-	}
-
-	err = yaml.Unmarshal(d, &user)
-	if err != nil {
-		log.Infof("Invalid file %s: %v", path, err)
+	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
+	if err = ReadYaml(path, &userInfo); err != nil {
+		log.Warnf("Invalid file %s: %v", path, err)
 		return
 	}
 	return
@@ -42,7 +41,7 @@ func GetUserInfo(project Project, user string) (userInfo UserInfo, err error) {
 
 //SetUserInfo saves the user info
 func DelUserInfo(project Project, user string) (err error) {
-	path := filepath.Join(project.Path, ProjectUsersFolder, user)
+	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	if err = os.Remove(path); err != nil {
 		log.Errorf("Cannot remove info for user %s: %v", user, err)
 		return
@@ -54,17 +53,6 @@ func DelUserInfo(project Project, user string) (err error) {
 
 //SetUserInfo saves the user info
 func SetUserInfo(project Project, user string, userInfo *UserInfo) (err error) {
-	d, err := yaml.Marshal(userInfo)
-	if err != nil {
-		log.Errorf("Cannot marshal info for user %s: %v", user, err)
-		return
-	}
-	path := filepath.Join(project.Path, ProjectUsersFolder, user)
-	err = ioutil.WriteFile(path, d, 0644)
-	if err != nil {
-		log.Errorf("Cannot save info for user %s: %v", user, err)
-		return
-	}
-	log.Infof("Task saved to %s", path)
-	return
+	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
+	return WriteYaml(path, userInfo)
 }

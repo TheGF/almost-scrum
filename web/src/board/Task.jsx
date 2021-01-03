@@ -7,7 +7,7 @@ import TaskEditor from './TaskEditor';
 import TaskViewer from './TaskViewer';
 import Properties from './Properties';
 import Progress from './Progress';
-import { MdTouchApp, MdVerticalAlignTop } from "react-icons/md";
+import { MdTouchApp, MdVerticalAlignTop, RiFilterLine } from "react-icons/all";
 
 
 function Task(props) {
@@ -77,7 +77,8 @@ function Task(props) {
             {userList}
         </Select>
         <span>{progress}</span>
-        <Button title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
+        <Button size="sm"><RiFilterLine onClick={touchTask} /></Button>
+        <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
     </HStack>
 
     function onChange(index) {

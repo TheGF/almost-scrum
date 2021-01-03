@@ -120,6 +120,7 @@ func postStoryAPI(c *gin.Context) {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
+		go core.ReIndex(&project)
 		c.String(http.StatusOK, name)
 		return
 	}
@@ -164,5 +165,6 @@ func putStoryAPI(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Cannot update task %s", name)
 		return
 	}
+	go core.ReIndex(&project)
 	c.String(http.StatusOK, "")
 }
