@@ -16,6 +16,7 @@ func tasksRoute(group *gin.RouterGroup) {
 	group.POST("/projects/:project/boards/:board", postStoryAPI)
 	group.POST("/projects/:project/boards/:board/:name", postStoryAPI)
 	group.PUT("/projects/:project/boards/:board/:name", putStoryAPI)
+	group.DELETE("/projects/:project/boards/:board/:name", deleteStoryAPI)
 }
 
 func getRange(c *gin.Context, max int) (start int, end int) {
@@ -168,3 +169,26 @@ func putStoryAPI(c *gin.Context) {
 	go core.ReIndex(&project)
 	c.String(http.StatusOK, "")
 }
+
+func deleteStoryAPI(c *gin.Context) {
+	var project core.Project
+
+	err := getProject(c, &project)
+	if err != nil {
+		return
+	}
+
+	board := c.Param("board")
+	name := c.Param("name")
+	story, err := core.DeleteTask(project, board, name)
+	switch err {
+	case core.ErrNoFound:
+		_ = c.Error(err)
+		c.String(http.StatusNotFound, "Task %s/%s does not exist", board, name)
+	case nil:
+		c.JSON(http.StatusOK, story)
+	default:
+		c.String(http.StatusInternalServerError, "Internal Error %v", err)
+	}
+}
+

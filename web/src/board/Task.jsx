@@ -1,13 +1,18 @@
-import { Box, Button, Editable, EditableInput, EditablePreview, HStack, Select, Spacer, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import { Box, Button, Editable, EditableInput, EditablePreview, 
+    HStack, Select, Spacer, Tab, TabList, TabPanel, TabPanels, 
+    Tabs, IconButton } from "@chakra-ui/react";
 import { React, useContext, useEffect, useState } from "react";
+import { BsTrash, MdVerticalAlignTop } from "react-icons/all";
 import T from "../core/T";
 import Server from '../server';
 import UserContext from '../UserContext';
+import Progress from './Progress';
+import Properties from './Properties';
 import TaskEditor from './TaskEditor';
 import TaskViewer from './TaskViewer';
-import Properties from './Properties';
-import Progress from './Progress';
-import { MdTouchApp, MdVerticalAlignTop, RiFilterLine } from "react-icons/all";
+import Utils from '../core/utils';
+import ConfirmDelete from './ConfirmDelete';
+import ConfirmChangeOwner from './ConfirmChangeOwner';
 
 
 function Task(props) {
@@ -16,22 +21,27 @@ function Task(props) {
     const { compact, boards, users } = props;
     const [task, setTask] = useState(null)
     const [progress, setProgress] = useState('')
+    const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
+    const [candidateOwner, setCandidateOwner] = useState(null)
 
     function updateProgress(task) {
         const progress = task && task.parts && task.parts.length ?
-            `${Math.round(100 * task.parts.filter(p => p.done).length / task.parts.length)}%` : ''
+            `${Math.round(100 * task.parts.filter(p => p.done).length / task.parts.length)}%`
+            : '-'
         setProgress(progress)
+        return task
     }
 
     function getTask() {
         Server.getTask(project, board, name)
-            .then(setTask)
             .then(updateProgress)
+            .then(setTask)
     }
     useEffect(getTask, [])
 
     function touchTask() {
         Server.touchTask(project, board, name)
+            .then(_ => props.onBoardChanged && props.onBoardChanged())
     }
 
     function saveTask(task) {
@@ -40,7 +50,33 @@ function Task(props) {
 
     function renameTask(title) {
         Server.moveTask(project, board, name, board, title)
-        props.onBoardChanged && props.onBoardChanged()
+            .then(_ => props.onBoardChanged && props.onBoardChanged())
+    }
+
+    function deleteTask() {
+        Server.deleteTask(project, board, name)
+            .then(_ => props.onBoardChanged && props.onBoardChanged())
+            .then(_ => setOpenConfirmDelete(false))
+    }
+
+    function changeOwner(evt) {
+        const newOwner = evt && evt.target && evt.target.value;
+        if (newOwner) {
+            if (owner == info.system_user) {
+                task.properties['Owner'] = `@${newOwner}`;
+                saveTask(task)
+                setTask({...task})
+            } else {
+                setCandidateOwner(newOwner);
+            }
+        }
+    }
+
+    function confirmCandidateOwner() {
+        task.properties['Owner'] = `@${candidateOwner}`;
+        saveTask(task)
+        setTask({...task})
+        setCandidateOwner(null);
     }
 
     function onBoardChanged(evt) {
@@ -61,7 +97,7 @@ function Task(props) {
         {b}
     </option>)
 
-    const mtime = new Date(modTime).toUTCString();
+    const mtime = Utils.getFriendlyDate(modTime)
     const header = task && <HStack spacing={3}>
         <label>{id}.</label>
         <Editable defaultValue={title} borderWidth="1px" minW="300px"
@@ -70,15 +106,15 @@ function Task(props) {
             <EditableInput />
         </Editable>
         <Spacer />
+        <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
+        <span>{progress}</span>
         <Select value={board} w="10em" onChange={onBoardChanged}>
             {boardList}
         </Select>
-        <Select value={owner} w="10em">
+        <Select value={owner} w="10em" onChange={changeOwner}>
             {userList}
         </Select>
-        <span>{progress}</span>
-        <Button size="sm"><RiFilterLine onClick={touchTask} /></Button>
-        <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
+        <IconButton onClick={_ => setOpenConfirmDelete(true)}><BsTrash/></IconButton>
     </HStack>
 
     function onChange(index) {
@@ -89,26 +125,31 @@ function Task(props) {
 
 
     const body = task && !compact ? <HStack spacing={3}>
+        <ConfirmChangeOwner owner={owner} candidateOwner={candidateOwner} 
+        setCandidateOwner={setCandidateOwner} onConfirm={confirmCandidateOwner}/>
+        <ConfirmDelete isOpen={openConfirmDelete} setIsOpen={setOpenConfirmDelete} 
+            onConfirm={deleteTask}/>
         <Tabs w="100%" onChange={onChange}>
             <TabList>
-                <Tab><T>view</T></Tab>
-                <Tab><T>edit</T></Tab>
-                <Tab><T>properties</T></Tab>
-                <Tab><T>progress</T></Tab>
-                <Tab><T>attachments</T></Tab>
+                <Tab key="view"><T>view</T></Tab>
+                <Tab key="edit"><T>edit</T></Tab>
+                <Tab key="properties"><T>properties</T></Tab>
+                <Tab key="progress"><T>progress</T></Tab>
+                <Tab key="attachments"><T>attachments</T></Tab>
+                <Spacer/>
             </TabList>
 
             <TabPanels>
-                <TabPanel padding={0}>
+                <TabPanel key="view" padding={0}>
                     <TaskViewer task={task} saveTask={saveTask} />
                 </TabPanel>
-                <TabPanel padding={0}>
+                <TabPanel key="edit" padding={0}>
                     <TaskEditor task={task} saveTask={saveTask} />
                 </TabPanel>
-                <TabPanel>
+                <TabPanel key="properties" >
                     <Properties task={task} saveTask={saveTask} />
                 </TabPanel>
-                <TabPanel>
+                <TabPanel key="progress" >
                     <Progress task={task} saveTask={task => {
                         saveTask(task);
                         updateProgress(task);

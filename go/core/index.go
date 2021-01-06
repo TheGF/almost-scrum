@@ -39,6 +39,7 @@ func SearchTask(project Project, board string, matchAll bool, keys ...string) ([
 	if IsErr(err, "cannot list tasks during search in %s/%s", project.Path, board) {
 		return []TaskInfo{}, err
 	}
+	logrus.Infof("Found %d tasks in board %s", len(infos), board)
 
 	if len(keys) == 0 {
 		return infos, nil
@@ -48,6 +49,7 @@ func SearchTask(project Project, board string, matchAll bool, keys ...string) ([
 	if IsErr(err, "cannot lookup ids on keys %v during search in %s/%s", keys, project.Path, board) {
 		return []TaskInfo{}, err
 	}
+	logrus.Infof("Found %d tasks with keys %v: %v", len(idsSet), keys, idsSet)
 
 	l := len(infos)
 	for i := 0; i < l; {
@@ -94,7 +96,6 @@ func lookupTaskIds(project Project, keys ...string) (map[uint16]int, error) {
 		ids, ok := project.Index.Ids[key]
 		if ok {
 			for _, id := range ids {
-				logrus.Debugf("Found key %s in task %d", key, id)
 				idsSet[id] += 1
 			}
 		}

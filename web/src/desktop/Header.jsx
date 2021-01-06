@@ -82,7 +82,8 @@ function Boards(props) {
             </MenuList>
         </Menu> : null;
 
-    const library = <Button key="library" colorScheme="yellow" isActive={active == 'library'} >
+    const library = <Button key="library" colorScheme="yellow"
+        isActive={active == 'library'} onClick={clickLibrary}>
         <T>library</T>
     </Button>
 

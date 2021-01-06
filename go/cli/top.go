@@ -11,7 +11,11 @@ import (
 func processTop(projectPath string, global bool, args []string) {
 	n := 7
 	if len(args) > 0 {
-		n, _ = strconv.Atoi(args[0])
+		c, err := strconv.Atoi(args[0])
+		if err == nil {
+			n = c
+			args = args[1:]
+		}
 	}
 
 	project := getProject(projectPath)
@@ -21,10 +25,11 @@ func processTop(projectPath string, global bool, args []string) {
 
 	color.Green("\n  %-40v%-20v%s", "Task", "Board", "Date")
 	for i, info := range infos {
-		tm := info.ModTime.Format(time.RFC822)
-		color.Yellow("  %-40v%-20v%s", info.Name, info.Board, tm)
-		if i > n {
+		if i >= n {
 			break
 		}
+		tm := info.ModTime.Format(time.RFC822)
+		color.Yellow("  %-40v%-20v%s", info.Name, info.Board, tm)
 	}
+	color.Green("  Total %d", len(infos))
 }

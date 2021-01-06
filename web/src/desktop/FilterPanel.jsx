@@ -1,6 +1,6 @@
-import { HStack, Input, InputGroup, InputLeftElement, Spacer, Flex, Button } from "@chakra-ui/react";
-import { React, useEffect, useState, useContext } from "react";
-import { BsSearch, BsViewStacked, MdViewHeadline } from 'react-icons/all';
+import { Button, HStack, Input, InputGroup, InputLeftElement, Spacer } from "@chakra-ui/react";
+import { React } from "react";
+import { BsSearch, BsViewStacked, MdViewHeadline, RiFilterLine } from 'react-icons/all';
 
 function FilterPanel(props) {
     const {compact, setCompact} = props;
@@ -14,6 +14,8 @@ function FilterPanel(props) {
             <Input type="phone" placeholder="Search Filter" />
         </InputGroup>
         <Spacer />
+        <Button size="sm"><RiFilterLine /></Button>
+
         <Button size="sm" onClick={_ => setCompact(true)} isActive={compact}>
             <MdViewHeadline />
         </Button>

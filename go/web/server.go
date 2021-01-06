@@ -25,7 +25,7 @@ func staticHandler(c *gin.Context) {
 
 func loadStaticContent(router *gin.Engine) {
 	for _, name := range AssetNames() {
-		path := fmt.Sprintf("/%s", name)
+		path := fmt.Sprintf("/%s", name[len("build"):])
 		data, err := Asset(name)
 		if err != nil {
 			log.Errorf("Cannot read asset %s: %s", name, err)
@@ -37,7 +37,7 @@ func loadStaticContent(router *gin.Engine) {
 		log.Debugf("Bound resource %s to %s", name, path)
 	}
 	router.GET("/", func(c *gin.Context) {
-		data, _ := Asset("index.html")
+		data, _ := Asset("build/index.html")
 		c.Writer.Write(data)
 	})
 

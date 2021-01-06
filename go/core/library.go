@@ -61,6 +61,23 @@ func ListLibrary(p Project, path string) ([]LibraryItem, string, error) {
 	return nil, path, nil
 }
 
+func MoveFileInLibrary(p Project, oldPath string, path string) error {
+	oldPath = filepath.Join(p.Path, ProjectLibraryFolder, oldPath)
+	path = filepath.Join(p.Path, ProjectLibraryFolder, path)
+
+	return os.Rename(oldPath, path)
+}
+
+func CreateFolderInLibrary(p Project, path string) error {
+	path = filepath.Join(p.Path, ProjectLibraryFolder, path)
+	return os.MkdirAll(path, 066)
+}
+
+func DeleteFileFromLibrary(p Project, path string) error {
+	path = filepath.Join(p.Path, ProjectLibraryFolder, path)
+	return os.Remove(path)
+}
+
 // GetPathInLibrary returns the absolute path for a resource stored in the library.
 func GetPathInLibrary(p Project, path string) (string, error) {
 	path = filepath.Join(p.Path, ProjectLibraryFolder, path)

@@ -62,7 +62,7 @@ class Server {
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
-    
+
     static createBoard(project, board) {
         return axios.put(`/api/v1/projects/${project}/boards/${board}`, null, getConfig())
             .then(r => r.data)
@@ -95,7 +95,7 @@ class Server {
 
     static setTaskLater(project, board, name, content) {
         const k = `${project}/${board}/${name}`
-        pendingSet[k] = [Date.now()+setDelay, project, board, name, content]
+        pendingSet[k] = [Date.now() + setDelay, project, board, name, content]
         if (pendingInterval == null) {
             pendingInterval = setInterval(setPendingTasks, setDelay)
         }
@@ -111,12 +111,20 @@ class Server {
         let url = `/api/v1/projects/${project}/boards/${newBoard}?move=${board}/${name}`
         if (title) {
             url += `&title=${title}`;
-        } 
+        }
         return axios.post(url,
             null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
+
+    static deleteTask(project, board, name) {
+        return axios.delete(`/api/v1/projects/${project}/boards/${board}/${name}`, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+
 
     static touchTask(project, board, name) {
         return axios.post(`/api/v1/projects/${project}/boards/${board}/${name}?touch`, null, getConfig())
@@ -124,13 +132,14 @@ class Server {
             .catch(loginWhenUnauthorized)
     }
 
-    static libraryPost(project, path, file = None) {
+    static uploadFileToLibrary(project, path, file = None) {
         const config = getConfig();
         let formData = null;
 
         if (file) {
             formData = new FormData();
             formData.append("file", file);
+            config.headers = config.headers || {};
             config.headers['Content-Type'] = 'multipart/form-data';
         }
 
@@ -139,14 +148,14 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
-    static libraryDelete(project, path) {
+    static deleteFromLibrary(project, path) {
         return axios.delete(`/api/v1/projects/${project}/library${path}`, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
 
-    static libraryDownload(project, path) {
-//        return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
+    static downloadFromlibrary(project, path) {
+        //        return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
 
         const link = document.createElement("a");
         link.href = `/api/v1/projects/${project}/library${path}?token=${localStorage.token}`;
@@ -156,8 +165,21 @@ class Server {
         document.body.removeChild(link);
     }
 
-    static libraryList(project, path) {
+    static listLibrary(project, path) {
         return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static createFolderInLibrary(project, path) {
+        return axios.put(`/api/v1/projects/${project}/library${path}`, null, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static moveFileInLibrary(project, oldpath, path) {
+        return axios.post(`/api/v1/projects/${project}/library${path}?move=${oldpath}`,
+            null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }

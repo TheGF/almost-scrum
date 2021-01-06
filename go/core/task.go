@@ -141,6 +141,16 @@ func SetTask(project Project, board string, id string, task *Task) error {
 	return nil
 }
 
+// GetTask a story in the Board
+func DeleteTask(project Project, board string, name string) (task Task, err error) {
+	p := filepath.Join(project.Path, ProjectBoardsFolder, board, name+TaskFileExt)
+	if err = os.Remove(p); IsErr(err, "Cannot delete task %s/%s", board, name) {
+		return task, err
+	}
+	return task, nil
+}
+
+
 // TouchTask set the modified time to current time. It applies to stories and folders
 func TouchTask(project Project, board string, name string) error {
 	currentTime := time.Now().Local()

@@ -1,6 +1,7 @@
 import { Flex, useDisclosure, VStack } from '@chakra-ui/react';
 import { React, useContext, useEffect, useState } from "react";
 import Board from '../board/Board';
+import Library from '../library/Library';
 import Server from '../server';
 import UserContext from '../UserContext';
 import AskBoardName from './AskBoardName';
@@ -50,18 +51,21 @@ function Desktop() {
         setShowLibrary(false);
     }
 
+    const content = showLibrary ? <Library /> :
+        <Board key={boardKey} name={board} boards={boards} />
+
     return <Flex
         direction="column"
         align="center"
         w={{ xl: "83%" }}
         m="0 auto">
-        
+
         <AskBoardName {...askBoardName} boards={boards} onCreate={createBoard} />
-        <VStack>
+        <VStack w="100%">
             <Header boards={boards}
                 onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
                 onNewTask={onNewTask} onNewBoard={_ => askBoardName.onOpen()} />
-            <Board key={boardKey} name={board} boards={boards}/>
+            {content}
         </VStack>
     </Flex>
 }
