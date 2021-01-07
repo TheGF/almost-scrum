@@ -71,9 +71,11 @@ class Server {
 
     static listTasks(project, board, filter, start, end) {
         let url = `/api/v1/projects/${project}/boards/${board}?`
-        if (start) url += `start=${start}`;
-        if (end) url += `end=${end}`;
-        if (filter) url += `filter=${filter}`;
+        let params = []
+        if (start) params.push(`start=${start}`);
+        if (end) params.push(`end=${end}`);
+        if (filter) params.push(`filter=${filter}`);
+        url += params.join('&')
 
         return axios.get(url, getConfig())
             .then(r => r.data)
@@ -87,8 +89,8 @@ class Server {
     }
 
 
-    static createTask(project, board, title, content) {
-        return axios.post(`/api/v1/projects/${project}/boards/${board}?title=${title}`, content, getConfig())
+    static createTask(project, board, title) {
+        return axios.post(`/api/v1/projects/${project}/boards/${board}?title=${title}`, null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
@@ -180,6 +182,14 @@ class Server {
     static moveFileInLibrary(project, oldpath, path) {
         return axios.post(`/api/v1/projects/${project}/library${path}?move=${oldpath}`,
             null, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static getSuggestions(project, prefix, total) {
+        let url = `/api/v1/projects/${project}/index/suggest/${prefix}`
+        if (total) url += `&total=${total}`
+        return axios.get(url, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }

@@ -32,6 +32,7 @@ func openProject(name string, path string) error {
 		return err
 	}
 
+	core.ReIndex(&project)
 	projectMapping[name] = project
 	return nil
 }

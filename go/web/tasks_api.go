@@ -59,9 +59,15 @@ func listStoryAPI(c *gin.Context) {
 		board = ""
 	}
 
-	filter := c.DefaultQuery("filter", "")
 
-	infos, err := core.ListTasks(project, board, filter)
+	filter := c.DefaultQuery("filter", "")
+	keys := []string{}
+	if filter != "" {
+		keys = strings.Split(filter, ",")
+	}
+
+	log.Debugf("Search in %s, filter=%s, keys=%v %d", board, filter, keys, len(keys))
+	infos, err := core.SearchTask(project, board, true, keys...)
 	switch err {
 	case core.ErrNoFound:
 		_ = c.Error(err)
@@ -105,19 +111,13 @@ func postStoryAPI(c *gin.Context) {
 	}
 	board := c.Param("board")
 
-	var story core.Task
 	title := c.DefaultQuery("title", "")
 	move := c.DefaultQuery("move", "")
 
 	if move == "" {
-		if err := c.BindJSON(&story); err != nil {
-			log.Warnf("Invalid JSON in request: %v", err)
-			_ = c.AbortWithError(http.StatusBadRequest, err)
-			return
-		}
-
-		name := core.NewTaskName(project, title)
-		if err := core.SetTask(project, board, name, &story); core.IsErr(err, "cannot save story to %s", name) {
+		system_user := core.GetSystemUser()
+		_, name, err := core.CreateTask(project, board, title, system_user)
+		if core.IsErr(err, "cannot create task %s", title) {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}

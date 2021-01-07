@@ -29,15 +29,7 @@ function Desktop() {
     }
 
     function onNewTask() {
-        Server.createTask(project, board, 'Click_and_Rename', {
-            description: "",
-            properties: {
-                "Owner": `@${username}`,
-                "Status": "Draft",
-            },
-            progress: [],
-            attachments: [],
-        })
+        Server.createTask(project, board, 'Click_and_Rename')
             .then(_ => setBoardKey(1 + boardKey))
     }
 

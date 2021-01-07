@@ -61,6 +61,7 @@ func StartWeb(projectPath string, port string, logLevel string, args []string) {
 	tasksRoute(v1)
 	libraryRoute(v1)
 	userRoute(v1)
+	indexRoute(v1)
 
 	r.Run(fmt.Sprintf(":%s", port))
 }
@@ -87,6 +88,7 @@ func StartServer(projectPath string, port string, logLevel string, args []string
 	tasksRoute(v1)
 	libraryRoute(v1)
 	userRoute(v1)
+	indexRoute(v1)
 
 	r.Run(fmt.Sprintf(":%s", port))
 }

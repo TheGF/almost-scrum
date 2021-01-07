@@ -1,24 +1,28 @@
-import { Box, Button, Editable, EditableInput, EditablePreview, 
-    HStack, Select, Spacer, Tab, TabList, TabPanel, TabPanels, 
-    Tabs, IconButton } from "@chakra-ui/react";
+import {
+    Box, Button, Editable, EditableInput, EditablePreview,
+    HStack,
+    IconButton, Select, Spacer, Tab, TabList, TabPanel, TabPanels,
+    Tabs
+} from "@chakra-ui/react";
 import { React, useContext, useEffect, useState } from "react";
 import { BsTrash, MdVerticalAlignTop } from "react-icons/all";
 import T from "../core/T";
+import Utils from '../core/utils';
 import Server from '../server';
 import UserContext from '../UserContext';
+import ConfirmChangeOwner from './ConfirmChangeOwner';
+import ConfirmDelete from './ConfirmDelete';
 import Progress from './Progress';
 import Properties from './Properties';
 import TaskEditor from './TaskEditor';
 import TaskViewer from './TaskViewer';
-import Utils from '../core/utils';
-import ConfirmDelete from './ConfirmDelete';
-import ConfirmChangeOwner from './ConfirmChangeOwner';
+
 
 
 function Task(props) {
     const { project, info } = useContext(UserContext);
     const { board, name, modTime } = props.info;
-    const { compact, boards, users } = props;
+    const { compact, boards, users, tags } = props;
     const [task, setTask] = useState(null)
     const [progress, setProgress] = useState('')
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
@@ -65,7 +69,7 @@ function Task(props) {
             if (owner == info.system_user) {
                 task.properties['Owner'] = `@${newOwner}`;
                 saveTask(task)
-                setTask({...task})
+                setTask({ ...task })
             } else {
                 setCandidateOwner(newOwner);
             }
@@ -75,7 +79,7 @@ function Task(props) {
     function confirmCandidateOwner() {
         task.properties['Owner'] = `@${candidateOwner}`;
         saveTask(task)
-        setTask({...task})
+        setTask({ ...task })
         setCandidateOwner(null);
     }
 
@@ -89,6 +93,8 @@ function Task(props) {
 
     const owner = task && task.properties && task.properties['Owner']
         && task.properties['Owner'].substring(1)
+    const readOnly = owner != info.system_user
+
     const [id, title] = name && name.split(/\.(.+)/) || ['', 'Something went wrong']
     const userList = users && users.map(u => <option key={u} value={u}>
         {u}
@@ -97,7 +103,7 @@ function Task(props) {
         {b}
     </option>)
 
-    const mtime = Utils.getFriendlyDate(modTime)
+    const mtime = `Last modified: ${Utils.getFriendlyDate(modTime)}`
     const header = task && <HStack spacing={3}>
         <label>{id}.</label>
         <Editable defaultValue={title} borderWidth="1px" minW="300px"
@@ -107,14 +113,16 @@ function Task(props) {
         </Editable>
         <Spacer />
         <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
-        <span>{progress}</span>
-        <Select value={board} w="10em" onChange={onBoardChanged}>
+        <span title="Task Progress">{progress}</span>
+        <Select value={board} title="Assign the Board" w="10em" onChange={onBoardChanged}>
             {boardList}
         </Select>
-        <Select value={owner} w="10em" onChange={changeOwner}>
+        <Select value={owner} title="Assign the Owner" w="10em" onChange={changeOwner}>
             {userList}
         </Select>
-        <IconButton onClick={_ => setOpenConfirmDelete(true)}><BsTrash/></IconButton>
+        <IconButton  title="Delete the task" onClick={_ => setOpenConfirmDelete(true)}>
+            <BsTrash />
+            </IconButton>
     </HStack>
 
     function onChange(index) {
@@ -125,10 +133,10 @@ function Task(props) {
 
 
     const body = task && !compact ? <HStack spacing={3}>
-        <ConfirmChangeOwner owner={owner} candidateOwner={candidateOwner} 
-        setCandidateOwner={setCandidateOwner} onConfirm={confirmCandidateOwner}/>
-        <ConfirmDelete isOpen={openConfirmDelete} setIsOpen={setOpenConfirmDelete} 
-            onConfirm={deleteTask}/>
+        <ConfirmChangeOwner owner={owner} candidateOwner={candidateOwner}
+            setCandidateOwner={setCandidateOwner} onConfirm={confirmCandidateOwner} />
+        <ConfirmDelete isOpen={openConfirmDelete} setIsOpen={setOpenConfirmDelete}
+            onConfirm={deleteTask} />
         <Tabs w="100%" onChange={onChange}>
             <TabList>
                 <Tab key="view"><T>view</T></Tab>
@@ -136,7 +144,7 @@ function Task(props) {
                 <Tab key="properties"><T>properties</T></Tab>
                 <Tab key="progress"><T>progress</T></Tab>
                 <Tab key="attachments"><T>attachments</T></Tab>
-                <Spacer/>
+                <Spacer />
             </TabList>
 
             <TabPanels>
@@ -144,16 +152,18 @@ function Task(props) {
                     <TaskViewer task={task} saveTask={saveTask} />
                 </TabPanel>
                 <TabPanel key="edit" padding={0}>
-                    <TaskEditor task={task} saveTask={saveTask} />
+                    <TaskEditor task={task} saveTask={saveTask} tags={tags} users={users} 
+                    readOnly={readOnly} />
                 </TabPanel>
                 <TabPanel key="properties" >
-                    <Properties task={task} saveTask={saveTask} />
+                    <Properties task={task} saveTask={saveTask} users={users} readOnly={readOnly} />
                 </TabPanel>
                 <TabPanel key="progress" >
-                    <Progress task={task} saveTask={task => {
-                        saveTask(task);
-                        updateProgress(task);
-                    }} />
+                    <Progress task={task} readOnly={readOnly}
+                        saveTask={task => {
+                            saveTask(task);
+                            updateProgress(task);
+                        }} />
                 </TabPanel>
                 <TabPanel>
                 </TabPanel>

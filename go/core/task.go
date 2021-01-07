@@ -132,6 +132,28 @@ func ExtractTaskId(name string) (uint16, string) {
 	return uint16(id), match[2]
 }
 
+func CreateTask(project Project, board string, title string, owner string) (*Task, string, error) {
+	task := Task{
+		Description: "Replace with the task description",
+		Properties:  map[string]string{},
+		Parts:       []Part{},
+		Attachments: []string{},
+	}
+
+	for _, propertyDef := range project.Config.PropertyModel {
+		value := propertyDef.Default
+		task.Properties[propertyDef.Name] = value
+	}
+	task.Properties["Owner"] = "@" + owner
+
+	name := NewTaskName(project, title)
+	if err := SetTask(project, board, name, &task); err != nil {
+		return nil, "", err
+	}
+
+	return &task, name, nil
+}
+
 //SetTask a story in the Board
 func SetTask(project Project, board string, id string, task *Task) error {
 	p := filepath.Join(project.Path, ProjectBoardsFolder, board, id+TaskFileExt)
@@ -149,7 +171,6 @@ func DeleteTask(project Project, board string, name string) (task Task, err erro
 	}
 	return task, nil
 }
-
 
 // TouchTask set the modified time to current time. It applies to stories and folders
 func TouchTask(project Project, board string, name string) error {

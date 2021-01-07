@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/monirz/gotri"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/text/unicode/norm"
 	"io/ioutil"
@@ -30,8 +31,9 @@ type TagLinks []TagLink
 type Ids []uint16
 
 type Index struct {
-	StopWords []string       `json:"stop_words"`
-	Ids       map[string]Ids `json:"ids"`
+	StopWords  []string       `json:"stop_words"`
+	Ids        map[string]Ids `json:"ids"`
+	searchTree *gotri.Trie
 }
 
 func SearchTask(project Project, board string, matchAll bool, keys ...string) ([]TaskInfo, error) {
@@ -65,6 +67,15 @@ func SearchTask(project Project, board string, matchAll bool, keys ...string) ([
 		}
 	}
 	return infos[0:l], nil
+}
+
+
+func SuggestKeys(project Project, prefix string, total int) []string {
+	suggestions := project.Index.searchTree.GetSuggestion(prefix, total)
+	if suggestions == nil {
+		return []string{}
+	}
+	return suggestions
 }
 
 func SearchTaskIds(project Project, keys ...string) (Ids, error) {
@@ -302,10 +313,17 @@ func cleanText(text []byte) (normal []string, special []string) {
 	return normal, special
 }
 
+func BuiltSearchTree(index *Index) {
+	for k := range index.Ids {
+		index.searchTree.Add(k, k)
+	}
+}
+
 func ReadIndex(project Project) (*Index, time.Time, error) {
 	var index = Index{
-		StopWords: make([]string, 0),
-		Ids:       make(map[string]Ids),
+		StopWords:  make([]string, 0),
+		Ids:        make(map[string]Ids),
+		searchTree: new(gotri.Trie),
 	}
 	p := filepath.Join(project.Path, IndexFile)
 	info, err := os.Stat(p)
@@ -320,6 +338,8 @@ func ReadIndex(project Project) (*Index, time.Time, error) {
 	if err != nil {
 		return nil, time.Unix(0, 0), err
 	}
+
+	BuiltSearchTree(&index)
 	return &index, info.ModTime(), nil
 }
 

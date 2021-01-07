@@ -12,14 +12,16 @@ import (
 )
 
 type ProjectConfig struct {
-	CurrentBoard  string   `yaml:"current_store"`
+	CurrentBoard  string `yaml:"current_store"`
 	PropertyModel []PropertyDef
 }
 
 type PropertyDef struct {
-	Name   string   `json:"name" yaml:"name"`
-	Kind   string   `json:"kind" yaml:"kind"`
-	Values []string `json:"values" yaml:"values"`
+	Name    string   `json:"name" yaml:"name"`
+	Kind    string   `json:"kind" yaml:"kind"`
+	Values  []string `json:"values" yaml:"values"`
+	Prefix  string   `json:"prefix" yaml:"prefix"`
+	Default string   `json:"default" yaml:"default"`
 }
 
 // Project is the basic information about a scrum project.
@@ -97,10 +99,11 @@ func InitProject(path string) (Project, error) {
 	projectConfig := ProjectConfig{
 		CurrentBoard: "backlog",
 		PropertyModel: []PropertyDef{
-			{"Owner", "User", nil},
-			{"Status", "Enum", []string{"Draft", "Started", "Done"}},
-			{"Points", "Enum", []string{"1","2","3","5","7","9","12", "15", "21"}},
-			{"Epic", "Tag", nil},
+			{"Owner", "User", nil, "", ""},
+			{"Status", "Enum", []string{"Draft", "Started", "Done"},
+				"", "Draft"},
+			{"Points", "Enum", []string{"1", "2", "3", "5", "7", "9", "12", "15", "21"},
+				"", "3"},
 		},
 	}
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {

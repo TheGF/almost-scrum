@@ -2,40 +2,37 @@ import { React, useEffect, useState, useContext } from "react";
 import ReactMde from "react-mde";
 import ReactMarkdown from "react-markdown";
 import "react-mde/lib/styles/css/react-mde-all.css";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, Center } from "@chakra-ui/react";
 import T from "../core/T";
+import UserContext from '../UserContext';
+import Server from '../server';
 
 
-function loadSuggestions(text) {
-  return new Promise((accept, reject) => {
-    setTimeout(() => {
-      const suggestions = [
-        {
-          preview: "Andre",
-          value: "@andre"
-        },
-        {
-          preview: "Angela",
-          value: "@angela"
-        },
-        {
-          preview: "David",
-          value: "@david"
-        },
-        {
-          preview: "Louise",
-          value: "@louise"
-        }
-      ].filter((i) => i.preview.toLowerCase().includes(text.toLowerCase()));
-      accept(suggestions);
-    }, 250);
-  });
-}
+
 
 
 
 function TaskEditor(props) {
-  const { name } = props;
+  const { project } = useContext(UserContext);
+  const { name, readOnly, tags, users } = props;
+
+  function loadSuggestions(text, triggeredBy) {
+    if (triggeredBy == '@') {
+      return new Promise((accept) => {
+        const suggestions = users
+          .filter(u => u.includes(text))
+          .map(u => ({ preview: u, value: `@${u}`, }))
+        accept(suggestions);
+      })
+    }
+    if (triggeredBy == '#') {
+      return Server.getSuggestions(project, `%23${text}`, 64)
+        .then(tags => {
+          return tags.map( t => ({ preview: t, value: t}))
+        })
+    }
+
+  }
 
   const save = async function* (data) {
     // Promise that waits for "time" milliseconds
@@ -71,7 +68,7 @@ function TaskEditor(props) {
       opts.textApi.replaceSelection("NICE");
     }
   };
-  
+
   function onChange(value) {
     setValue(value);
     if (task) {
@@ -79,18 +76,21 @@ function TaskEditor(props) {
       saveTask(task);
     }
   }
+  const editMessage = readOnly ? <Center h="3em">
+    Change owner if you want to edit the content
+</Center> : null
 
-  return (<Box>
+  return readOnly ? editMessage : <Box>
     <ReactMde
       value={value}
       onChange={onChange}
       disablePreview={true}
       loadSuggestions={loadSuggestions}
+      suggestionTriggerCharacters={['@', '#']}
       paste={{
         saveImage: save
       }}
-    /></Box>
-  );
+    /></Box>;
 }
 
 export default TaskEditor

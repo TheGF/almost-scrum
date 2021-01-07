@@ -1,9 +1,12 @@
-import { Button, Center, HStack, Input, Spacer, Switch, Table, TableCaption, Tbody, Td, Tr } from '@chakra-ui/react';
+import {
+    Button, Center, HStack, Input, Spacer, Switch, Table,
+    TableCaption, Tbody, Td, Tr
+} from '@chakra-ui/react';
 import { React, useState } from "react";
 import { FiPlusCircle, VscTrash } from 'react-icons/all';
 
 function Progress(props) {
-    const { task, saveTask } = props;
+    const { task, saveTask, readOnly } = props;
     const [parts, setParts] = useState(task.parts || []);
 
     function RenderPart(props) {
@@ -44,16 +47,18 @@ function Progress(props) {
         return <Tr>
             <Td w="2em">
                 <HStack spacing="1">
-                    <Button onClick={addRow}><FiPlusCircle /></Button>
+                    <Button onClick={addRow} disabled={readOnly}><FiPlusCircle /></Button>
                     <Button ><VscTrash /></Button>
                 </HStack>
             </Td>
             <Td>
-                <Input value={description} placeholder="Describe a required action"
+                <Input value={description} readOnly={readOnly}
+                    placeholder="Describe a required action"
                     onChange={onDescriptionChange} />
             </Td>
             <Td w="2em">
-                <Switch isChecked={done} onChange={onDoneChange} />
+                <Switch isChecked={done} isReadOnly={readOnly}
+                    onChange={onDoneChange} />
             </Td>
         </Tr>
     }
@@ -69,8 +74,12 @@ function Progress(props) {
 
     const rows = parts.map((part, idx) => <RenderPart key={idx} part={part} />)
     const add = parts.length ? null : <Button onClick={addFirstRow}><FiPlusCircle /></Button>
+    const editMessage = readOnly ? <Center h="2em">
+        Change owner if you want to edit the content
+    </Center> : null
 
     return <>
+        {editMessage}
         {add}
         <Table colorScheme="teal" size="sm">
             <TableCaption w="100%">

@@ -7,6 +7,7 @@ require (
 	github.com/bbalet/stopwords v1.0.0
 	github.com/fatih/color v1.10.0
 	github.com/gabriel-vasile/mimetype v1.1.2
+	github.com/gammazero/radixtree v0.0.0-20200706235324-6f383e8dfbec
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-git/go-git v4.7.0+incompatible // indirect
 	github.com/go-git/go-git/v5 v5.2.0
@@ -16,6 +17,7 @@ require (
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/monirz/gotri v0.0.0-20200219181904-dacfb98c509f
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/sergi/go-diff v1.1.0 // indirect

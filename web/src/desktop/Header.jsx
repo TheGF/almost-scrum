@@ -13,7 +13,7 @@ import T from "../core/T";
 const visibleBoards = 5
 
 function Boards(props) {
-    const { boards, active, onSelectBoard, onSelectLibrary } = props;
+    const { boards, active, onSelectBoard, onSelectLibrary, setSearchKeys } = props;
     const [recentBoards, setRecentBoards] = useState([]);
     const [more, setMore] = useState([]);
 
