@@ -14,7 +14,7 @@ type UserInfo struct {
 }
 
 // GetUserList returns the project users
-func GetUserList(project Project) []string {
+func GetUserList(project *Project) []string {
 	path := filepath.Join(project.Path, ProjectUsersFolder)
 	file, _ := os.Open(path)
 	names, _ := file.Readdirnames(0)
@@ -30,7 +30,7 @@ func GetUserList(project Project) []string {
 }
 
 // GetUserInfo returns information about the specified user
-func GetUserInfo(project Project, user string) (userInfo UserInfo, err error) {
+func GetUserInfo(project *Project, user string) (userInfo UserInfo, err error) {
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	if err = ReadYaml(path, &userInfo); err != nil {
 		log.Warnf("Invalid file %s: %v", path, err)
@@ -40,7 +40,7 @@ func GetUserInfo(project Project, user string) (userInfo UserInfo, err error) {
 }
 
 //SetUserInfo saves the user info
-func DelUserInfo(project Project, user string) (err error) {
+func DelUserInfo(project *Project, user string) (err error) {
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	if err = os.Remove(path); err != nil {
 		log.Errorf("Cannot remove info for user %s: %v", user, err)
@@ -52,7 +52,7 @@ func DelUserInfo(project Project, user string) (err error) {
 
 
 //SetUserInfo saves the user info
-func SetUserInfo(project Project, user string, userInfo *UserInfo) (err error) {
+func SetUserInfo(project *Project, user string, userInfo *UserInfo) (err error) {
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	return WriteYaml(path, userInfo)
 }

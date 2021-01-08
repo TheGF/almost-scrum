@@ -42,7 +42,7 @@ function Properties(props) {
 
         function renderTag() {
             const options = values && values.map(option =>
-                <option value={option} key={option}>{T.translate(option)}</option>
+                <option value={option} key={option}>{option}</option>
             ) || []
             return readOnly ? <label>{value}</label> :
                 <Select placeholder="Choose" value={value}
@@ -57,7 +57,7 @@ function Properties(props) {
             ) || []
             const label = value && value.substring(1)
             return readOnly ? <label>{label}</label> :
-                <Select value={value}
+                <Select placeholder="Choose" value={value}
                     size="small" onChange={onChange}>
                     {options}
                 </Select>

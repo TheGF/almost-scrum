@@ -54,7 +54,7 @@ func BenchmarkGet(b *testing.B) {
 }
 
 func TestMarkdown(t *testing.T) {
-	filename := "../../.ash/boards/backlog/17.Click and Rename me.md" //"test.md"
+	filename := "test.md"
 	data, err := ioutil.ReadFile(filename)
 	assert.Nilf(t, err, "Cannot open markdown file: %w", err)
 

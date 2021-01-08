@@ -15,25 +15,23 @@ func userRoute(group *gin.RouterGroup) {
 }
 
 func listUsersAPI(c *gin.Context) {
-	var p core.Project
-	err := getProject(c, &p)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
-	users := core.GetUserList(p)
+	users := core.GetUserList(project)
 	c.JSON(http.StatusOK, users)
 }
 
 func getUserAPI(c *gin.Context) {
-	var p core.Project
-	err := getProject(c, &p)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
 	user := c.Param("user")
-	userInfo, err := core.GetUserInfo(p, user)
+	userInfo, err := core.GetUserInfo(project, user)
 	if err != nil {
 		log.Warnf("Cannot get user %s info: %v", user, err)
 		_ = c.Error(err)
@@ -44,9 +42,8 @@ func getUserAPI(c *gin.Context) {
 }
 
 func putUserAPI(c *gin.Context) {
-	var p core.Project
-	err := getProject(c, &p)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
@@ -54,7 +51,7 @@ func putUserAPI(c *gin.Context) {
 	user := c.Param("user")
 	_ = c.BindJSON(&userInfo)
 
-	err = core.SetUserInfo(p, user, &userInfo)
+	err := core.SetUserInfo(project, user, &userInfo)
 	if err != nil {
 		log.Warnf("Cannot set user %s info: %v", user, err)
 		_ = c.Error(err)

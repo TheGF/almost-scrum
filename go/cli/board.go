@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func listBoard(project core.Project, args []string) {
+func listBoard(project *core.Project, args []string) {
 	boards, _ := core.ListBoards(project)
 	var selected string
 

@@ -44,7 +44,7 @@ func WriteProjectConfig(path string, config *ProjectConfig) error {
 
 // FindProject searches for a project inside path and its parents up to root.
 // Usually, root can be an empty string.
-func FindProject(path string) (Project, error) {
+func FindProject(path string) (*Project, error) {
 	p, _ := FindFileUpwards(path, GitFolder)
 	if p != "" {
 		_, err := os.Stat(filepath.Join(p, ProjectFolder))
@@ -57,33 +57,33 @@ func FindProject(path string) (Project, error) {
 	if p != "" {
 		return OpenProject(p)
 	}
-	return Project{}, ErrNoFound
+	return nil, ErrNoFound
 }
 
 // OpenProject checks if the given path contains a project and creates an instance of Project.
-func OpenProject(path string) (Project, error) {
+func OpenProject(path string) (*Project, error) {
 	projectConfig, err := ReadProjectConfig(path)
 	if err != nil {
-		return Project{}, ErrNoFound
+		return nil, ErrNoFound
 	}
 
 	logrus.Debugf("FindProject - Project found in %s", path)
-	return Project{
+	return &Project{
 		Path:   path,
 		Config: projectConfig,
 	}, nil
 }
 
 // InitProject initializes a new project in the specified directory
-func InitProject(path string) (Project, error) {
+func InitProject(path string) (*Project, error) {
 	path, err := filepath.Abs(path)
 	if err != nil {
-		return Project{}, err
+		return nil, err
 	}
 
 	if _, err := ReadProjectConfig(path); err == nil {
 		logrus.Warnf("InitProject - Cannot initialize project. Project %s already exists", path)
-		return Project{Path: path}, ErrExists
+		return &Project{Path: path}, ErrExists
 	}
 
 	// Create required folders
@@ -91,7 +91,7 @@ func InitProject(path string) (Project, error) {
 		folder = filepath.Join(path, folder)
 		if err := os.MkdirAll(folder, 0755); err != nil {
 			logrus.Errorf("InitProject - Cannot create folder %s", folder)
-			return Project{}, err
+			return nil, err
 		}
 	}
 
@@ -100,15 +100,15 @@ func InitProject(path string) (Project, error) {
 		CurrentBoard: "backlog",
 		PropertyModel: []PropertyDef{
 			{"Owner", "User", nil, "", ""},
-			{"Status", "Enum", []string{"Draft", "Started", "Done"},
-				"", "Draft"},
+			{"Status", "Tag", []string{"#Draft", "#Started", "#Done"},
+				"", "#Draft"},
 			{"Points", "Enum", []string{"1", "2", "3", "5", "7", "9", "12", "15", "21"},
 				"", "3"},
 		},
 	}
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {
 		logrus.Errorf("InitProject - Cannot create config file in %s", path)
-		return Project{}, err
+		return nil, err
 	}
 
 	// Board a reference to the project in the global configuration
@@ -116,14 +116,14 @@ func InitProject(path string) (Project, error) {
 	globalConfig.Projects[filepath.Base(path)] = path
 	SaveConfig(globalConfig)
 
-	return Project{
+	return &Project{
 		Path:   path,
 		Config: projectConfig,
 	}, nil
 }
 
 //NewTaskName browses all stories in all boards and returns the next possible id.
-func NewTaskName(project Project, title string) string {
+func NewTaskName(project *Project, title string) string {
 	path := filepath.Join(project.Path, "boards")
 	id := 1
 
@@ -145,7 +145,7 @@ func NewTaskName(project Project, title string) string {
 }
 
 // ShredProject fully deletes all files in a project. Use with caution!
-func ShredProject(project Project) error {
+func ShredProject(project *Project) error {
 	files := append([]string{}, ProjectFolders...)
 	files = append(files, ProjectConfigFile)
 
@@ -171,7 +171,7 @@ func ShredProject(project Project) error {
 }
 
 // ListBoards returns the boards in the project
-func ListBoards(project Project) ([]string, error) {
+func ListBoards(project *Project) ([]string, error) {
 	p := filepath.Join(project.Path, "boards")
 	infos, err := ioutil.ReadDir(p)
 	if err != nil {
@@ -187,7 +187,7 @@ func ListBoards(project Project) ([]string, error) {
 }
 
 // CreateBoard creates a new store inside a project
-func CreateBoard(project Project, name string) error {
+func CreateBoard(project *Project, name string) error {
 	p := filepath.Join(project.Path, "boards", name)
 	return os.MkdirAll(p, 0777)
 }

@@ -16,13 +16,6 @@ function Board(props) {
     const [infos, setInfos] = useState([]);
     const [users, setUsers] = useState([]);
     const [compact, setCompact] = useState(false);
-    const [tags, setTags] = useState([]);
-
-    function loadTags() {
-        Server.getSuggestions(project, '%23', 64)
-            .then(setTags)
-    }
-    useEffect(loadTags, []);
 
     function loadTaskList() {
         const filter = searchKeys.join(',')
@@ -40,7 +33,7 @@ function Board(props) {
     const tasks = infos && infos.map(info =>
         <Task key={info.id} info={info} compact={compact}
             boards={boards} onBoardChanged={loadTaskList}
-            users={users} tags={tags}/>
+            users={users} searchKeys={searchKeys}/>
     );
     return <VStack
         spacing={4}

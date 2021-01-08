@@ -21,9 +21,9 @@ type LibraryItem struct {
 }
 
 // ListLibrary returns the content of the specified path in the library.
-func ListLibrary(p Project, path string) ([]LibraryItem, string, error) {
+func ListLibrary(project *Project, path string) ([]LibraryItem, string, error) {
 
-	path, _ = GetPathInLibrary(p, path)
+	path, _ = GetPathInLibrary(project, path)
 	fileInfo, err := os.Stat(path)
 	if err != nil {
 		log.Warnf("ListLibrary - Cannot get info about file %s: %v", path, err)
@@ -61,25 +61,25 @@ func ListLibrary(p Project, path string) ([]LibraryItem, string, error) {
 	return nil, path, nil
 }
 
-func MoveFileInLibrary(p Project, oldPath string, path string) error {
-	oldPath = filepath.Join(p.Path, ProjectLibraryFolder, oldPath)
-	path = filepath.Join(p.Path, ProjectLibraryFolder, path)
+func MoveFileInLibrary(project *Project, oldPath string, path string) error {
+	oldPath = filepath.Join(project.Path, ProjectLibraryFolder, oldPath)
+	path = filepath.Join(project.Path, ProjectLibraryFolder, path)
 
 	return os.Rename(oldPath, path)
 }
 
-func CreateFolderInLibrary(p Project, path string) error {
-	path = filepath.Join(p.Path, ProjectLibraryFolder, path)
+func CreateFolderInLibrary(project *Project, path string) error {
+	path = filepath.Join(project.Path, ProjectLibraryFolder, path)
 	return os.MkdirAll(path, 066)
 }
 
-func DeleteFileFromLibrary(p Project, path string) error {
-	path = filepath.Join(p.Path, ProjectLibraryFolder, path)
+func DeleteFileFromLibrary(project *Project, path string) error {
+	path = filepath.Join(project.Path, ProjectLibraryFolder, path)
 	return os.Remove(path)
 }
 
 // GetPathInLibrary returns the absolute path for a resource stored in the library.
-func GetPathInLibrary(p Project, path string) (string, error) {
-	path = filepath.Join(p.Path, ProjectLibraryFolder, path)
+func GetPathInLibrary(project *Project, path string) (string, error) {
+	path = filepath.Join(project.Path, ProjectLibraryFolder, path)
 	return filepath.Abs(path)
 }

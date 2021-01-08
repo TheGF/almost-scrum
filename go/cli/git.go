@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func selectTasks(project core.Project, global bool) []core.TaskInfo {
+func selectTasks(project *core.Project, global bool) []core.TaskInfo {
 	var board string
 	if global {
 		board = ""
@@ -53,7 +53,7 @@ func selectTasks(project core.Project, global bool) []core.TaskInfo {
 	return selected
 }
 
-func addProgress(project core.Project, info core.TaskInfo, commitInfo core.CommitInfo) {
+func addProgress(project *core.Project, info core.TaskInfo, commitInfo core.CommitInfo) {
 	task, err := core.GetTask(project, info.Board, info.Name)
 	if err != nil {
 		return

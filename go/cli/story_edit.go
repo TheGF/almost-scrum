@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func chooseTask(project core.Project, board string, keys... string) core.TaskInfo {
+func chooseTask(project *core.Project, board string, keys... string) core.TaskInfo {
 	infos, err := core.SearchTask(project, board, true, keys...)
 	abortIf(err)
 
@@ -34,7 +34,7 @@ func chooseTask(project core.Project, board string, keys... string) core.TaskInf
 	return infos[selected]
 }
 
-func chooseUser(project core.Project) string {
+func chooseUser(project *core.Project) string {
 	prompt := promptui.Select{
 		Label: "Select a user (CTRL+C to exit)",
 		Items: core.GetUserList(project),
@@ -141,7 +141,7 @@ func processOwner(projectPath string, global bool, args []string) {
 	}
 	task.Properties["owner"] = "@"+owner
 	abortIf(core.SetTask(project, info.Board, info.Name, &task))
-	abortIf(core.ReIndex(&project))
+	abortIf(core.ReIndex(project))
 	color.Green("Task %s assigned to %s", info.Name, owner)
 }
 

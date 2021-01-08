@@ -33,7 +33,7 @@ func prepareMessage(commitInfo CommitInfo) string {
 	return out.String()
 }
 
-func GitCommit(project Project, commitInfo CommitInfo) error {
+func GitCommit(project *Project, commitInfo CommitInfo) error {
 	gitFolder := filepath.Dir(project.Path)
 	boardsFolder := filepath.Join(project.Path, ProjectBoardsFolder)
 

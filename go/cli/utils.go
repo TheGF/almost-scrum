@@ -16,7 +16,7 @@ func abortIf(err error) {
 	}
 }
 
-func getProject(projectPath string) core.Project {
+func getProject(projectPath string) *core.Project {
 	project, err := core.FindProject(projectPath)
 	if err != nil {
 		color.Red("No project found. Make sure a project exists in current directory" +
@@ -36,7 +36,7 @@ func getProject(projectPath string) core.Project {
 	return project
 }
 
-func getProjectConfig(project core.Project) core.ProjectConfig {
+func getProjectConfig(project *core.Project) core.ProjectConfig {
 	config, err := core.ReadProjectConfig(project.Path)
 	if err != nil {
 		color.Red("No project found. Make sure a project exists in current directory" +
@@ -46,7 +46,7 @@ func getProjectConfig(project core.Project) core.ProjectConfig {
 	return config
 }
 
-func getBoard(project core.Project, global bool) string {
+func getBoard(project *core.Project, global bool) string {
 	if global {
 		return ""
 	} else {
@@ -54,7 +54,7 @@ func getBoard(project core.Project, global bool) string {
 	}
 }
 
-func chooseBoard(project core.Project) string {
+func chooseBoard(project *core.Project) string {
 	boards, err := core.ListBoards(project)
 	abortIf(err)
 

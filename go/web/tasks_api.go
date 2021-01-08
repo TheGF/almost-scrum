@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -47,10 +48,8 @@ func getRange(c *gin.Context, max int) (start int, end int) {
 }
 
 func listStoryAPI(c *gin.Context) {
-	var project core.Project
-
-	err := getProject(c, &project)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
@@ -61,9 +60,11 @@ func listStoryAPI(c *gin.Context) {
 
 
 	filter := c.DefaultQuery("filter", "")
-	keys := []string{}
+	var keys []string
 	if filter != "" {
 		keys = strings.Split(filter, ",")
+	} else {
+		keys = []string{}
 	}
 
 	log.Debugf("Search in %s, filter=%s, keys=%v %d", board, filter, keys, len(keys))
@@ -82,10 +83,8 @@ func listStoryAPI(c *gin.Context) {
 }
 
 func getStoryAPI(c *gin.Context) {
-	var project core.Project
-
-	err := getProject(c, &project)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
@@ -104,24 +103,23 @@ func getStoryAPI(c *gin.Context) {
 }
 
 func postStoryAPI(c *gin.Context) {
-	var project core.Project
-
-	if err := getProject(c, &project); err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
-	board := c.Param("board")
 
+	board := c.Param("board")
 	title := c.DefaultQuery("title", "")
 	move := c.DefaultQuery("move", "")
 
 	if move == "" {
-		system_user := core.GetSystemUser()
-		_, name, err := core.CreateTask(project, board, title, system_user)
+		systemUser := core.GetSystemUser()
+		_, name, err := core.CreateTask(project, board, title, systemUser)
 		if core.IsErr(err, "cannot create task %s", title) {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
-		go core.ReIndex(&project)
+		_ = core.ReIndex(project)
 		c.String(http.StatusOK, name)
 		return
 	}
@@ -144,37 +142,35 @@ func postStoryAPI(c *gin.Context) {
 			oldBoard, oldName, board, name ) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
+	_ = core.ReIndex(project)
+	c.String(http.StatusOK, filepath.Join(board, name))
 }
 
 func putStoryAPI(c *gin.Context) {
-	var project core.Project
-
-	err := getProject(c, &project)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
 	var task core.Task
 	name := c.Param("name")
 	board := c.Param("board")
-	if err = c.BindJSON(&task); core.IsErr(err, "Invalid JSON") {
+	if err := c.BindJSON(&task); core.IsErr(err, "Invalid JSON") {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	if err = core.SetTask(project, board, name, &task); err != nil {
+	if err := core.SetTask(project, board, name, &task); err != nil {
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot update task %s", name)
 		return
 	}
-	go core.ReIndex(&project)
+	_ = core.ReIndex(project)
 	c.String(http.StatusOK, "")
 }
 
 func deleteStoryAPI(c *gin.Context) {
-	var project core.Project
-
-	err := getProject(c, &project)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 

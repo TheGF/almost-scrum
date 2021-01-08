@@ -9,10 +9,10 @@ import (
 func processReIndex(projectPath string, args []string) {
 	project := getProject(projectPath)
 	if len(args) == 1 && args[0] == "full" {
-		core.ClearIndex(project)
+		_ = core.ClearIndex(project)
 	}
 	start := time.Now()
-	err := core.ReIndex(&project)
+	err := core.ReIndex(project)
 	abortIf(err)
 	elapsed := time.Since(start)
 

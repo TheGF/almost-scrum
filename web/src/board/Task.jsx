@@ -22,7 +22,7 @@ import TaskViewer from './TaskViewer';
 function Task(props) {
     const { project, info } = useContext(UserContext);
     const { board, name, modTime } = props.info;
-    const { compact, boards, users, tags } = props;
+    const { compact, boards, users, searchKeys } = props;
     const [task, setTask] = useState(null)
     const [progress, setProgress] = useState('')
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
@@ -149,10 +149,10 @@ function Task(props) {
 
             <TabPanels>
                 <TabPanel key="view" padding={0}>
-                    <TaskViewer task={task} saveTask={saveTask} />
+                    <TaskViewer task={task} saveTask={saveTask} searchKeys={searchKeys} />
                 </TabPanel>
                 <TabPanel key="edit" padding={0}>
-                    <TaskEditor task={task} saveTask={saveTask} tags={tags} users={users} 
+                    <TaskEditor task={task} saveTask={saveTask} users={users} 
                     readOnly={readOnly} />
                 </TabPanel>
                 <TabPanel key="properties" >

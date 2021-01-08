@@ -1,9 +1,8 @@
-This is just a document for test purposes
-
+This is a test
 ### Properties
-- owner: mp
-- points: 12
-- tags: integration, instruments
+- Owner: @mp
+- Status: #Draft
+- Points: 12
 
 ### Progress
 - [x] GFM task list 1

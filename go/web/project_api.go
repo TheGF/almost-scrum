@@ -8,21 +8,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ProjectMapping map[string]core.Project
+type ProjectMapping map[string]*core.Project
 
 var projectMapping = make(ProjectMapping)
 
 // getProject resolves the URL parameters
-func getProject(c *gin.Context, p *core.Project) error {
+func getProject(c *gin.Context ) *core.Project {
 	name := c.Param("project")
 
 	if project, found := projectMapping[name]; found {
-		*p = project
-		return nil
+		return project
 	} else {
 		_ = c.Error(core.ErrNoFound)
 		c.String(http.StatusNotFound, "Project %s not found in configuration", name)
-		return core.ErrNoFound
+		return nil
 	}
 }
 
@@ -32,7 +31,7 @@ func openProject(name string, path string) error {
 		return err
 	}
 
-	core.ReIndex(&project)
+	_ = core.ReIndex(project)
 	projectMapping[name] = project
 	return nil
 }
@@ -73,23 +72,21 @@ type ProjectInfo struct {
 }
 
 func getProjectInfoAPI(c *gin.Context) {
-	var p core.Project
-	if err := getProject(c, &p); err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
 	info := ProjectInfo{
 		SystemUser:    core.GetSystemUser(),
-		PropertyModel: p.Config.PropertyModel,
+		PropertyModel: project.Config.PropertyModel,
 	}
 	c.JSON(http.StatusOK, info)
 }
 
 func listBoardsAPI(c *gin.Context) {
-	var project core.Project
-
-	err := getProject(c, &project)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
@@ -104,12 +101,11 @@ func listBoardsAPI(c *gin.Context) {
 }
 
 func createBoardAPI(c *gin.Context) {
-	var project core.Project
-
-	err := getProject(c, &project)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
+
 	board := c.Param("board")
 	if err := core.CreateBoard(project, board); err != nil {
 		_ = c.Error(err)

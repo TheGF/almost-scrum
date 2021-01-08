@@ -12,9 +12,10 @@ import (
 
 var (
 	paragraphMatch  = regexp.MustCompile(`#+\s+(\S+)[^#]+`)
+	lineMatch       = regexp.MustCompile(`#+\s+(\w+)|([^\n]+)`)
 	propertyMatch   = regexp.MustCompile(`\s*([^:]*):\s+(.*)`)
 	partMatch       = regexp.MustCompile(`\[([x ])]\s+(.+)`)
-	attachmentMatch = regexp.MustCompile(`\[[^]]*]\([^\)]+\)`)
+	attachmentMatch = regexp.MustCompile(`\[[^]]*]\([^)]+\)`)
 )
 
 func parseProperties(node *blackfriday.Node, task *Task) {
@@ -144,6 +145,35 @@ func RenderTask(task *Task) []byte {
 	return output.Bytes()
 }
 
+type paragraph struct {
+	header string
+	title   string
+	body    string
+}
+
+func splitInParagraph(input []byte) []paragraph {
+	paragraphs := []paragraph{}
+
+	lines := lineMatch.FindAllStringSubmatch(string(input), -1)
+	for _, line := range lines {
+		all := line[0]
+		title := line[1]
+		part := line[2]
+
+		if title != "" {
+			paragraphs = append(paragraphs, paragraph{all+"\n", title, ""})
+			continue
+		}
+
+		if len(paragraphs) == 0 {
+			paragraphs = append(paragraphs, paragraph{"", "", ""})
+		}
+		paragraphs[len(paragraphs)-1].body += part + "\n"
+	}
+
+	return paragraphs
+}
+
 func ParseTask(input []byte, task *Task) error {
 	var description bytes.Buffer
 
@@ -151,21 +181,14 @@ func ParseTask(input []byte, task *Task) error {
 	task.Parts = []Part{}
 	task.Attachments = []string{}
 
-	locS := paragraphMatch.FindAllSubmatchIndex(input, -1)
-
-	if len(locS) > 0 {
-		description.Write(input[0:locS[0][0]])
-	}
-
-	for _, loc := range locS {
-		paragraph := input[loc[0]:loc[1]]
-		title := string(input[loc[2]:loc[3]])
-
-		switch title {
+	paragraphs := splitInParagraph(input)
+	for _, paragraph := range paragraphs {
+		switch paragraph.title {
 		case "Properties", "Progress", "Attachments":
-			parseList(paragraph, title, task)
+			parseList([]byte(paragraph.body), paragraph.title, task)
 		default:
-			description.Write(paragraph)
+			description.WriteString(paragraph.header)
+			description.WriteString(paragraph.body)
 		}
 	}
 

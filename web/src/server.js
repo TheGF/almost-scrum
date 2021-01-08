@@ -74,7 +74,7 @@ class Server {
         let params = []
         if (start) params.push(`start=${start}`);
         if (end) params.push(`end=${end}`);
-        if (filter) params.push(`filter=${filter}`);
+        if (filter) params.push(`filter=${encodeURIComponent(filter)}`);
         url += params.join('&')
 
         return axios.get(url, getConfig())
@@ -83,6 +83,7 @@ class Server {
     }
 
     static getTask(project, board, name) {
+        name = encodeURIComponent(name)
         return axios.get(`/api/v1/projects/${project}/boards/${board}/${name}`, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
@@ -90,6 +91,7 @@ class Server {
 
 
     static createTask(project, board, title) {
+        title = encodeURIComponent(title)
         return axios.post(`/api/v1/projects/${project}/boards/${board}?title=${title}`, null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
@@ -104,15 +106,17 @@ class Server {
     }
 
     static setTask(project, board, name, content) {
+        name = encodeURIComponent(name)
         return axios.put(`/api/v1/projects/${project}/boards/${board}/${name}`, content, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
 
     static moveTask(project, board, name, newBoard, title) {
+        name = encodeURIComponent(name)
         let url = `/api/v1/projects/${project}/boards/${newBoard}?move=${board}/${name}`
         if (title) {
-            url += `&title=${title}`;
+            url += `&title=${encodeURIComponent(title)}`;
         }
         return axios.post(url,
             null, getConfig())
@@ -121,6 +125,7 @@ class Server {
     }
 
     static deleteTask(project, board, name) {
+        name = encodeURIComponent(name)
         return axios.delete(`/api/v1/projects/${project}/boards/${board}/${name}`, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
@@ -129,12 +134,14 @@ class Server {
 
 
     static touchTask(project, board, name) {
+        name = encodeURIComponent(name)
         return axios.post(`/api/v1/projects/${project}/boards/${board}/${name}?touch`, null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized)
     }
 
     static uploadFileToLibrary(project, path, file = None) {
+        path = encodeURIComponent(path)
         const config = getConfig();
         let formData = null;
 
@@ -151,12 +158,14 @@ class Server {
     }
 
     static deleteFromLibrary(project, path) {
+        path = encodeURIComponent(path)
         return axios.delete(`/api/v1/projects/${project}/library${path}`, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
 
     static downloadFromlibrary(project, path) {
+        path = encodeURIComponent(path)
         //        return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
 
         const link = document.createElement("a");
@@ -168,18 +177,22 @@ class Server {
     }
 
     static listLibrary(project, path) {
+        path = encodeURIComponent(path)
         return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
 
     static createFolderInLibrary(project, path) {
+        path = encodeURIComponent(path)
         return axios.put(`/api/v1/projects/${project}/library${path}`, null, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
 
     static moveFileInLibrary(project, oldpath, path) {
+        oldpath = encodeURIComponent(oldpath)
+        path = encodeURIComponent(path)
         return axios.post(`/api/v1/projects/${project}/library${path}?move=${oldpath}`,
             null, getConfig())
             .then(r => r.data)
@@ -187,6 +200,7 @@ class Server {
     }
 
     static getSuggestions(project, prefix, total) {
+        prefix = encodeURIComponent(prefix)
         let url = `/api/v1/projects/${project}/index/suggest/${prefix}`
         if (total) url += `&total=${total}`
         return axios.get(url, getConfig())

@@ -47,7 +47,7 @@ type Task struct {
 }
 
 // ListBoardTasks list the tasks in the board
-func ListTasks(project Project, board string, filter string) ([]TaskInfo, error) {
+func ListTasks(project *Project, board string, filter string) ([]TaskInfo, error) {
 	var infos = make([]TaskInfo, 0)
 
 	if board == "" {
@@ -75,7 +75,7 @@ func ListTasks(project Project, board string, filter string) ([]TaskInfo, error)
 	return infos, nil
 }
 
-func listTasksForBoard(project Project, board string, filter string, infos *[]TaskInfo) error {
+func listTasksForBoard(project *Project, board string, filter string, infos *[]TaskInfo) error {
 	p := filepath.Join(project.Path, ProjectBoardsFolder, board)
 	fileInfos, err := ioutil.ReadDir(p)
 	if IsErr(err, "cannot read board %s", board) {
@@ -108,7 +108,7 @@ func listTasksForBoard(project Project, board string, filter string, infos *[]Ta
 }
 
 // GetTask a story in the Board
-func GetTask(project Project, board string, name string) (task Task, err error) {
+func GetTask(project *Project, board string, name string) (task Task, err error) {
 	p := filepath.Join(project.Path, ProjectBoardsFolder, board, name+TaskFileExt)
 	if err = ReadTask(p, &task); IsErr(err, "Cannot read task %s/%s", board, name) {
 		return task, err
@@ -117,7 +117,7 @@ func GetTask(project Project, board string, name string) (task Task, err error) 
 }
 
 // GetTaskPath returns the absolute path of a story
-func GetTaskPath(project Project, board string, name string) string {
+func GetTaskPath(project *Project, board string, name string) string {
 	p := filepath.Join(project.Path, ProjectBoardsFolder, board, name+TaskFileExt)
 	p, _ = filepath.Abs(p)
 	return p
@@ -132,7 +132,7 @@ func ExtractTaskId(name string) (uint16, string) {
 	return uint16(id), match[2]
 }
 
-func CreateTask(project Project, board string, title string, owner string) (*Task, string, error) {
+func CreateTask(project *Project, board string, title string, owner string) (*Task, string, error) {
 	task := Task{
 		Description: "Replace with the task description",
 		Properties:  map[string]string{},
@@ -155,7 +155,7 @@ func CreateTask(project Project, board string, title string, owner string) (*Tas
 }
 
 //SetTask a story in the Board
-func SetTask(project Project, board string, id string, task *Task) error {
+func SetTask(project *Project, board string, id string, task *Task) error {
 	p := filepath.Join(project.Path, ProjectBoardsFolder, board, id+TaskFileExt)
 	if err := WriteTask(p, task); IsErr(err, "cannot save task %s/%s", board, id) {
 		return err
@@ -164,7 +164,7 @@ func SetTask(project Project, board string, id string, task *Task) error {
 }
 
 // GetTask a story in the Board
-func DeleteTask(project Project, board string, name string) (task Task, err error) {
+func DeleteTask(project *Project, board string, name string) (task Task, err error) {
 	p := filepath.Join(project.Path, ProjectBoardsFolder, board, name+TaskFileExt)
 	if err = os.Remove(p); IsErr(err, "Cannot delete task %s/%s", board, name) {
 		return task, err
@@ -173,7 +173,7 @@ func DeleteTask(project Project, board string, name string) (task Task, err erro
 }
 
 // TouchTask set the modified time to current time. It applies to stories and folders
-func TouchTask(project Project, board string, name string) error {
+func TouchTask(project *Project, board string, name string) error {
 	currentTime := time.Now().Local()
 	p := filepath.Join(project.Path, ProjectBoardsFolder, board, name+TaskFileExt)
 	if err := os.Chtimes(p, currentTime, currentTime); IsErr(err, "cannot touch %s/%s", board, name) {
@@ -182,7 +182,7 @@ func TouchTask(project Project, board string, name string) error {
 	return nil
 }
 
-func MoveTask(project Project, oldBoard string, oldName string, board string, name string) error {
+func MoveTask(project *Project, oldBoard string, oldName string, board string, name string) error {
 	source := filepath.Join(project.Path, ProjectBoardsFolder, oldBoard, oldName+TaskFileExt)
 	target := filepath.Join(project.Path, ProjectBoardsFolder, board, name+TaskFileExt)
 
@@ -191,6 +191,6 @@ func MoveTask(project Project, oldBoard string, oldName string, board string, na
 	}
 
 	currentTime := time.Now().Local()
-	os.Chtimes(target, currentTime, currentTime)
+	_ = os.Chtimes(target, currentTime, currentTime)
 	return nil
 }

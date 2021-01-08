@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	wordSegment = regexp.MustCompile(`[#@]?[\pL\p{Mc}\p{Mn}']+`)
+	wordSegment = regexp.MustCompile(`[#@]?[\pL\p{Mc}\p{Mn}][\pL\p{Mc}\p{Mn}\p{N}_']*`)
 	//	wordSegment = regexp.MustCompile(`([^\n][#@])?[\pNL\p{Mc}\p{Mn}_']+`)
 	stopWords = english
 )
@@ -36,7 +36,7 @@ type Index struct {
 	searchTree *gotri.Trie
 }
 
-func SearchTask(project Project, board string, matchAll bool, keys ...string) ([]TaskInfo, error) {
+func SearchTask(project *Project, board string, matchAll bool, keys ...string) ([]TaskInfo, error) {
 	infos, err := ListTasks(project, board, "")
 	if IsErr(err, "cannot list tasks during search in %s/%s", project.Path, board) {
 		return []TaskInfo{}, err
@@ -70,7 +70,7 @@ func SearchTask(project Project, board string, matchAll bool, keys ...string) ([
 }
 
 
-func SuggestKeys(project Project, prefix string, total int) []string {
+func SuggestKeys(project *Project, prefix string, total int) []string {
 	suggestions := project.Index.searchTree.GetSuggestion(prefix, total)
 	if suggestions == nil {
 		return []string{}
@@ -78,7 +78,7 @@ func SuggestKeys(project Project, prefix string, total int) []string {
 	return suggestions
 }
 
-func SearchTaskIds(project Project, keys ...string) (Ids, error) {
+func SearchTaskIds(project *Project, keys ...string) (Ids, error) {
 	idsSet, err := lookupTaskIds(project, keys...)
 	if IsErr(err, "cannot lookup ids on keys %v", keys) {
 		return Ids{}, err
@@ -90,7 +90,7 @@ func SearchTaskIds(project Project, keys ...string) (Ids, error) {
 	return ids, nil
 }
 
-func lookupTaskIds(project Project, keys ...string) (map[uint16]int, error) {
+func lookupTaskIds(project *Project, keys ...string) (map[uint16]int, error) {
 	if project.Index == nil {
 		index, _, err := ReadIndex(project)
 		if IsErr(err, "cannot read index for %s", project.Path) {
@@ -114,7 +114,7 @@ func lookupTaskIds(project Project, keys ...string) (map[uint16]int, error) {
 	return idsSet, nil
 }
 
-func ClearIndex(project Project) error {
+func ClearIndex(project *Project) error {
 	p := filepath.Join(project.Path, IndexFile)
 	_, err := os.Stat(p)
 	if os.IsNotExist(err) {
@@ -156,12 +156,12 @@ func diffIds(a Ids, b Ids) (removed Ids, added Ids) {
 func ReIndex(project *Project) error {
 	logrus.Debugf("Reindex project %s", project.Path)
 
-	index, modTime, err := ReadIndex(*project)
+	index, modTime, err := ReadIndex(project)
 	if err != nil {
 		return err
 	}
 
-	infos, err := ListTasks(*project, "", "")
+	infos, err := ListTasks(project, "", "")
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func ReIndex(project *Project) error {
 	for _, info := range infos {
 		if info.ModTime.Sub(modTime) > 0 {
 			logrus.Debugf("ReIndex task %s/%s", info.Board, info.Name)
-			normal, special := indexTask(*project, info.Board, info.Name)
+			normal, special := indexTask(project, info.Board, info.Name)
 			clearIndex(info.ID, index)
 			mergeToIndex(info.ID, normal, index, idsLimit, &newStopWords)
 			mergeToIndex(info.ID, special, index, -1, nil)
@@ -191,7 +191,7 @@ func ReIndex(project *Project) error {
 	project.Index = index
 
 	if logrus.GetLevel() == logrus.DebugLevel {
-		oldIndex, _, err := ReadIndex(*project)
+		oldIndex, _, err := ReadIndex(project)
 		if err == nil {
 			for key, value := range index.Ids {
 				oldValue, found := oldIndex.Ids[key]
@@ -218,7 +218,8 @@ func ReIndex(project *Project) error {
 
 	}
 
-	return WriteIndex(*project, index)
+	BuiltSearchTree(project)
+	return WriteIndex(project, index)
 }
 
 func clearIndex(id uint16, index *Index) {
@@ -278,7 +279,7 @@ func mergeStopWords(index *Index) {
 	}
 }
 
-func indexTask(project Project, board string, name string) (normal []string, special []string) {
+func indexTask(project *Project, board string, name string) (normal []string, special []string) {
 	p := filepath.Join(project.Path, "boards", board, name+TaskFileExt)
 	data, err := ioutil.ReadFile(p)
 	if err != nil {
@@ -313,13 +314,20 @@ func cleanText(text []byte) (normal []string, special []string) {
 	return normal, special
 }
 
-func BuiltSearchTree(index *Index) {
-	for k := range index.Ids {
-		index.searchTree.Add(k, k)
+func BuiltSearchTree(project *Project) {
+	for k := range project.Index.Ids {
+		project.Index.searchTree.Add(k, k)
+	}
+	for _, propertyDef := range project.Config.PropertyModel {
+		if propertyDef.Kind == "Tag" && propertyDef.Values != nil {
+			for _, value := range propertyDef.Values {
+				project.Index.searchTree.Add(value, value)
+			}
+		}
 	}
 }
 
-func ReadIndex(project Project) (*Index, time.Time, error) {
+func ReadIndex(project *Project) (*Index, time.Time, error) {
 	var index = Index{
 		StopWords:  make([]string, 0),
 		Ids:        make(map[string]Ids),
@@ -339,11 +347,12 @@ func ReadIndex(project Project) (*Index, time.Time, error) {
 		return nil, time.Unix(0, 0), err
 	}
 
-	BuiltSearchTree(&index)
+	project.Index = &index
+	BuiltSearchTree(project)
 	return &index, info.ModTime(), nil
 }
 
-func WriteIndex(project Project, index *Index) error {
+func WriteIndex(project *Project, index *Index) error {
 	p := filepath.Join(project.Path, IndexFile)
 
 	return WriteJSON(p, index)

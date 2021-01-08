@@ -16,17 +16,13 @@ func libraryRoute(group *gin.RouterGroup) {
 }
 
 func listLibraryAPI(c *gin.Context) {
-	var p core.Project
-
-	err := getProject(c, &p)
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusNotFound, "Project not found")
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
 	path := c.Param("path")
-	list, path, err := core.ListLibrary(p, path)
+	list, path, err := core.ListLibrary(project, path)
 	if err != nil {
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot read path %s in library", path, err)
@@ -43,10 +39,8 @@ func listLibraryAPI(c *gin.Context) {
 }
 
 func createFolderAPI(c *gin.Context) {
-	var project core.Project
-
-	err := getProject(c, &project)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
@@ -61,10 +55,8 @@ func createFolderAPI(c *gin.Context) {
 }
 
 func uploadFileAPI(c *gin.Context) {
-	var p core.Project
-
-	err := getProject(c, &p)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
@@ -72,7 +64,7 @@ func uploadFileAPI(c *gin.Context) {
 	move := c.DefaultQuery("move", "")
 
 	if move == "" {
-		path, err = core.GetPathInLibrary(p, path)
+		path, err := core.GetPathInLibrary(project, path)
 		if err != nil {
 			log.Warnf("Cannot resolve path %s: %v", path, err)
 			_ = c.Error(err)
@@ -88,13 +80,13 @@ func uploadFileAPI(c *gin.Context) {
 		}
 		listLibraryAPI(c)
 	} else {
-		if _, err = core.GetPathInLibrary(p, move); err != nil {
+		if _, err := core.GetPathInLibrary(project, move); err != nil {
 			log.Warnf("Cannot resolve path %s: %v", path, err)
 			_ = c.Error(err)
 			c.String(http.StatusNotFound, "Original path %s does not exist", move)
 			return
 		}
-		if err = core.MoveFileInLibrary(p, move, path); err != nil {
+		if err := core.MoveFileInLibrary(project, move, path); err != nil {
 			_ = c.Error(err)
 			c.String(http.StatusInternalServerError, "Cannot move %s to %s", move, path)
 			return
@@ -104,15 +96,13 @@ func uploadFileAPI(c *gin.Context) {
 }
 
 func deleteFileAPI(c *gin.Context) {
-	var p core.Project
-
-	err := getProject(c, &p)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
 
 	path := c.Param("path")
-	if err = core.DeleteFileFromLibrary(p, path); err != nil {
+	if err := core.DeleteFileFromLibrary(project, path); err != nil {
 		log.Warnf("Cannot delete path %s: %v", path, err)
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot delete file")

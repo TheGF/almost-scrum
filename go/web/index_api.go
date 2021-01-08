@@ -13,12 +13,10 @@ func indexRoute(group *gin.RouterGroup) {
 }
 
 func getSuggestAPI(c *gin.Context) {
-	var project core.Project
-	err := getProject(c, &project)
-	if err != nil {
+	var project *core.Project
+	if project = getProject(c); project == nil {
 		return
 	}
-
 
 	prefix := c.Param("prefix")
 	total, _ := strconv.Atoi(c.DefaultQuery("total", "10"))
