@@ -83,11 +83,11 @@ func GetGitStatus(project *Project) (GitStatus, error) {
 			continue
 		}
 		if parts[0] == ProjectFolder {
-			//if parts[1] == ProjectBoardsFolder {
-			//	gitStatus.AshFiles = append(gitStatus.AshFiles, name)
-			//} else if parts[1] == ProjectLibraryFolder && project.Config.IncludeLibInGit {
-			//	gitStatus.AshFiles = append(gitStatus.AshFiles, name)
-			//}
+			if parts[1] == ProjectBoardsFolder {
+				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
+			} else if parts[1] == ProjectLibraryFolder && project.Config.IncludeLibInGit {
+				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
+			}
 		} else {
 			switch state.Worktree {
 			case git.Modified, git.Added, git.Deleted, git.Renamed:
@@ -109,8 +109,8 @@ func GitPull(project *Project) {
 
 func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 	start := time.Now()
-	boardsFolder := filepath.Join(project.Path, ProjectBoardsFolder)
-	libraryFolder := filepath.Join(project.Path, ProjectLibraryFolder)
+	//boardsFolder := filepath.Join(project.Path, ProjectBoardsFolder)
+	//libraryFolder := filepath.Join(project.Path, ProjectLibraryFolder)
 	gitFolder := filepath.Dir(project.Path)
 	userInfo, err := GetUserInfo(project, commitInfo.User)
 	if err != nil {
@@ -133,10 +133,10 @@ func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 	message := prepareMessage(commitInfo)
 	logrus.Debugf("Git message:\n%s", message)
 
-	w.Add(boardsFolder)
-	if project.Config.IncludeLibInGit {
-		w.Add(libraryFolder)
-	}
+	//w.Add(boardsFolder)
+	//if project.Config.IncludeLibInGit {
+	//	w.Add(libraryFolder)
+	//}
 
 	for _, file := range commitInfo.Files {
 		if _, err = w.Add(file); err != nil {
