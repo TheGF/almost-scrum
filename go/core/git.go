@@ -54,6 +54,7 @@ func prepareMessage(commitInfo CommitInfo) string {
 }
 
 func GetGitStatus(project *Project) (GitStatus, error) {
+	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
 	repo, err := git.PlainOpen(gitFolder)
@@ -97,6 +98,8 @@ func GetGitStatus(project *Project) (GitStatus, error) {
 		}
 	}
 
+	elapsed := time.Since(start)
+	logrus.Infof("Git Status completed in %s", elapsed)
 	return gitStatus, nil
 }
 
@@ -105,6 +108,8 @@ func GitPull(project *Project) {
 }
 
 func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
+	start := time.Now()
+
 	gitFolder := filepath.Dir(project.Path)
 	boardsFolder := filepath.Join(project.Path, ProjectBoardsFolder)
 
@@ -130,6 +135,8 @@ func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 	for _, file := range commitInfo.Files {
 		if _, err = w.Add(file); err != nil {
 			logrus.Warnf("Cannot add file %s to the commit: %v", file, err)
+		} else {
+			logrus.Infof("Added file %s to commit", file)
 		}
 	}
 
@@ -144,6 +151,7 @@ func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 		logrus.Warnf("Cannot complete commit: %v", err)
 		return plumbing.ZeroHash, err
 	}
-	logrus.Infof("Commit completed. Hash: %v", hash)
+	elapsed := time.Since(start)
+	logrus.Infof("Commit completed in %s. Hash: %v", elapsed, hash)
 	return hash, nil
 }
