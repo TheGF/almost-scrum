@@ -110,7 +110,7 @@ func processCommit(projectPath string, global bool) {
 
 	if len(status.StagedFiles) == 0 && len(status.AshFiles) == 0 {
 		color.Green("Nothing to commit. Bye")
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	printStatus(status)
