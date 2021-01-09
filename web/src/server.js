@@ -19,7 +19,7 @@ function getConfig() {
 }
 
 const pendingSet = {}
-const setDelay = 5 * 1000
+const setDelay = 2 * 1000
 let pendingInterval = null
 
 function setPendingTasks() {

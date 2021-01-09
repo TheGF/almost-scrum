@@ -33,6 +33,32 @@ func prepareMessage(commitInfo CommitInfo) string {
 	return out.String()
 }
 
+func GitStatus(project *Project) error {
+	gitFolder := filepath.Dir(project.Path)
+
+	repo, err := git.PlainOpen(gitFolder)
+	if err != nil {
+		return err
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+
+	status, err := worktree.Status()
+	if err != nil {
+		return err
+	}
+
+	print(status)
+	return nil
+}
+
+func GitPull(project *Project) {
+
+}
+
 func GitCommit(project *Project, commitInfo CommitInfo) error {
 	gitFolder := filepath.Dir(project.Path)
 	boardsFolder := filepath.Join(project.Path, ProjectBoardsFolder)

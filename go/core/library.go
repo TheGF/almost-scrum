@@ -70,7 +70,7 @@ func MoveFileInLibrary(project *Project, oldPath string, path string) error {
 
 func CreateFolderInLibrary(project *Project, path string) error {
 	path = filepath.Join(project.Path, ProjectLibraryFolder, path)
-	return os.MkdirAll(path, 066)
+	return os.MkdirAll(path, 0755)
 }
 
 func DeleteFileFromLibrary(project *Project, path string) error {

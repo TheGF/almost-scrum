@@ -17,6 +17,7 @@ require (
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/monirz/gotri v0.0.0-20200219181904-dacfb98c509f
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/russross/blackfriday/v2 v2.1.0

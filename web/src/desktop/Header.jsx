@@ -47,7 +47,7 @@ function Boards(props) {
     }
 
     function clickAll() {
-        onSelectBoard && onSelectBoard("")
+        onSelectBoard && onSelectBoard("~")
     }
 
     function clickLibrary() {
@@ -55,7 +55,7 @@ function Boards(props) {
     }
 
     const all = <Button key="all" colorScheme="blue"
-        isActive={active == ''} onClick={clickAll}>
+        isActive={active == '~'} onClick={clickAll}>
         <T>all</T>
     </Button>
 

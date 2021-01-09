@@ -58,7 +58,6 @@ func listStoryAPI(c *gin.Context) {
 		board = ""
 	}
 
-
 	filter := c.DefaultQuery("filter", "")
 	var keys []string
 	if filter != "" {

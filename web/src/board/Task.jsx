@@ -1,4 +1,5 @@
 import {
+    Badge,
     Box, Button, Editable, EditableInput, EditablePreview,
     HStack,
     IconButton, Select, Spacer, Tab, TabList, TabPanel, TabPanels,
@@ -27,6 +28,29 @@ function Task(props) {
     const [progress, setProgress] = useState('')
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
     const [candidateOwner, setCandidateOwner] = useState(null)
+
+    function getTags(task) {
+        function extractTags(text) {
+            const tags = []
+            if (text) {
+                const re = /(#\w+)/g
+                while (true) {
+                    const m = re.exec(text);
+                    if (m) {tags.push(m[1])} else break
+                }
+            }
+            return tags
+        }
+
+        let tags = extractTags(task.description)
+        for (const value of Object.values(task.properties)) {
+            tags = [...tags, ...extractTags(value)]
+        }
+        for (const part of Object.values(task.parts)) {
+            tags = [...tags, ...extractTags(part)]
+        }
+        return tags
+    }
 
     function updateProgress(task) {
         const progress = task && task.parts && task.parts.length ?
@@ -104,6 +128,7 @@ function Task(props) {
     </option>)
 
     const mtime = `Last modified: ${Utils.getFriendlyDate(modTime)}`
+    const tags = task ? getTags(task).map(tag => <Badge colorScheme="purple">{tag}</Badge>) : null;
     const header = task && <HStack spacing={3}>
         <label>{id}.</label>
         <Editable defaultValue={title} borderWidth="1px" minW="300px"
@@ -112,6 +137,7 @@ function Task(props) {
             <EditableInput />
         </Editable>
         <Spacer />
+        {compact ? <HStack h="2em" spacing={2}>{tags}</HStack> : null}
         <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
         <span title="Task Progress">{progress}</span>
         <Select value={board} title="Assign the Board" w="10em" onChange={onBoardChanged}>
@@ -131,7 +157,6 @@ function Task(props) {
         }
     }
 
-
     const body = task && !compact ? <HStack spacing={3}>
         <ConfirmChangeOwner owner={owner} candidateOwner={candidateOwner}
             setCandidateOwner={setCandidateOwner} onConfirm={confirmCandidateOwner} />
@@ -145,6 +170,7 @@ function Task(props) {
                 <Tab key="progress"><T>progress</T></Tab>
                 <Tab key="attachments"><T>attachments</T></Tab>
                 <Spacer />
+                <HStack h="2em" spacing={2}>{tags}</HStack>
             </TabList>
 
             <TabPanels>

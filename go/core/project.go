@@ -13,7 +13,8 @@ import (
 
 type ProjectConfig struct {
 	CurrentBoard  string `yaml:"current_store"`
-	PropertyModel []PropertyDef
+	PropertyModel []PropertyDef `yaml:"property_model"`
+	IncludeLibInGit bool `yaml:"include_lib_in_git"`
 }
 
 type PropertyDef struct {
