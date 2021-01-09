@@ -116,23 +116,27 @@ func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 		return plumbing.ZeroHash, err
 	}
 
+
 	r, err := git.PlainOpen(gitFolder)
 	if err != nil {
 		return plumbing.ZeroHash, err
 	}
+	logrus.Debugf("Open git repository %s", gitFolder)
 
 	w, err := r.Worktree()
 	if err != nil {
 		return plumbing.ZeroHash, err
 	}
+	logrus.Debugf("Worktree successfully open")
 
 	message := prepareMessage(commitInfo)
+	logrus.Debugf("Git message:\n%s", message)
 
 	for _, file := range commitInfo.Files {
 		if _, err = w.Add(file); err != nil {
 			logrus.Warnf("Cannot add file %s to the commit: %v", file, err)
 		} else {
-			logrus.Infof("Added file %s to commit", file)
+			logrus.Debugf("Added file %s to commit", file)
 		}
 	}
 
