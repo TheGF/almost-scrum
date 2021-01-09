@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
+	"os"
 	"strings"
 	"time"
 )
@@ -108,6 +109,11 @@ func processCommit(projectPath string, global bool) {
 		"Error is: %v")
 	printStatus(status)
 
+	if len(status.StagedFiles) == 0 && len(status.AshFiles) == 0 {
+		color.Green("Nothing to commit. Bye")
+		os.Exit(1)
+	}
+
 	commitInfo := core.CommitInfo{
 		User: core.GetSystemUser(),
 		Comments: map[string]string{},
@@ -131,7 +137,7 @@ func processCommit(projectPath string, global bool) {
 	for _, file := range status.StagedFiles {
 		commitInfo.Files = append(commitInfo.Files, file)
 	}
-	
+
 	hash, err := core.GitCommit(project, commitInfo)
 	abortIf(err, "")
 
