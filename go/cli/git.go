@@ -107,13 +107,13 @@ func processCommit(projectPath string, global bool) {
 	status, err := core.GetGitStatus(project)
 	abortIf(err, "Ops. Something went wrong with your Git Repo. Check integrity with Git."+
 		"Error is: %v")
-	printStatus(status)
 
 	if len(status.StagedFiles) == 0 && len(status.AshFiles) == 0 {
 		color.Green("Nothing to commit. Bye")
 		os.Exit(1)
 	}
 
+	printStatus(status)
 	commitInfo := core.CommitInfo{
 		User: core.GetSystemUser(),
 		Comments: map[string]string{},
