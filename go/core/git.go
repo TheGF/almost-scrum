@@ -111,8 +111,6 @@ func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 	start := time.Now()
 
 	gitFolder := filepath.Dir(project.Path)
-	boardsFolder := filepath.Join(project.Path, ProjectBoardsFolder)
-
 	userInfo, err := GetUserInfo(project, commitInfo.User)
 	if err != nil {
 		return plumbing.ZeroHash, err
@@ -127,8 +125,6 @@ func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 	if err != nil {
 		return plumbing.ZeroHash, err
 	}
-
-	_, err = w.Add(boardsFolder)
 
 	message := prepareMessage(commitInfo)
 
