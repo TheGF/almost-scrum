@@ -2,10 +2,22 @@ package cli
 
 import (
 	"almost-scrum/core"
+	"fmt"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"strings"
+	"time"
 )
+
+func getTaskRow(info core.TaskInfo, selected bool) string {
+	var tick = " "
+	if selected {
+		tick = "✔"
+	}
+	tm := info.ModTime.Format(time.RFC822)
+	return fmt.Sprintf("%s %-40v%-20v%s",
+		tick, info.Name, info.Board, tm)
+}
 
 func selectTasks(project *core.Project, global bool) []core.TaskInfo {
 	var board string
@@ -16,93 +28,113 @@ func selectTasks(project *core.Project, global bool) []core.TaskInfo {
 	}
 
 	infos, _ := core.ListTasks(project, board, "")
-	names := make([]string, 0, len(infos))
-	names = append(names, "Done")
+	rows := make([]string, 0, len(infos))
+	rows = append(rows, "Done")
 	for _, info := range infos {
-		names = append(names, info.Name)
+		rows = append(rows, getTaskRow(info, false))
 	}
 
 	for {
 		prompt := promptui.Select{
-			Label:    "Choose the tasks for the commit. Select Done to move on",
-			Items:    names,
+			Label:        "Choose the tasks you worked on for this commit. Select Done to move on",
+			Items:        rows,
+			HideSelected: true,
 		}
-		index, name, err := prompt.Run()
+		index, selected, err := prompt.Run()
 		if err != nil {
 			return []core.TaskInfo{}
 		}
 
-		if name == "Done" {
+		if selected == "Done" {
 			break
 		}
 
-		if strings.HasPrefix(name, "✔") {
-			names[index] = name[1:]
-		} else {
-			names[index] = "✔" + name
-		}
+		rows[index] = getTaskRow(infos[index-1], !strings.HasPrefix(selected, "✔"))
 	}
 
-	selected := []core.TaskInfo{}
-	for index, name := range names {
+	selected := make([]core.TaskInfo,0)
+	for index, name := range rows {
 		if strings.HasPrefix(name, "✔") {
 			selected = append(selected, infos[index-1])
 		}
-	} 
+	}
 
 	return selected
 }
 
-func addProgress(project *core.Project, info core.TaskInfo, commitInfo core.CommitInfo) {
+func addComment(project *core.Project, info core.TaskInfo, commitInfo core.CommitInfo) {
 	task, err := core.GetTask(project, info.Board, info.Name)
 	if err != nil {
 		return
 	}
 
-	actions := make([]string, 0, len(task.Parts))
-	for _, part := range task.Parts {
-		actions = append(actions, part.Description)
+	color.Green("Comment changes in: %s/%s", info.Board, info.Name)
+
+	if len(task.Parts) > 0 {
+		color.Green("Progress Summary")
+		for idx, part := range task.Parts {
+			color.Green("    %d. %s", idx, part.Description)
+		}
 	}
 
+	comments := []string{"Generic Progress", "Bugfix"}
 	prompt := promptui.SelectWithAdd{
-		Label:    "Choose an action or add a new one",
-		Items:    actions,
-		AddLabel: "Add custom action",
+		Label:    "Choose a comment or add a custom",
+		Items:    comments,
+		AddLabel: "Add custom comment",
 	}
 
-	_, action, err := prompt.Run()
+	_, comment, err := prompt.Run()
 	if err != nil {
 		return
 	}
 
-	commitInfo.Body = append(commitInfo.Body, core.GitMessagePart{
-		Task:     info.Name,
-		Progress:  []string{action},
-	})
+	commitInfo.Comments[info.Name] = comment
 }
 
-func processCommit(projectPath string, global bool, args []string) {
+func printStatus(status core.GitStatus) {
+	color.Green("Changes staged for commit:")
+	for _, staged := range status.StagedFiles {
+		color.Red("        %s", staged)
+	}
+	color.Green("\nUntracked files: %s", strings.Join(status.UntrackedFiles, " "))
+}
+
+func processCommit(projectPath string, global bool) {
 	project := getProject(projectPath)
+
+	status, err := core.GetGitStatus(project)
+	abortIf(err, "Ops. Something went wrong with your Git Repo. Check integrity with Git."+
+		"Error is: %v")
+	printStatus(status)
 
 	commitInfo := core.CommitInfo{
 		User: core.GetSystemUser(),
-		Body: []core.GitMessagePart{},
+		Comments: map[string]string{},
 	}
 
 	prompt := promptui.Prompt{
 		Label: "Enter a Commit Header",
 	}
 	header, err := prompt.Run()
-	abortIf(err)
+	abortIf(err, "")
 	commitInfo.Header = header
 
 	selectedTasks := selectTasks(project, global)
 	for _, selectedTask := range selectedTasks {
-		addProgress(project, selectedTask, commitInfo)
+		addComment(project, selectedTask, commitInfo)
 	}
 
-	err = core.GitCommit(project, commitInfo)
-	abortIf(err)
+	for _, file := range status.AshFiles {
+		commitInfo.Files = append(commitInfo.Files, file)
+	}
+	for _, file := range status.StagedFiles {
+		commitInfo.Files = append(commitInfo.Files, file)
+	}
+	
+	hash, err := core.GitCommit(project, commitInfo)
+	abortIf(err, "")
 
-	color.Green("You can now use Git push to complete the update to the master")
+	color.Green("Commit completed. Hash: %v", hash)
+	color.Green("You can now push the update to the master")
 }

@@ -32,7 +32,7 @@ func processUsers(projectPath string, args []string) {
 			prompt := promptui.Prompt{Label: "Enter the new user"}
 			user, _ = prompt.Run()
 		}
-		abortIf(core.SetUserInfo(project, user, &core.UserInfo{}))
+		abortIf(core.SetUserInfo(project, user, &core.UserInfo{}), "")
 	case "del":
 		users := core.GetUserList(project)
 		if len(users) == 1 {
@@ -46,7 +46,7 @@ func processUsers(projectPath string, args []string) {
 		}
 		_, user, err := prompt.Run()
 		if err == nil {
-			abortIf(core.DelUserInfo(project, user))
+			abortIf(core.DelUserInfo(project, user), "")
 		}
 	}
 	color.Green("Users updated!")

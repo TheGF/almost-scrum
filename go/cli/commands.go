@@ -148,7 +148,7 @@ func ProcessArgs() {
 	case "move":
 		processMove(projectPath, global, commands[1:])
 	case "commit":
-		processCommit(projectPath, global, commands[1:])
+		processCommit(projectPath, global)
 	case "reindex":
 		processReIndex(projectPath, commands[1:])
 	case "web":

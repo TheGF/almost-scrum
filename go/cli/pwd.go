@@ -30,8 +30,8 @@ func processPwd(args []string) {
 	}
 
 	password, err := prompt.Run()
-	abortIf(err)
+	abortIf(err, "")
 
 	err = core.SetPassword(user, password)
-	abortIf(err)
+	abortIf(err, "")
 }

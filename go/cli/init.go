@@ -10,7 +10,7 @@ import (
 func processInit(projectPath string, _ []string) {
 
 	projectPath, err := filepath.Abs(projectPath)
-	abortIf(err)
+	abortIf(err, "")
 
 	_, err = os.Stat(filepath.Join(projectPath, core.GitFolder))
 	if err == nil {
@@ -23,16 +23,16 @@ func processInit(projectPath string, _ []string) {
 		return
 	}
 	project, err := core.InitProject(projectPath)
-	abortIf(err)
+	abortIf(err, "")
 
 	config, err := core.ReadProjectConfig(projectPath)
-	abortIf(err)
+	abortIf(err, "")
 
 	err = core.WriteProjectConfig(projectPath, &config)
-	abortIf(err)
+	abortIf(err, "")
 
 	err = core.SetUserInfo(project, core.GetSystemUser(), &core.UserInfo{})
-	abortIf(err)
+	abortIf(err, "")
 
 	color.Green("Project initialized successfully in %s", projectPath)
 }

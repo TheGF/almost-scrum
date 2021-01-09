@@ -25,7 +25,7 @@ func listBoard(project *core.Project, args []string) {
 	config := getProjectConfig(project)
 	config.CurrentBoard = selected
 	err := core.WriteProjectConfig(project.Path, &config)
-	abortIf(err)
+	abortIf(err, "")
 
 	color.Green("Current board '%s'", selected)
 
@@ -36,7 +36,7 @@ func processBoard(projectPath string, args []string) {
 
 	if len(args) == 2 && args[0] == "new" {
 		err := core.CreateBoard(project, args[1])
-		abortIf(err)
+		abortIf(err, "")
 		color.Green("Board %s created", args[1])
 	} else {
 		listBoard(project, args)

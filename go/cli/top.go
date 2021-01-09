@@ -21,7 +21,7 @@ func processTop(projectPath string, global bool, args []string) {
 	project := getProject(projectPath)
 	board := getBoard(project, global)
 	infos, err := core.SearchTask(project, board, true, args...)
-	abortIf(err)
+	abortIf(err, "")
 
 	color.Green("\n  %-40v%-20v%s", "Task", "Board", "Date")
 	for i, info := range infos {

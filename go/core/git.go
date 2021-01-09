@@ -2,99 +2,148 @@ package core
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/sirupsen/logrus"
+	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
-type GitMessagePart struct {
-	Task     string
-	Progress []string
+type GitFileState int
+
+const (
+	GitUntracked GitFileState = iota
+	GitReady
+	GitMerged
+)
+
+type GitFile struct {
+	Path  string
+	State GitFileState
+}
+
+type GitStatus struct {
+	AshFiles       []string
+	StagedFiles    []string
+	UntrackedFiles []string
 }
 
 type CommitInfo struct {
-	User   string
-	Header string
-	Body   []GitMessagePart
+	User     string
+	Header   string
+	Comments map[string]string
+	Files    []string
 }
 
 func prepareMessage(commitInfo CommitInfo) string {
 	var out bytes.Buffer
 
 	out.WriteString(commitInfo.Header)
-	out.WriteString("\n")
+	out.WriteString("\n\n============\n")
 
-	for _, part := range commitInfo.Body {
-		out.WriteString(part.Task)
+	for task, comment := range commitInfo.Comments {
+		out.WriteString(task)
 		out.WriteString("\n")
+		out.WriteString(comment)
+		out.WriteString("\n------------\n\n")
 	}
 	return out.String()
 }
 
-func GitStatus(project *Project) error {
+func GetGitStatus(project *Project) (GitStatus, error) {
 	gitFolder := filepath.Dir(project.Path)
 
 	repo, err := git.PlainOpen(gitFolder)
 	if err != nil {
-		return err
+		return GitStatus{}, err
 	}
 
 	worktree, err := repo.Worktree()
 	if err != nil {
-		return err
+		return GitStatus{}, err
 	}
 
 	status, err := worktree.Status()
 	if err != nil {
-		return err
+		return GitStatus{}, err
 	}
 
-	print(status)
-	return nil
+	gitStatus := GitStatus{
+		AshFiles:       make([]string, 0),
+		StagedFiles:    make([]string, 0),
+		UntrackedFiles: make([]string, 0),
+	}
+	for name, state := range status {
+		parts := strings.Split(name, string(os.PathSeparator))
+		if len(parts) == 0 {
+			continue
+		}
+		if parts[0] == ProjectFolder {
+			if parts[1] == ProjectBoardsFolder {
+				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
+			} else if parts[1] == ProjectLibraryFolder && project.Config.IncludeLibInGit {
+				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
+			}
+		} else {
+			switch state.Worktree {
+			case git.Modified, git.Added, git.Deleted, git.Renamed:
+				gitStatus.StagedFiles = append(gitStatus.StagedFiles, name)
+			case git.Untracked:
+				gitStatus.UntrackedFiles = append(gitStatus.UntrackedFiles, name)
+			}
+		}
+	}
+
+	return gitStatus, nil
 }
 
 func GitPull(project *Project) {
 
 }
 
-func GitCommit(project *Project, commitInfo CommitInfo) error {
+func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 	gitFolder := filepath.Dir(project.Path)
 	boardsFolder := filepath.Join(project.Path, ProjectBoardsFolder)
 
 	userInfo, err := GetUserInfo(project, commitInfo.User)
 	if err != nil {
-		return err
+		return plumbing.ZeroHash, err
 	}
 
 	r, err := git.PlainOpen(gitFolder)
 	if err != nil {
-		return err
+		return plumbing.ZeroHash, err
 	}
 
 	w, err := r.Worktree()
 	if err != nil {
-		return err
+		return plumbing.ZeroHash, err
 	}
 
 	_, err = w.Add(boardsFolder)
 
 	message := prepareMessage(commitInfo)
-	fmt.Printf("Message %v:", message)
 
-	if message == "" {
-		_, err := w.Commit(message, &git.CommitOptions{
-			Author: &object.Signature{
-				Name:  commitInfo.User,
-				Email: userInfo.Email,
-				When:  time.Now(),
-			},
-		})
-		if err != nil {
-			return nil
+	for _, file := range commitInfo.Files {
+		if _, err = w.Add(file); err != nil {
+			logrus.Warnf("Cannot add file %s to the commit: %v", file, err)
 		}
-//		logrus.Info("Commit %v", commit)
 	}
-	return nil
+
+	hash, err := w.Commit(message, &git.CommitOptions{
+		Author: &object.Signature{
+			Name:  commitInfo.User,
+			Email: userInfo.Email,
+			When:  time.Now(),
+		},
+	})
+	if err != nil {
+		logrus.Warnf("Cannot complete commit: %v", err)
+		return plumbing.ZeroHash, err
+	}
+	logrus.Infof("Commit completed. Hash: %v", hash)
+	return hash, nil
 }

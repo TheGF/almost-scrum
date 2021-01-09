@@ -9,9 +9,12 @@ import (
 	"github.com/fatih/color"
 )
 
-func abortIf(err error) {
+func abortIf(err error, msg string) {
 	if err != nil {
-		color.Red("Wow. Something went wrong: %v", err)
+		if msg == "" {
+			msg = "Wow. Something went wrong: %v"
+		}
+		color.Red(msg, err)
 		os.Exit(1)
 	}
 }
@@ -56,7 +59,7 @@ func getBoard(project *core.Project, global bool) string {
 
 func chooseBoard(project *core.Project) string {
 	boards, err := core.ListBoards(project)
-	abortIf(err)
+	abortIf(err, "")
 
 	cursorPos := sort.SearchStrings(boards, project.Config.CurrentBoard)
 	prompt := promptui.Select{

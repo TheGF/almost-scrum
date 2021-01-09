@@ -13,5 +13,5 @@ func openExternalEditor(editor string, path string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
-	abortIf(err)
+	abortIf(err, "")
 }

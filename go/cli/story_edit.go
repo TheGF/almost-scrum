@@ -11,7 +11,7 @@ import (
 
 func chooseTask(project *core.Project, board string, keys... string) core.TaskInfo {
 	infos, err := core.SearchTask(project, board, true, keys...)
-	abortIf(err)
+	abortIf(err, "")
 
 	choices := make([]string, 0, len(infos))
 	for _, info := range infos {
@@ -91,7 +91,7 @@ func processMove(projectPath string, global bool, args []string) {
 		return
 	}
 	name := fmt.Sprintf("%d.%s", id, title)
-	abortIf(core.MoveTask(project, info.Board, info.Name, board, name))
+	abortIf(core.MoveTask(project, info.Board, info.Name, board, name), "")
 	color.Green("Task #%d moved to %s/%s", id, board, name)
 }
 
@@ -140,8 +140,8 @@ func processOwner(projectPath string, global bool, args []string) {
 		return
 	}
 	task.Properties["owner"] = "@"+owner
-	abortIf(core.SetTask(project, info.Board, info.Name, &task))
-	abortIf(core.ReIndex(project))
+	abortIf(core.SetTask(project, info.Board, info.Name, &task), "")
+	abortIf(core.ReIndex(project), "")
 	color.Green("Task %s assigned to %s", info.Name, owner)
 }
 
@@ -168,6 +168,6 @@ func processTouch(projectPath string, global bool, args []string) {
 
 	if info.Name != "" {
 		err := core.TouchTask(project, info.Board, info.Name)
-		abortIf(err)
+		abortIf(err, "")
 	}
 }

@@ -44,6 +44,6 @@ func processNew(projectPath string, args []string) {
 	}
 
 	_, name, err := core.CreateTask(project, board, title, core.GetSystemUser())
-	abortIf(err)
+	abortIf(err, "")
 	openEditor(project, board, name)
 }

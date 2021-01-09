@@ -13,7 +13,7 @@ func processReIndex(projectPath string, args []string) {
 	}
 	start := time.Now()
 	err := core.ReIndex(project)
-	abortIf(err)
+	abortIf(err, "")
 	elapsed := time.Since(start)
 
 	color.Green("Reindex completed in %s: %d stop words, %d indexes",
