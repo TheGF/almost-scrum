@@ -85,7 +85,7 @@ function Properties(props) {
         </Tr>
     }
 
-    const rows = property_model.map(propertyDef => renderProperty(propertyDef))
+    const rows = (property_model || []).map(propertyDef => renderProperty(propertyDef))
     const editMessage = readOnly ? <Center h="2em">
         Change owner if you want to edit the content
     </Center> : null

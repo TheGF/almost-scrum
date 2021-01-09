@@ -3,6 +3,8 @@ package web
 import (
 	"almost-scrum/core"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -13,7 +15,7 @@ type ProjectMapping map[string]*core.Project
 var projectMapping = make(ProjectMapping)
 
 // getProject resolves the URL parameters
-func getProject(c *gin.Context ) *core.Project {
+func getProject(c *gin.Context) *core.Project {
 	name := c.Param("project")
 
 	if project, found := projectMapping[name]; found {
@@ -65,10 +67,10 @@ func listProjectsAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, keys)
 }
 
-
 type ProjectInfo struct {
 	SystemUser    string             `json:"system_user"`
 	PropertyModel []core.PropertyDef `json:"property_model"`
+	GitProject    bool               `json:"git_project"`
 }
 
 func getProjectInfoAPI(c *gin.Context) {
@@ -77,9 +79,14 @@ func getProjectInfoAPI(c *gin.Context) {
 		return
 	}
 
+	gitFolder := filepath.Join(filepath.Dir(project.Path), core.GitFolder)
+	_, err := os.Stat(gitFolder)
+	gitProject := err == nil
+
 	info := ProjectInfo{
 		SystemUser:    core.GetSystemUser(),
 		PropertyModel: project.Config.PropertyModel,
+		GitProject:    gitProject,
 	}
 	c.JSON(http.StatusOK, info)
 }
@@ -115,4 +122,3 @@ func createBoardAPI(c *gin.Context) {
 	log.Debugf("createBoardAPI - Board %s created in project: %v", board, project)
 	c.JSON(http.StatusCreated, board)
 }
-

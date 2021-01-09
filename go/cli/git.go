@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
-	"os"
 	"strings"
 	"time"
 )
@@ -110,7 +109,7 @@ func processCommit(projectPath string, global bool) {
 
 	if len(status.StagedFiles) == 0 && len(status.AshFiles) == 0 {
 		color.Green("Nothing to commit. Bye")
-		os.Exit(0)
+		return
 	}
 
 	printStatus(status)

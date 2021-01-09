@@ -6,9 +6,10 @@ import {
     Stack,
     useColorMode
 } from "@chakra-ui/react";
-import { React, useEffect, useState } from "react";
+import { React, useEffect, useState, useContext } from "react";
 import { BiChevronDown } from "react-icons/all";
 import T from "../core/T";
+import UserContext from '../UserContext';
 
 const visibleBoards = 5
 
@@ -96,6 +97,8 @@ function Boards(props) {
 }
 
 function Header(props) {
+    const { info } = useContext(UserContext)
+
     const [activeBoard, setActiveBoard] = useState('backlog');
     const [boardKey, setBoardKey] = useState(0);
     const { onNewTask, onNewBoard } = props;
@@ -119,8 +122,8 @@ function Header(props) {
                     Toggle {colorMode === "light" ? "Dark" : "Light"}
                 </MenuItem>
                 <MenuDivider />
-                <MenuItem>Git Push</MenuItem>
-                <MenuItem>Git Pull</MenuItem>
+                {info && info.git_project ? <MenuItem>Git Integration</MenuItem> : null}
+                <MenuItem>Help</MenuItem>
             </MenuList>
         </Menu>
         <Boards key={boardKey} {...props}

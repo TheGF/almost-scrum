@@ -4,7 +4,6 @@ import { BsViewStacked, MdViewHeadline, RiFilterLine } from 'react-icons/all';
 import ReactTags from 'react-tag-autocomplete';
 import Server from '../server';
 import UserContext from '../UserContext';
-import css from './reactTags.css';
 
 function FilterPanel(props) {
     const { project } = useContext(UserContext);
@@ -12,7 +11,7 @@ function FilterPanel(props) {
     const [tags, setTags] = useState([])
     const [suggestions, setSuggestions] = useState([]);
     const reactTags = useRef()
-    css
+    
     
     function updateSearchKeys() {
         const keys = tags.map(tag => tag.name)
