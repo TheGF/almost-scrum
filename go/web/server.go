@@ -62,6 +62,7 @@ func StartWeb(projectPath string, port string, logLevel string, args []string) {
 	libraryRoute(v1)
 	userRoute(v1)
 	indexRoute(v1)
+	gitRoute(v1)
 
 	r.Run(fmt.Sprintf(":%s", port))
 }
@@ -89,6 +90,7 @@ func StartServer(projectPath string, port string, logLevel string, args []string
 	libraryRoute(v1)
 	userRoute(v1)
 	indexRoute(v1)
+	gitRoute(v1)
 
 	r.Run(fmt.Sprintf(":%s", port))
 }

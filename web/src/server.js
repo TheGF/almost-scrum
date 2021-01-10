@@ -208,6 +208,12 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
+    static getGitStatus(project) {
+        return axios.get(`/api/v1/projects/${project}/git/status`, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
 }
 
 export default Server;

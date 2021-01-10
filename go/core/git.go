@@ -26,9 +26,9 @@ type GitFile struct {
 }
 
 type GitStatus struct {
-	AshFiles       []string
-	StagedFiles    []string
-	UntrackedFiles []string
+	AshFiles       []string `json:"ashFiles"`
+	StagedFiles    []string `json:"stagedFiles"`
+	UntrackedFiles []string `json:"untrackedFiles"`
 }
 
 type CommitInfo struct {

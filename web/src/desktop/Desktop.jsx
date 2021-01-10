@@ -6,6 +6,7 @@ import Server from '../server';
 import UserContext from '../UserContext';
 import AskBoardName from './AskBoardName';
 import Header from './Header';
+import GitIntegration from '../git/GitIntegration';
 
 function Desktop() {
     const { project, username } = useContext(UserContext);
@@ -13,6 +14,8 @@ function Desktop() {
     const [boards, setBoards] = useState([]);
     const [boardKey, setBoardKey] = useState(0);
     const [showLibrary, setShowLibrary] = useState(false);
+    const [showGitIntegration, setShowGitIntegration] = useState(false);
+
     const askBoardName = useDisclosure(false)
 
     function listBoards() {
@@ -46,20 +49,26 @@ function Desktop() {
     const content = showLibrary ? <Library /> :
         <Board key={boardKey} name={board} boards={boards} />
 
-    return <Flex
-        direction="column"
-        align="center"
-        w={{ xl: "83%" }}
-        m="0 auto">
+    return <>
+        <GitIntegration isOpen={showGitIntegration}
+            onClose={_ => setShowGitIntegration(false)} />
 
         <AskBoardName {...askBoardName} boards={boards} onCreate={createBoard} />
-        <VStack w="100%">
-            <Header boards={boards}
+        <Flex
+            direction="column"
+            align="center"
+            w={{ xl: "83%" }}
+            m="0 auto">
+
+            <VStack w="100%">
+                <Header boards={boards}
+                    setShowGitIntegration={setShowGitIntegration} />
                 onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
                 onNewTask={onNewTask} onNewBoard={_ => askBoardName.onOpen()} />
             {content}
-        </VStack>
-    </Flex>
+            </VStack>
+        </Flex>
+    </>
 }
 
 export default Desktop

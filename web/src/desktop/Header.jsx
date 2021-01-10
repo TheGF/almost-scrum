@@ -10,6 +10,7 @@ import { React, useEffect, useState, useContext } from "react";
 import { BiChevronDown } from "react-icons/all";
 import T from "../core/T";
 import UserContext from '../UserContext';
+import GitIntegration from '../git/GitIntegration'
 
 const visibleBoards = 5
 
@@ -101,7 +102,7 @@ function Header(props) {
 
     const [activeBoard, setActiveBoard] = useState('backlog');
     const [boardKey, setBoardKey] = useState(0);
-    const { onNewTask, onNewBoard } = props;
+    const { onNewTask, onNewBoard, setShowGitIntegration } = props;
     const { colorMode, toggleColorMode } = useColorMode()
 
     function onSelectBoard(board) {
@@ -122,7 +123,10 @@ function Header(props) {
                     Toggle {colorMode === "light" ? "Dark" : "Light"}
                 </MenuItem>
                 <MenuDivider />
-                {info && info.git_project ? <MenuItem>Git Integration</MenuItem> : null}
+                {info && info.git_project ? <MenuItem
+                    onClick={_ => setShowGitIntegration(true)}>
+                    Git Integration
+                    </MenuItem> : null}
                 <MenuItem>Help</MenuItem>
             </MenuList>
         </Menu>
