@@ -10,6 +10,8 @@ import (
 func gitRoute(group *gin.RouterGroup) {
 	group.GET("/projects/:project/git/status", getGitStatusAPI)
 	group.POST("/projects/:project/git/commit", postGitCommitAPI)
+	group.POST("/projects/:project/git/push", postGitPushAPI)
+	group.POST("/projects/:project/git/pull", postGitPullAPI)
 }
 
 func getGitStatusAPI(c *gin.Context) {
@@ -47,6 +49,37 @@ func postGitCommitAPI(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "cannot commit content: %v", err)
 		return
 	}
-	c.JSON(http.StatusOK, hash)
+	c.JSON(http.StatusOK, hash.String())
 }
 
+func postGitPullAPI(c *gin.Context) {
+	var project *core.Project
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	commit, err := core.GitPull(project)
+	if err != nil {
+		logrus.Warnf("Cannot pull content project %s: %v", project.Path, err)
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "cannot commit content: %v", err)
+		return
+	}
+	c.JSON(http.StatusOK, commit)
+}
+
+func postGitPushAPI(c *gin.Context) {
+	var project *core.Project
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	err := core.GitPush(project)
+	if err != nil {
+		logrus.Warnf("Cannot push content project %s: %v", project.Path, err)
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "cannot commit content: %v", err)
+		return
+	}
+	c.JSON(http.StatusOK, "")
+}

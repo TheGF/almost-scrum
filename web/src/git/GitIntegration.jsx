@@ -13,13 +13,16 @@ import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react"
 import GitFiles from './GitFiles'
 import GitMessage from './GitMessage';
 import GitCommit from "./GitCommit";
+import GitPush from './GitPush';
 
 function GitIntegration({ isOpen, onClose }) {
     const [gitStatus, setGitStatus] = useState(null)
-    const [gitMessage, setGitMessage] = useState({header: '', body: {}})
+    const [gitMessage, setGitMessage] = useState({ header: '', body: {} })
     const [commitDone, setCommitDone] = useState(false)
 
     function onCommit() {
+        setGitStatus(null)
+        setGitMessage(null)
         setCommitDone(true)
     }
 
@@ -34,9 +37,9 @@ function GitIntegration({ isOpen, onClose }) {
                     <TabList>
                         <Tab>Commit Files</Tab>
                         <Tab>Commit Message</Tab>
-                        <Tab isDisabled={!gitStatus || !gitMessage.header} 
+                        <Tab isDisabled={!gitStatus || !gitMessage.header}
                             onCommit={onCommit}>Commit</Tab>
-                        <Tab isDisabled={!commitDone}>Push</Tab>
+                        <Tab>Push</Tab>
                     </TabList>
 
                     <TabPanels>
@@ -44,10 +47,13 @@ function GitIntegration({ isOpen, onClose }) {
                             <GitFiles gitStatus={gitStatus} setGitStatus={setGitStatus} />
                         </TabPanel>
                         <TabPanel>
-                            <GitMessage gitMessage={gitMessage} setGitMessage={setGitMessage} />                        
+                            <GitMessage gitMessage={gitMessage} setGitMessage={setGitMessage} />
                         </TabPanel>
                         <TabPanel>
                             <GitCommit gitStatus={gitStatus} gitMessage={gitMessage} />
+                        </TabPanel>
+                        <TabPanel>
+                            <GitPush/>
                         </TabPanel>
                     </TabPanels>
                 </Tabs>

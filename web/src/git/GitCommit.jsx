@@ -28,6 +28,7 @@ function GitCommit(props) {
         Server.postGitCommit(project, commitInfo)
             .then(setGitHash)
             .then(_=>setCommitInProgress(false))
+            .then(onCommit)
     }
 
     const summary = [

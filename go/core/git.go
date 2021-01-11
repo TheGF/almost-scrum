@@ -12,18 +12,6 @@ import (
 	"time"
 )
 
-type GitFileState int
-
-const (
-	GitUntracked GitFileState = iota
-	GitReady
-	GitMerged
-)
-
-type GitFile struct {
-	Path  string
-	State GitFileState
-}
 
 type GitStatus struct {
 	AshFiles       []string `json:"ashFiles"`
@@ -104,9 +92,63 @@ func GetGitStatus(project *Project) (GitStatus, error) {
 	return gitStatus, nil
 }
 
-func GitPull(project *Project) {
+func GitPull(project *Project) (string, error) {
+	start := time.Now()
+	gitFolder := filepath.Dir(project.Path)
 
+	r, err := git.PlainOpen(gitFolder)
+	if err != nil {
+		return "", err
+	}
+	logrus.Debugf("Open git repository %s", gitFolder)
+
+	w, err := r.Worktree()
+	if err != nil {
+		return "", err
+	}
+	logrus.Debugf("Worktree successfully open")
+
+	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+	if err != nil {
+		return "", err
+	}
+
+	// Print the latest commit that was just pulled
+	ref, err := r.Head()
+	if err != nil {
+		return "", err
+	}
+
+	commit, err := r.CommitObject(ref.Hash())
+	if err != nil {
+		return "", err
+	}
+
+	elapsed := time.Since(start)
+	logrus.Infof("Pull completed in %s", elapsed)
+	return commit.String(), nil
 }
+
+func GitPush(project *Project) error {
+	start := time.Now()
+	gitFolder := filepath.Dir(project.Path)
+
+	r, err := git.PlainOpen(gitFolder)
+	if err != nil {
+		return err
+	}
+	logrus.Debugf("Open git repository %s", gitFolder)
+
+	err = r.Push(&git.PushOptions{})
+	if err != nil {
+		logrus.Warnf("Cannot complete push: %v", err)
+		return err
+	}
+	elapsed := time.Since(start)
+	logrus.Infof("Push completed in %s", elapsed)
+	return nil
+}
+
 
 func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 	start := time.Now()

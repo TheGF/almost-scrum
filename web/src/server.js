@@ -220,6 +220,17 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
+    static postGitPush(project) {
+        return axios.post(`/api/v1/projects/${project}/git/push`, null, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static postGitPull(project) {
+        return axios.post(`/api/v1/projects/${project}/git/pull`, null, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
 
 }
 
