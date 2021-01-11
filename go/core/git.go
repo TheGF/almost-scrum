@@ -32,10 +32,10 @@ type GitStatus struct {
 }
 
 type CommitInfo struct {
-	User     string
-	Header   string
-	Comments map[string]string
-	Files    []string
+	User   string            `json:"user"`
+	Header string            `json:"header"`
+	Body   map[string]string `json:"body"`
+	Files  []string          `json:"files"`
 }
 
 func prepareMessage(commitInfo CommitInfo) string {
@@ -44,7 +44,7 @@ func prepareMessage(commitInfo CommitInfo) string {
 	out.WriteString(commitInfo.Header)
 	out.WriteString("\n\n============\n")
 
-	for task, comment := range commitInfo.Comments {
+	for task, comment := range commitInfo.Body {
 		out.WriteString(task)
 		out.WriteString("\n")
 		out.WriteString(comment)

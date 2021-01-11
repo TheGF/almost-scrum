@@ -89,7 +89,7 @@ func addComment(project *core.Project, info core.TaskInfo, commitInfo core.Commi
 		return
 	}
 
-	commitInfo.Comments[info.Name] = comment
+	commitInfo.Body[info.Name] = comment
 }
 
 func printStatus(status core.GitStatus) {
@@ -115,7 +115,7 @@ func processCommit(projectPath string, global bool) {
 	printStatus(status)
 	commitInfo := core.CommitInfo{
 		User: core.GetSystemUser(),
-		Comments: map[string]string{},
+		Body: map[string]string{},
 	}
 
 	prompt := promptui.Prompt{

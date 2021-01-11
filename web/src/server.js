@@ -214,6 +214,13 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
+    static postGitCommit(project, commitInfo) {
+        return axios.post(`/api/v1/projects/${project}/git/commit`, commitInfo, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+
 }
 
 export default Server;

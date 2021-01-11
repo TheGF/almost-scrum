@@ -23,7 +23,7 @@ func TestCommit(t *testing.T) {
 	commitInfo := CommitInfo{
 		User:     "mp",
 		Header:   "This is just a test",
-		Comments: map[string]string{
+		Body: map[string]string{
 			"task 1": "a comment",
 			"task 2": "another comment",
 			"task 3": "final comment",

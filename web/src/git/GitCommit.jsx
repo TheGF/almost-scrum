@@ -12,13 +12,32 @@ import UserContext from '../UserContext';
 
 function GitCommit(props) {
     const { project, info } = useContext(UserContext)
-    const [infos, setInfos] = useState([]);
+    const { gitStatus, gitMessage } = props
+    const [gitHash, setGitHash] = useState(null)
+    const commitInfo = {
+        user: info.loginUser,
+        header: gitMessage.header,
+        body: gitMessage.body,
+        files: gitStatus && [...gitStatus.ashFiles, ...gitStatus.stagedFiles] || [],
+    }
 
-    return <Center>
+    function commit() {
+        Server.postGitCommit(project, commitInfo)
+            .then(setGitHash)
+    }
+
+    return <VStack>
+        <VStack textAlign="left">
+            <b>Summary</b>
+            <label>User: {commitInfo.user}</label>
+            <label>Header: {commitInfo.header}</label>
+            <label>Staged Files: {commitInfo.files.join('')}</label>
+        </VStack>
         <HStack spacing={5}>
-            <Button size="lg" colorScheme="blue">Commit</Button>
+            <Button size="lg" colorScheme="blue" onClick={commit}>Commit</Button>
             <Button size="lg" colorScheme="green">Push</Button>
         </HStack>
-    </Center>
+    </VStack>
+
 }
 export default GitCommit;

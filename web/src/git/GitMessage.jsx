@@ -13,6 +13,7 @@ import UserContext from '../UserContext';
 function GitMessage(props) {
     const { project, info } = useContext(UserContext)
     const [infos, setInfos] = useState([]);
+    const { gitMessage, setGitMessage } = props;
 
     function fetchTasks() {
         Server.listTasks(project, '~', `@${info.system_user}`, 0, 20)
@@ -28,6 +29,14 @@ function GitMessage(props) {
             Server.getTask(project, board, name)
                 .then(setTask)
         }
+
+        function changeComment(evt) {
+            const comment = evt && evt.target && evt.target.value
+            gitMessage.body[name] = comment
+            setGitMessage({ ...gitMessage })
+        }
+
+        const comment = gitMessage.body[name]
 
         const progress = task && task.parts && task.parts.map(part => <ListItem>
             <ListIcon as={part.done ? BiCheckCircle : BiCircle} color="green.500" />
@@ -49,7 +58,8 @@ function GitMessage(props) {
                 >
                     <Flex w="50%">
                         <Textarea
-                            placeholder="Enter the comment for this task" />
+                            placeholder="Enter the comment for this task"
+                            value={comment} onChange={changeComment} />
                     </Flex>
                     <Flex w="50%">
                         <VStack>
@@ -64,10 +74,16 @@ function GitMessage(props) {
         </AccordionItem>
     }
 
-    const accordions = infos ? infos.map(info => <TaskComment {...info} />) : null
+    function changeHeader(evt) {
+        const header = evt && evt.target && evt.target.value
+        gitMessage.header = header
+        setGitMessage({ ...gitMessage })
+    }
 
+    const accordions = infos ? infos.map(info => <TaskComment {...info} />) : null
     return <VStack >
-        <Input placeholder="Message header" ></Input>
+        <Input placeholder="Message header" value={gitMessage.header} isRequired
+            onChange={changeHeader}></Input>
         <HStack w="100%">
             <Spacer />
             <Text>Select the task where you progressed during this commit and

@@ -69,6 +69,7 @@ func listProjectsAPI(c *gin.Context) {
 
 type ProjectInfo struct {
 	SystemUser    string             `json:"system_user"`
+	LoginUser     string             `json:"loginUser"`
 	PropertyModel []core.PropertyDef `json:"property_model"`
 	GitProject    bool               `json:"git_project"`
 }
@@ -85,6 +86,7 @@ func getProjectInfoAPI(c *gin.Context) {
 
 	info := ProjectInfo{
 		SystemUser:    core.GetSystemUser(),
+		LoginUser:     core.GetSystemUser(),
 		PropertyModel: project.Config.PropertyModel,
 		GitProject:    gitProject,
 	}
