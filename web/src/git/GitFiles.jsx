@@ -2,17 +2,20 @@ import {
     Button, Flex, HStack, Switch, Table, Tbody, Td, Th, Thead, Tr,
     VStack
 } from '@chakra-ui/react';
-import { React, useContext } from "react";
+import { React, useContext, useState } from "react";
 import Server from '../server';
 import UserContext from '../UserContext';
 
 function GitFiles(props) {
     const { project } = useContext(UserContext)
     const { gitStatus, setGitStatus } = props;
+    const [ fetchingFiles, setFetchingFiles ] = useState(false);
 
     function fetchStatus() {
+        setFetchingFiles(true)
         Server.getGitStatus(project)
             .then(setGitStatus)
+            .then(_ => setFetchingFiles(false))
     }
 
     function getRows(gitStatus) {
@@ -57,7 +60,7 @@ function GitFiles(props) {
 
     return <VStack>
         <HStack>
-            <Button onClick={fetchStatus}>Get Status</Button>
+            <Button onClick={fetchStatus} isLoading={fetchingFiles}>Get Status</Button>
             <Button>Pull</Button>
         </HStack>
         <Flex overflow="auto" h="20em" w="70%">

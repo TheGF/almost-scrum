@@ -17,6 +17,11 @@ import GitCommit from "./GitCommit";
 function GitIntegration({ isOpen, onClose }) {
     const [gitStatus, setGitStatus] = useState(null)
     const [gitMessage, setGitMessage] = useState({header: '', body: {}})
+    const [commitDone, setCommitDone] = useState(false)
+
+    function onCommit() {
+        setCommitDone(true)
+    }
 
     return <Modal isOpen={isOpen} onClose={onClose} size="full" top
         scrollBehavior="inside" >
@@ -29,7 +34,9 @@ function GitIntegration({ isOpen, onClose }) {
                     <TabList>
                         <Tab>Commit Files</Tab>
                         <Tab>Commit Message</Tab>
-                        <Tab isDisabled={!gitStatus || !gitMessage.header}>Commit</Tab>
+                        <Tab isDisabled={!gitStatus || !gitMessage.header} 
+                            onCommit={onCommit}>Commit</Tab>
+                        <Tab isDisabled={!commitDone}>Push</Tab>
                     </TabList>
 
                     <TabPanels>
