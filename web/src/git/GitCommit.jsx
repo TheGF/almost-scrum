@@ -38,7 +38,7 @@ function GitCommit(props) {
         ['Staged Files', commitInfo.files.join(' ')],
     ]
     const table = summary.map(r => <Tr>
-        <Td>{r[0]}</Td>
+        <Td key={r[0]}>{r[0]}</Td>
         <Td>{r[1]}</Td>
     </Tr>)
 

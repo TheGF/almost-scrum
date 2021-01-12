@@ -36,7 +36,7 @@ function Task(props) {
                 const re = /(#\w+)/g
                 while (true) {
                     const m = re.exec(text);
-                    if (m) {tags.push(m[1])} else break
+                    if (m) { tags.push(m[1]) } else break
                 }
             }
             return tags
@@ -90,7 +90,7 @@ function Task(props) {
     function changeOwner(evt) {
         const newOwner = evt && evt.target && evt.target.value;
         if (newOwner) {
-            if (owner == info.system_user) {
+            if (owner == info.systemUser) {
                 task.properties['Owner'] = `@${newOwner}`;
                 saveTask(task)
                 setTask({ ...task })
@@ -117,7 +117,7 @@ function Task(props) {
 
     const owner = task && task.properties && task.properties['Owner']
         && task.properties['Owner'].substring(1)
-    const readOnly = owner != info.system_user
+    const readOnly = owner != info.systemUser
 
     const [id, title] = name && name.split(/\.(.+)/) || ['', 'Something went wrong']
     const userList = users && users.map(u => <option key={u} value={u}>
@@ -128,7 +128,9 @@ function Task(props) {
     </option>)
 
     const mtime = `Last modified: ${Utils.getFriendlyDate(modTime)}`
-    const tags = task ? getTags(task).map(tag => <Badge colorScheme="purple">{tag}</Badge>) : null;
+    const tags = task ? getTags(task).map(tag => <Badge key={tag} colorScheme="purple">
+        {tag}
+    </Badge>) : null;
     const header = task && <HStack spacing={3}>
         <label>{id}.</label>
         <Editable defaultValue={title} borderWidth="1px" minW="300px"
@@ -146,9 +148,9 @@ function Task(props) {
         <Select value={owner} title="Assign the Owner" w="10em" onChange={changeOwner}>
             {userList}
         </Select>
-        <IconButton  title="Delete the task" onClick={_ => setOpenConfirmDelete(true)}>
+        <IconButton title="Delete the task" onClick={_ => setOpenConfirmDelete(true)}>
             <BsTrash />
-            </IconButton>
+        </IconButton>
     </HStack>
 
     function onChange(index) {
@@ -169,12 +171,12 @@ function Task(props) {
                 <Tab key="properties"><T>properties</T></Tab>
                 <Tab key="progress"><T>progress</T></Tab>
                 <Tab key="attachments"><T>attachments</T></Tab>
-                <Spacer />
-                <HStack h="2em" spacing={2}>{tags}</HStack>
+                <Spacer key="spacer" />
+                <HStack h="2em" spacing={2} key="tags">{tags}</HStack>
             </TabList>
 
             <TabPanels>
-                <TabPanel key="view" padding={0}>
+                {/* <TabPanel key="view" padding={0}>
                     <TaskViewer task={task} saveTask={saveTask} searchKeys={searchKeys} />
                 </TabPanel>
                 <TabPanel key="edit" padding={0}>
@@ -192,7 +194,7 @@ function Task(props) {
                         }} />
                 </TabPanel>
                 <TabPanel>
-                </TabPanel>
+                </TabPanel> */}
             </TabPanels>
         </Tabs>
     </HStack> : ''

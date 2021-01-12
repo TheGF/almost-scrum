@@ -9,7 +9,7 @@ function App() {
   const project = '~'
 
   const [info, setInfo] = useState(null)
-  const username  = info && info.system_user
+  const username  = info && info.systemUser
   const value = { project, info, username }
 
   function getInfo() {

@@ -123,7 +123,7 @@ function Header(props) {
                     Toggle {colorMode === "light" ? "Dark" : "Light"}
                 </MenuItem>
                 <MenuDivider />
-                {info && info.git_project ? <MenuItem
+                {info && info.gitProject ? <MenuItem
                     onClick={_ => setShowGitIntegration(true)}>
                     Git Integration
                     </MenuItem> : null}

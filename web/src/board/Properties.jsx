@@ -9,7 +9,7 @@ import UserContext from '../UserContext';
 function Properties(props) {
     const { task, saveTask, readOnly, users } = props;
     const { info } = useContext(UserContext)
-    const { property_model } = info
+    const { propertyModel } = info
     const { properties } = task;
 
     function renderProperty(propertyDef) {
@@ -85,7 +85,7 @@ function Properties(props) {
         </Tr>
     }
 
-    const rows = (property_model || []).map(propertyDef => renderProperty(propertyDef))
+    const rows = (propertyModel || []).map(propertyDef => renderProperty(propertyDef))
     const editMessage = readOnly ? <Center h="2em">
         Change owner if you want to edit the content
     </Center> : null

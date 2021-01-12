@@ -9,13 +9,20 @@ import UserContext from '../UserContext';
 function GitFiles(props) {
     const { project } = useContext(UserContext)
     const { gitStatus, setGitStatus } = props;
-    const [ fetchingFiles, setFetchingFiles ] = useState(false);
+    const [gettingStatus, setGettingStatus] = useState(false);
+    const [pullInProgress, setPullInProgress] = useState(false);
 
-    function fetchStatus() {
-        setFetchingFiles(true)
+    function getStatus() {
+        setGettingStatus(true)
         Server.getGitStatus(project)
             .then(setGitStatus)
-            .then(_ => setFetchingFiles(false))
+            .then(_ => setGettingStatus(false))
+    }
+
+    function pull() {
+        setPullInProgress(true)
+        Server.postGitPull(project)
+            .then(_ => setPullInProgress(false))
     }
 
     function getRows(gitStatus) {
@@ -60,10 +67,10 @@ function GitFiles(props) {
 
     return <VStack>
         <HStack>
-            <Button onClick={fetchStatus} isLoading={fetchingFiles}>Get Status</Button>
-            <Button>Pull</Button>
+            <Button onClick={getStatus} isLoading={gettingStatus}>Get Status</Button>
+            <Button onClick={pull} isLoading={pullInProgress}>Pull</Button>
         </HStack>
-        <Flex overflow="auto" h="20em" w="70%">
+        <Flex overflow="auto" h="20em" w="100%">
             <Table overflow="auto" >
                 <Thead>
                     <Tr>

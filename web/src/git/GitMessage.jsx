@@ -9,6 +9,7 @@ import { React, useContext, useEffect, useState } from "react";
 import { BiCheckCircle, BiCircle } from "react-icons/bi";
 import Server from '../server';
 import UserContext from '../UserContext';
+import TaskComment from './TaskComment';
 
 function GitMessage(props) {
     const { project, info } = useContext(UserContext)
@@ -16,62 +17,21 @@ function GitMessage(props) {
     const { gitMessage, setGitMessage } = props;
 
     function fetchTasks() {
-        Server.listTasks(project, '~', `@${info.system_user}`, 0, 20)
+        Server.listTasks(project, '~', `@${info.systemUser}`, 0, 20)
             .then(setInfos)
     }
     useEffect(fetchTasks, [])
 
-    function TaskComment(props) {
-        const { name, board } = props
-        const [task, setTask] = useState(null)
-
-        function fetchFromServer() {
-            Server.getTask(project, board, name)
-                .then(setTask)
-        }
-
-        function changeComment(evt) {
-            const comment = evt && evt.target && evt.target.value
-            gitMessage.body[name] = comment
-            setGitMessage({ ...gitMessage })
-        }
-
-        const comment = gitMessage.body[name]
-
-        const progress = task && task.parts && task.parts.map(part => <ListItem>
-            <ListIcon as={part.done ? BiCheckCircle : BiCircle} color="green.500" />
-            {part.description}
-        </ListItem>)
-
-        return <AccordionItem>
-            <AccordionButton _expanded={{ bg: "tomato", color: "white" }}
-                onClick={fetchFromServer}
-            >
-                <Box flex="1" textAlign="left">
-                    {name}
-                </Box>
-                <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel pb={4}>
-                <HStack
-                    divider={<StackDivider borderColor="gray.200" />}
-                >
-                    <Flex w="50%">
-                        <Textarea
-                            placeholder="Enter the comment for this task"
-                            value={comment} onChange={changeComment} />
-                    </Flex>
-                    <Flex w="50%">
-                        <VStack>
-                            <label><b>Progress</b></label>
-                            <List spacing={3}>
-                                {progress}
-                            </List>
-                        </VStack>
-                    </Flex>
-                </HStack>
-            </AccordionPanel>
-        </AccordionItem>
+    function newTask() {
+        Server.createTask(project, info.currentBoard, 'rename me')
+            .then(n => {
+                const newTask = {
+                    board: info.currentBoard,
+                    name: n,
+                    isNew: true,
+                }
+                setInfos([newTask, ...infos])
+            })
     }
 
     function changeHeader(evt) {
@@ -80,20 +40,23 @@ function GitMessage(props) {
         setGitMessage({ ...gitMessage })
     }
 
-    const accordions = infos ? infos.map(info => <TaskComment {...info} />) : null
+    const comments = infos ? infos.map(info => <TaskComment key={info.name}
+        gitMessage={gitMessage} setGitMessage={setGitMessage} {...info} />) : null
     return <VStack >
         <Input placeholder="Message header" value={gitMessage.header} isRequired
             onChange={changeHeader}></Input>
-        <HStack w="100%">
+        <HStack>
             <Spacer />
             <Text>Select the task where you progressed during this commit and
             describe the progress</Text>
             <Spacer />
-            <Button>New Task</Button>
+            <Button onClick={newTask}>New Task</Button>
         </HStack>
-        <Accordion defaultIndex={[]} allowMultiple w="100%">
-            {accordions}
-        </Accordion>
+        <Flex overflow="auto" h="20em" w="100%">
+            <Accordion defaultIndex={[]} allowMultiple w="100%">
+                {comments}
+            </Accordion>
+        </Flex>
     </VStack>
 }
 export default GitMessage;
