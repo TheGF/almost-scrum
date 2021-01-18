@@ -13,6 +13,7 @@ import (
 )
 
 var identityKey = "id"
+var oauth bool = false
 
 type login struct {
 	Username string `form:"username" json:"username" binding:"required"`
@@ -24,6 +25,15 @@ type User struct {
 	UserName  string
 	FirstName string
 	LastName  string
+}
+
+func getWebUser(c *gin.Context) string {
+	if oauth {
+		user, _ := c.Get(identityKey)
+		return user.(*User).UserName
+	} else {
+		return core.GetSystemUser()
+	}
 }
 
 func getJWTMiddleware() *jwt.GinJWTMiddleware {
@@ -95,5 +105,6 @@ func getJWTMiddleware() *jwt.GinJWTMiddleware {
 		log.Fatal("authMiddleware.MiddlewareInit() Error:" + err.Error())
 	}
 
+	oauth = true
 	return middleware
 }

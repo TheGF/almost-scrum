@@ -2,16 +2,18 @@ package core
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 )
-
 
 type GitStatus struct {
 	AshFiles       []string `json:"ashFiles"`
@@ -92,7 +94,7 @@ func GetGitStatus(project *Project) (GitStatus, error) {
 	return gitStatus, nil
 }
 
-func GitPull(project *Project) (string, error) {
+func GitPull(project *Project, username string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
@@ -129,7 +131,35 @@ func GitPull(project *Project) (string, error) {
 	return commit.String(), nil
 }
 
-func GitPush(project *Project) error {
+func getAuth(project *Project, user string) (transport.AuthMethod, error) {
+	userInfo, err := GetUserInfo(project, user)
+	if err != nil {
+		return nil, err
+	}
+
+	credentials, found := userInfo.Credentials["GitUserPass"]
+	if !found {
+		logrus.Debugf("No Git username and password for user %s", user)
+		return nil, nil
+	}
+
+	credentials, err = DecryptStringForProject(project, credentials)
+	if err != nil {
+		return nil, err
+	}
+	parts := strings.Split(credentials, ":")
+	if len(parts) == 2 {
+		logrus.Debugf("Fount Git username and password for user %s", user)
+		return &http.BasicAuth{
+			Username: parts[0],
+			Password: parts[1],
+		}, nil
+	} else {
+		return nil, ErrNoFound
+	}
+}
+
+func GitPush(project *Project, user string) error {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
@@ -137,18 +167,22 @@ func GitPush(project *Project) error {
 	if err != nil {
 		return err
 	}
-	logrus.Debugf("Open git repository %s", gitFolder)
 
-	err = r.Push(&git.PushOptions{})
+	auth, err := getAuth(project, user)
 	if err != nil {
-		logrus.Warnf("Cannot complete push: %v", err)
+		return err
+	}
+
+	err = r.Push(&git.PushOptions{
+		Auth: auth,
+	})
+	if err != nil {
 		return err
 	}
 	elapsed := time.Since(start)
 	logrus.Infof("Push completed in %s", elapsed)
 	return nil
 }
-
 
 func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 	start := time.Now()
@@ -195,4 +229,30 @@ func GitCommit(project *Project, commitInfo CommitInfo) (plumbing.Hash, error) {
 	elapsed := time.Since(start)
 	logrus.Infof("Commit completed in %s. Hash: %v", elapsed, hash)
 	return hash, nil
+}
+
+type GitCredentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func SetGitCredentials(project *Project, user string, gitCredentials GitCredentials) error {
+	userInfo, err := GetUserInfo(project, user)
+	if err != nil {
+		return err
+	}
+
+	if gitCredentials.Password != "" {
+		credentials := fmt.Sprintf("%s:%s", gitCredentials.Username, gitCredentials.Password)
+		credentials, err := EncryptStringForProject(project, credentials)
+		if err != nil {
+			return err
+		}
+		userInfo.Credentials["GitUserPass"] = credentials
+
+		if err := SetUserInfo(project, user, &userInfo); err != nil {
+			return err
+		}
+	}
+	return nil
 }

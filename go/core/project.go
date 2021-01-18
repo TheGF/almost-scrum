@@ -7,14 +7,17 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"crypto/aes"
+	"encoding/hex"
 
 	"github.com/sirupsen/logrus"
 )
 
 type ProjectConfig struct {
-	CurrentBoard    string        `yaml:"current_store"`
-	PropertyModel   []PropertyDef `yaml:"property_model"`
-	IncludeLibInGit bool          `yaml:"include_lib_in_git"`
+	CurrentBoard    string        `yaml:"currentStore"`
+	PropertyModel   []PropertyDef `yaml:"propertyModel"`
+	IncludeLibInGit bool          `yaml:"includeLibInGit"`
+	CipherKey	string		`yaml:"cipherKey"`
 }
 
 type PropertyDef struct {
@@ -29,6 +32,7 @@ type PropertyDef struct {
 type Project struct {
 	Path   string
 	Config ProjectConfig
+	EncryptionSeed string
 	Index  *Index
 }
 
@@ -106,6 +110,7 @@ func InitProject(path string) (*Project, error) {
 			{"Points", "Enum", []string{"1", "2", "3", "5", "7", "9", "12", "15", "21"},
 				"", "3"},
 		},
+		CipherKey: GenerateRandomString(64),
 	}
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {
 		logrus.Errorf("InitProject - Cannot create config file in %s", path)
@@ -191,4 +196,37 @@ func ListBoards(project *Project) ([]string, error) {
 func CreateBoard(project *Project, name string) error {
 	p := filepath.Join(project.Path, "boards", name)
 	return os.MkdirAll(p, 0777)
+}
+
+func EncryptStringForProject(project *Project, value string) (string, error){
+	c, err := aes.NewCipher([]byte(project.Config.CipherKey))
+	if err != nil {
+		return "", err
+	}
+
+	// allocate space for ciphered data
+	padding := (aes.BlockSize - len(value) % aes.BlockSize) % aes.BlockSize
+	out := make([]byte, len(value)+padding)
+	in := make([]byte, len(out))
+	for idx := range out {
+		in[idx] = 0
+	}
+
+	copy(in, value[:])
+	c.Encrypt(out, in)
+	// return hex string
+	return hex.EncodeToString(out), nil
+}
+
+func DecryptStringForProject(project *Project, value string) (string, error){
+	ciphertext, _ := hex.DecodeString(value)
+
+	c, err := aes.NewCipher([]byte(project.Config.CipherKey))
+	if err != nil {
+		return "", err
+	}
+
+	pt := make([]byte, len(ciphertext))
+	c.Decrypt(pt, ciphertext)
+	return string(pt[:]), nil
 }

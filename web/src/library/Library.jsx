@@ -13,15 +13,19 @@ import T from '../core/T';
 import Server from '../server';
 import UserContext from '../UserContext';
 import Utils from '../core/utils';
+import PageEditor from './PageEditor';
+import { GiGrapes } from 'react-icons/gi';
 
 function Library(props) {
     const { project } = useContext(UserContext);
-    const [path, setPath] = useState('')
+    const { attachedFiles, setAttachedFiles } = props
+    const [path, setPath] = useState(props.path || '')
 
     const [favorites, setFavorites] = useState(
         (localStorage.getItem('ash-lib-favs') || '').split(',').filter(f => f)
     )
     const [files, setFiles] = useState([])
+    const [page, setPage] = useState(null)
 
     function updateFavorites(path, oldPath) {
         if (path) {
@@ -44,6 +48,18 @@ function Library(props) {
             .then(listFolder)
     }
 
+    function newPage() {
+        const cnt = files.filter(f => f.name.startsWith('page-')).length
+        const folder = `${path}/page-${cnt}.pg`
+        Server.createFolderInLibrary(project, folder)
+            .then(listFolder)
+            .then(_ => {
+                const file = new Blob(['Change me'], {type: 'text/markdown'})
+                Server.uploadFileToLibrary(project, folder, file, 'index.md')
+            })
+    }
+
+
     function deleteFile(file) {
         Server.deleteFromLibrary(project, `${path}/${file.name}`)
             .than(listFolder)
@@ -56,12 +72,16 @@ function Library(props) {
     }
 
     function onFileClick(file) {
+        const p = [path, file.name].join('/')
         if (file.dir) {
-            const p = [path, file.name].join('/')
-            setPath(p)
-            updateFavorites(p)
+            if (file.name.endsWith('.pg')) {
+                setPage(p)
+            } else {
+                setPath(p)
+                updateFavorites(p)
+            }
         } else {
-            Server.downloadFromlibrary(project, `${path}/${file.name}`);
+            Server.openFromlibrary(project, p);
         }
     }
 
@@ -81,10 +101,34 @@ function Library(props) {
     function renderFavs() {
         return favorites.map(p => {
             const label = p.split('/').pop()
-            return <Button onClick={_ => setPath(p)} isActive={p == path}>
+            return <Button key={p} onClick={_ => setPath(p)} isActive={p == path}>
                 {label}
             </Button>
         })
+    }
+
+    function attach(file) {
+        setAttachedFiles([...attachedFiles, file])
+    }
+
+    function detach(file) {
+        const idx = attachedFiles.indexOf(file)
+        setAttachedFiles([
+            ...attachedFiles.slice(0, idx),
+            ...attachedFiles.slice(idx + 1)
+        ])
+    }
+
+    function getAttachButton(file) {
+        if (!setAttachedFiles || file.dir) {
+            return null
+        }
+        const p = `${path}/${file.name}`
+        if (attachedFiles.includes(p)) {
+            return <Button colorScheme="yellow" onClick={_ => detach(p)}>Detach</Button>
+        } else {
+            return <Button onClick={_ => attach(p)}>Attach</Button>
+        }
     }
 
     const rows = files.map(file => <Tr key={file.name}>
@@ -94,7 +138,7 @@ function Library(props) {
                 {({ isEditing, onEdit }) => (
                     <HStack spacing={2}>
                         <>
-                            {Utils.fileIcon(file.dir, file.mime)}
+                            {file.name.endsWith('.pg') ? <GiGrapes /> : Utils.fileIcon(file.dir, file.mime)}
                             <Link href="#" onClick={_ => {
                                 if (!isEditing) onFileClick(file)
                             }}>
@@ -113,7 +157,7 @@ function Library(props) {
         <Td>{file.size}</Td>
         <Td>
             <ButtonGroup size="sm" spacing={2}>
-                <Button>Links</Button>
+                {getAttachButton(file)}
                 <Button onClick={_ => deleteFile(file)}>Delete</Button>
             </ButtonGroup>
         </Td>
@@ -141,10 +185,12 @@ function Library(props) {
     let hiddenInput = null
 
     return <VStack w="90%" align="left" >
+        <PageEditor page={page} setPage={setPage}/>
         <HStack w="90%" borderWidth="2" borderColor="gray">
             {breadcrumb}
             <Spacer />
-            <ButtonGroup variant="outline"> {renderFavs()}
+            <ButtonGroup variant="outline">
+                {renderFavs()}
             </ButtonGroup>
             <Spacer />
             <VisuallyHidden>
@@ -158,8 +204,11 @@ function Library(props) {
             <Button onClick={newFolder}>
                 <T>New Folder</T>
             </Button>
+            <Button onClick={newPage}>
+                <T>New Page</T>
+            </Button>
             <IconButton onClick={listFolder}>
-                <AiOutlineReload onclick={listFolder} />
+                <AiOutlineReload onClick={listFolder} />
             </IconButton>
         </HStack>
         <Table>

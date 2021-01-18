@@ -21,7 +21,7 @@ var story = Task{
 			Done:        false,
 		},
 	},
-	Attachments: []string{},
+	Files: []string{},
 }
 
 func TestListTasks(t *testing.T) {

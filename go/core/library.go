@@ -18,6 +18,7 @@ type LibraryItem struct {
 	ModTime time.Time `json:"modTime"`
 	Mime    string    `json:"mime"`
 	Dir     bool      `json:"dir"`
+	Parent  string    `json:"parent"`
 }
 
 // ListLibrary returns the content of the specified path in the library.
@@ -82,4 +83,29 @@ func DeleteFileFromLibrary(project *Project, path string) error {
 func GetPathInLibrary(project *Project, path string) (string, error) {
 	path = filepath.Join(project.Path, ProjectLibraryFolder, path)
 	return filepath.Abs(path)
+}
+
+// GetPathInLibrary returns the absolute path for a resource stored in the library.
+func GetLibraryItems(project *Project, paths []string) ([]LibraryItem, error) {
+	items := make([]LibraryItem, 0, len(paths))
+
+	for _, path := range paths {
+		fullPath := filepath.Join(project.Path, ProjectLibraryFolder, path)
+		fileInfo, err := os.Stat(fullPath)
+		if err != nil {
+			continue
+		}
+
+		mime, _ := mimetype.DetectFile(path)
+		items = append(items, LibraryItem{
+			Name:    fileInfo.Name(),
+			Size:    fileInfo.Size(),
+			ModTime: fileInfo.ModTime(),
+			Mime:    mime.String(),
+			Dir:     fileInfo.IsDir(),
+			Parent:  filepath.Dir(path),
+		})
+	}
+
+	return items, nil
 }

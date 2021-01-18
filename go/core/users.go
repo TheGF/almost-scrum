@@ -7,10 +7,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+
+
 // UserInfo contains information about a user.
 type UserInfo struct {
 	Email string `json:"email"`
 	Icon  []byte `json:"icon"`
+	Credentials map[string]string `json:"credentials"`
 }
 
 // GetUserList returns the project users

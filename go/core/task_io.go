@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	paragraphMatch  = regexp.MustCompile(`#+\s+(\S+)[^#]+`)
-	lineMatch       = regexp.MustCompile(`#+\s+(\w+)|([^\n]+)`)
-	propertyMatch   = regexp.MustCompile(`\s*([^:]*):\s+(.*)`)
-	partMatch       = regexp.MustCompile(`\[([x ])]\s+(.+)`)
-	attachmentMatch = regexp.MustCompile(`\[[^]]*]\([^)]+\)`)
+	paragraphMatch = regexp.MustCompile(`#+\s+(\S+)[^#]+`)
+	lineMatch      = regexp.MustCompile(`#+\s+(\w+)|([^\n]+)`)
+	propertyMatch  = regexp.MustCompile(`\s*([^:]*):\s+(.*)`)
+	partMatch      = regexp.MustCompile(`\[([x ])]\s+(.+)`)
+	filesMatch     = regexp.MustCompile(`\[[^]]*]\([^)]+\)`)
 )
 
 func parseProperties(node *blackfriday.Node, task *Task) {
@@ -45,13 +45,13 @@ func parseParts(node *blackfriday.Node, task *Task) {
 	logrus.Debugf("ParseTask - found part %s [done = %t]", description, done)
 }
 
-func parseAttachments(node *blackfriday.Node, task *Task) {
+func parseFiles(node *blackfriday.Node, task *Task) {
 	if node.Next == nil || node.Next.LinkData.Destination == nil {
 		return
 	}
 
 	link := string(node.Next.LinkData.Destination)
-	task.Attachments = append(task.Attachments, link)
+	task.Files = append(task.Files, link)
 	logrus.Debugf("ParseTask - found attachment %s", link)
 }
 
@@ -78,8 +78,8 @@ func parseList(input []byte, title string, task *Task) {
 					parseProperties(text, task)
 				case "Progress":
 					parseParts(text, task)
-				case "Attachments":
-					parseAttachments(text, task)
+				case "Files":
+					parseFiles(text, task)
 				}
 			}
 		}
@@ -119,6 +119,19 @@ func renderParts(task *Task, output *bytes.Buffer) {
 	}
 }
 
+func renderFiles(task *Task, output *bytes.Buffer) {
+	if task.Files == nil {
+		return
+	}
+	output.WriteString("### Files\n")
+
+	for _, val := range task.Files {
+		output.WriteString("- ")
+		output.WriteString(val)
+		output.WriteString("\n")
+	}
+}
+
 func ReadTask(path string, task *Task) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -141,6 +154,7 @@ func RenderTask(task *Task) []byte {
 	}
 	renderProperties(task, &output)
 	renderParts(task, &output)
+	renderFiles(task, &output)
 
 	return output.Bytes()
 }
@@ -179,12 +193,12 @@ func ParseTask(input []byte, task *Task) error {
 
 	task.Properties = map[string]string{}
 	task.Parts = []Part{}
-	task.Attachments = []string{}
+	task.Files = []string{}
 
 	paragraphs := splitInParagraph(input)
 	for _, paragraph := range paragraphs {
 		switch paragraph.title {
-		case "Properties", "Progress", "Attachments":
+		case "Properties", "Progress", "Files":
 			parseList([]byte(paragraph.body), paragraph.title, task)
 		default:
 			description.WriteString(paragraph.header)

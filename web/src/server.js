@@ -140,14 +140,18 @@ class Server {
             .catch(loginWhenUnauthorized)
     }
 
-    static uploadFileToLibrary(project, path, file = None) {
+    static uploadFileToLibrary(project, path, file, name) {
         path = encodeURIComponent(path)
         const config = getConfig();
         let formData = null;
 
         if (file) {
             formData = new FormData();
-            formData.append("file", file);
+            if (name) {
+                formData.append("file", file, name);
+            } else {
+                formData.append("file", file);
+            }
             config.headers = config.headers || {};
             config.headers['Content-Type'] = 'multipart/form-data';
         }
@@ -165,6 +169,13 @@ class Server {
     }
 
     static downloadFromlibrary(project, path) {
+        path = encodeURIComponent(path)
+        return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static openFromlibrary(project, path) {
         path = encodeURIComponent(path)
         //        return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
 
@@ -198,6 +209,14 @@ class Server {
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }
+
+    static getLibraryStat(project, files) {
+        return axios.post(`/api/v1/projects/${project}/library-stat`,
+            files, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
 
     static getSuggestions(project, prefix, total) {
         prefix = encodeURIComponent(prefix)

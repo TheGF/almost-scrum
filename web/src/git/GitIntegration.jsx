@@ -14,6 +14,8 @@ import GitFiles from './GitFiles'
 import GitMessage from './GitMessage';
 import GitCommit from "./GitCommit";
 import GitPush from './GitPush';
+import GitSettings from './GitSettings';
+import T from "../core/T";
 
 function GitIntegration({ isOpen, onClose }) {
     const [gitStatus, setGitStatus] = useState(null)
@@ -35,11 +37,12 @@ function GitIntegration({ isOpen, onClose }) {
             <ModalBody>
                 <Tabs>
                     <TabList>
-                        <Tab>Commit Files</Tab>
-                        <Tab>Commit Message</Tab>
+                        <Tab><T>files</T></Tab>
+                        <Tab><T>message</T></Tab>
                         <Tab isDisabled={!gitStatus || !gitMessage.header}
-                            onCommit={onCommit}>Commit</Tab>
-                        <Tab>Push</Tab>
+                            onCommit={onCommit}><T>commit</T></Tab>
+                        <Tab><T>push</T></Tab>
+                        <Tab><T>settings</T></Tab>
                     </TabList>
 
                     <TabPanels>
@@ -54,6 +57,9 @@ function GitIntegration({ isOpen, onClose }) {
                         </TabPanel>
                         <TabPanel>
                             <GitPush/>
+                        </TabPanel>
+                        <TabPanel>
+                            <GitSettings/>
                         </TabPanel>
                     </TabPanels>
                 </Tabs>

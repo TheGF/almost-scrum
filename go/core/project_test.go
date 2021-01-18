@@ -29,3 +29,14 @@ func TestInitProject(t *testing.T) {
 	assert.Nilf(t, err, "Cannot shred project: %w", err)
 
 }
+
+func TestEncryption(t *testing.T) {
+	project, err := OpenProject("../../.ash")
+	assert.NotNilf(t, err, "Cannot open project: %w", err)
+
+	s := "Hello World"
+	e, _ := EncryptStringForProject(project, s)
+	d, _ := DecryptStringForProject(project, e)
+	assert.Equal(t, s, d)
+
+}

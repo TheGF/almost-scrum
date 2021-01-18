@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/sirupsen/logrus"
+	"math/rand"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -48,3 +49,12 @@ func GetSystemUser() string {
 	return u.Username
 }
 
+func GenerateRandomString(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	s := make([]rune, n)
+	for i := range s {
+		s[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(s)
+}

@@ -13,6 +13,7 @@ func libraryRoute(group *gin.RouterGroup) {
 	group.PUT("/projects/:project/library/*path", createFolderAPI)
 	group.POST("/projects/:project/library/*path", uploadFileAPI)
 	group.DELETE("/projects/:project/library/*path", deleteFileAPI)
+	group.POST("/projects/:project/library-stat", getLibraryItemsAPI)
 }
 
 func listLibraryAPI(c *gin.Context) {
@@ -109,4 +110,27 @@ func deleteFileAPI(c *gin.Context) {
 		return
 	}
 	c.String(http.StatusOK, "")
+}
+
+
+func getLibraryItemsAPI(c *gin.Context) {
+	var project *core.Project
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	var files []string
+	if err := c.BindJSON(&files); core.IsErr(err, "Invalid JSON") {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	items, err := core.GetLibraryItems(project, files)
+	if err != nil {
+		log.Warnf("Cannot get stat info for %v: %v", files, err)
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "Cannot get files stats")
+		return
+	}
+	c.JSON(http.StatusOK, items)
 }

@@ -43,7 +43,7 @@ type Task struct {
 	Description string            `json:"description"`
 	Properties  map[string]string `json:"properties"`
 	Parts       []Part            `json:"parts"`
-	Attachments []string          `json:"attachments"`
+	Files       []string          `json:"files"`
 }
 
 // ListBoardTasks list the tasks in the board
@@ -137,7 +137,7 @@ func CreateTask(project *Project, board string, title string, owner string) (*Ta
 		Description: "Replace with the task description",
 		Properties:  map[string]string{},
 		Parts:       []Part{},
-		Attachments: []string{},
+		Files:       []string{},
 	}
 
 	for _, propertyDef := range project.Config.PropertyModel {

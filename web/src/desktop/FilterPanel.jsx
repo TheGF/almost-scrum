@@ -2,6 +2,7 @@ import { Button, HStack, Spacer } from "@chakra-ui/react";
 import { React, useContext, useEffect, useRef, useState } from "react";
 import { BsViewStacked, MdViewHeadline, RiFilterLine } from 'react-icons/all';
 import ReactTags from 'react-tag-autocomplete';
+import './reactTags.css'
 import Server from '../server';
 import UserContext from '../UserContext';
 

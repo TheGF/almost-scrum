@@ -34,3 +34,22 @@ func TestCommit(t *testing.T) {
 	hash, err := GitCommit(project, commitInfo)
 	t.Logf("GitCommit %v", hash)
 }
+
+func TestPush(t *testing.T) {
+	project, err := OpenProject("../../.ash")
+	assert.NotNilf(t, err, "Cannot open project: %w", err)
+
+	GitPush(project, GetSystemUser())
+}
+
+func TestSetGitCredentials(t *testing.T) {
+	project, err := OpenProject("../../.ash")
+	assert.NotNilf(t, err, "Cannot open project: %w", err)
+
+	gitCredentials := GitCredentials{
+		Username: "mp",
+		Password: "122abd851b139cb1f73a1f1ded40c6047dd9c3d3",
+	}
+
+	SetGitCredentials(project, GetSystemUser(), gitCredentials)
+}

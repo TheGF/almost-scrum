@@ -3,7 +3,10 @@ package web
 import (
 	"fmt"
 	"github.com/fatih/color"
+	"mime"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -32,13 +35,15 @@ func loadStaticContent(router *gin.Engine) {
 			continue
 		}
 		router.GET(path, func(c *gin.Context) {
-			c.Writer.Write(data)
+			m := mime.TypeByExtension(filepath.Ext(path))
+			c.Data(http.StatusOK, m, data)
+			log.Debugf("Get content of %s with mime %v", path, m)
 		})
 		log.Debugf("Bound resource %s to %s", name, path)
 	}
 	router.GET("/", func(c *gin.Context) {
 		data, _ := Asset("build/index.html")
-		c.Writer.Write(data)
+		c.Data(http.StatusOK, "text/html", data)
 	})
 
 }
@@ -66,8 +71,6 @@ func StartWeb(projectPath string, port string, logLevel string, args []string) {
 
 	r.Run(fmt.Sprintf(":%s", port))
 }
-
-
 
 //StartServer starts the embedded server portal.
 func StartServer(projectPath string, port string, logLevel string, args []string) {

@@ -62,10 +62,10 @@ function Desktop() {
 
             <VStack w="100%">
                 <Header boards={boards}
-                    setShowGitIntegration={setShowGitIntegration} />
-                onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
-                onNewTask={onNewTask} onNewBoard={_ => askBoardName.onOpen()} />
-            {content}
+                    setShowGitIntegration={setShowGitIntegration}
+                    onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
+                    onNewTask={onNewTask} onNewBoard={_ => askBoardName.onOpen()} />
+                {content}
             </VStack>
         </Flex>
     </>

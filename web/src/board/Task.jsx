@@ -17,6 +17,7 @@ import Progress from './Progress';
 import Properties from './Properties';
 import TaskEditor from './TaskEditor';
 import TaskViewer from './TaskViewer';
+import Files from './Files';
 
 
 
@@ -170,18 +171,18 @@ function Task(props) {
                 <Tab key="edit"><T>edit</T></Tab>
                 <Tab key="properties"><T>properties</T></Tab>
                 <Tab key="progress"><T>progress</T></Tab>
-                <Tab key="attachments"><T>attachments</T></Tab>
+                <Tab key="files"><T>files</T></Tab>
                 <Spacer key="spacer" />
                 <HStack h="2em" spacing={2} key="tags">{tags}</HStack>
             </TabList>
 
             <TabPanels>
-                {/* <TabPanel key="view" padding={0}>
+                <TabPanel key="view" padding={0}>
                     <TaskViewer task={task} saveTask={saveTask} searchKeys={searchKeys} />
                 </TabPanel>
                 <TabPanel key="edit" padding={0}>
-                    <TaskEditor task={task} saveTask={saveTask} users={users} 
-                    readOnly={readOnly} />
+                    <TaskEditor task={task} saveTask={saveTask} users={users}
+                        readOnly={readOnly} />
                 </TabPanel>
                 <TabPanel key="properties" >
                     <Properties task={task} saveTask={saveTask} users={users} readOnly={readOnly} />
@@ -194,7 +195,8 @@ function Task(props) {
                         }} />
                 </TabPanel>
                 <TabPanel>
-                </TabPanel> */}
+                    <Files task={task} saveTask={saveTask} readOnly={readOnly}/>
+                </TabPanel>
             </TabPanels>
         </Tabs>
     </HStack> : ''

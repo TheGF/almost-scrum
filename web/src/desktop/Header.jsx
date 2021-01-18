@@ -130,8 +130,9 @@ function Header(props) {
                 <MenuItem>Help</MenuItem>
             </MenuList>
         </Menu>
-        <Boards key={boardKey} {...props}
-            active={activeBoard} setActiveBoard={setActiveBoard} />
+        <Boards key={boardKey} 
+            active={activeBoard} setActiveBoard={setActiveBoard}
+            {...props} />
     </Stack>
 }
 
