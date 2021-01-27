@@ -44,7 +44,7 @@ function GitSettings(props) {
             ...gitSettings,
             useGitNative: !gitSettings.useGitNative,
         })
-        Server.putGitSettings(gitSettings)
+        Server.putGitSettings(project, gitSettings)
     }
 
     return gitSettings ? <VStack spacing={10}>
