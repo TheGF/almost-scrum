@@ -1,6 +1,8 @@
 import {
     Button,
-    VStack
+    Textarea,
+    VStack,
+    Text
 } from "@chakra-ui/react";
 import { React, useContext, useState } from "react";
 import Server from '../server';
@@ -18,24 +20,20 @@ function GitPush(props) {
             .then(_ => setPushInProgress(false))
     }
 
-    return pushOutput ?
-        <VStack>
-            <Text fontSize="md" color="green">
-                Push was successful
-            </Text>
+    return <VStack>
+        <Button size="lg" colorScheme="blue" isLoading={pushInProgress}
+            onClick={push}>
+            Push
+        </Button>
+        {pushOutput ? <>
             <Textarea
                 value={pushOutput}
                 size="md"
                 resize="Vertical"
-                rows="10"
+                rows="6"
             />
-        </VStack> :
-        <VStack>
-            <Button size="lg" colorScheme="blue" isLoading={pushInProgress}
-                onClick={push}>
-                Push
-            </Button>
-        </VStack>
+        </> : null}
+    </VStack>
 
 }
 export default GitPush;

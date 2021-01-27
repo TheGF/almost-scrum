@@ -5,6 +5,7 @@ import {
     InputGroup,
     InputRightElement,
     VStack,
+    HStack,
     Center,
     StackDivider,
     Spacer
@@ -50,15 +51,18 @@ function GitSettings(props) {
 
     return gitSettings ? <VStack spacing={10}>
         <FormControl id="git-native-form" maxWidth="30em">
-            <FormLabel>Use Git Native Client</FormLabel>
-            <Switch id="git-native" isChecked={gitSettings.useGitNative} onChange={switchNativeGit} />
+            <HStack>
+                <FormLabel>Use Git Native Client</FormLabel>
+                <Spacer/>
+                <Switch id="git-native" isChecked={gitSettings.useGitNative} onChange={switchNativeGit} />
+            </HStack>
             <FormHelperText>
                 Requires Git client to be installed in your system. When off, connect directly to Git (not recommended)
         </FormHelperText>
         </FormControl>
         <FormControl id="credentials" maxWidth="30em">
             <FormLabel>Username</FormLabel>
-            <Input type="username" value={gitSettings.username}/>
+            <Input type="username" value={gitSettings.username} />
             <FormLabel>Password</FormLabel>
             <InputGroup size="md">
                 <Input
