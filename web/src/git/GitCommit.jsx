@@ -43,12 +43,17 @@ function GitCommit(props) {
     </Tr>)
 
     return commitOutput ?
-        <Textarea
-            value={commitOutput}
-            size="md"
-            resize="Vertical"
-            rows="10"
-        /> :
+        <VStack>
+            <Text fontSize="md" color="green">
+                Commit was successful
+            </Text>
+            <Textarea
+                value={commitOutput}
+                size="md"
+                resize="Vertical"
+                rows="10"
+            />
+        </VStack> :
         <VStack>
             <VStack textAlign="left">
                 <Table>
