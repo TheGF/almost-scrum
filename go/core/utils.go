@@ -80,7 +80,7 @@ func UnzipFile(data []byte, destination string) error {
 		if f.FileInfo().IsDir() {
 
 			// Creating a new Folder
-			os.MkdirAll(path, os.ModePerm)
+			_ = os.MkdirAll(path, os.ModePerm)
 			continue
 		}
 		if err = os.MkdirAll(filepath.Dir(path), os.ModePerm); err != nil {
@@ -98,8 +98,8 @@ func UnzipFile(data []byte, destination string) error {
 			return err
 		}
 		_, err = io.Copy(outFile, rc)
-		outFile.Close()
-		rc.Close()
+		_ = outFile.Close()
+		_ = rc.Close()
 		if err != nil {
 			return err
 		}
@@ -135,17 +135,17 @@ func RunProgram(command string, arg ...string) error {
 	return cmd.Run()
 }
 
-func RunCommand(command string, arg ...string) (out string, es string, err error) {
-	var o bytes.Buffer
-	var e bytes.Buffer
+func RunCommand(command string, arg ...string) (out string, err error) {
+	var buf bytes.Buffer
 
+	writer := bufio.NewWriter(&buf)
 	cmd := exec.Command(command, arg...)
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = bufio.NewWriter(&o)
-	cmd.Stderr = bufio.NewWriter(&e)
+	cmd.Stdout = writer
+	cmd.Stderr = writer
 	if err = cmd.Run(); err != nil {
-		return "","",err
+		return buf.String(), err
 	}
-	return o.String(), e.String(), err
+	return buf.String(), err
 }
 

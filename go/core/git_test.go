@@ -21,6 +21,8 @@ func TestCommit(t *testing.T) {
 	project, err := OpenProject("../../.ash")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
+	status, err := gitClient.GetStatus(project)
+
 	commitInfo := CommitInfo{
 		User:     "mp",
 		Header:   "This is just a test",
@@ -29,7 +31,7 @@ func TestCommit(t *testing.T) {
 			"task 2": "another comment",
 			"task 3": "final comment",
 		},
-		Files:    []string{},
+		Files:    status.StagedFiles,
 	}
 
 	hash, err := gitClient.Commit(project, commitInfo)

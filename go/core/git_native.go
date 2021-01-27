@@ -20,7 +20,7 @@ func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
-	out, _, err := RunCommand("git", "-C", gitFolder, "status", "--porcelain")
+	out, err := RunCommand("git", "-C", gitFolder, "status", "--porcelain")
 	if err != nil {
 		return GitStatus{}, err
 	}
@@ -70,23 +70,23 @@ func (client GitNative) Pull(project *Project, user string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
-	_, _, err := RunCommand("git", "-C", gitFolder, "pull")
+	out, err := RunCommand("git", "-C", gitFolder, "pull")
 	if err != nil {
 		return "",err
 	}
 
 	elapsed := time.Since(start)
 	logrus.Infof("Pull completed in %s", elapsed)
-	return "",nil
+	return out,nil
 }
 
 func (client GitNative) Push(project *Project, user string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
-	out, es, err := RunCommand("git", "-C", gitFolder, "push")
+	out, err := RunCommand("git", "-C", gitFolder, "push")
 	if err != nil {
-		return es, err
+		return out, err
 	}
 
 	elapsed := time.Since(start)
@@ -115,14 +115,17 @@ func (client GitNative) Commit(project *Project, commitInfo CommitInfo) (string,
 	for _, file := range commitInfo.Files {
 		args = append(args, file)
 	}
-	if _, _, err := RunCommand("git", args...); err != nil {
-		return "", err
+	out, err := RunCommand("git", args...)
+	logrus.Debugf("Git add: %s", out)
+	if err != nil {
+		return out, err
 	}
 
-	out, _, err := RunCommand("git", "-C", gitFolder, "commit",
+	out, err = RunCommand("git", "-C", gitFolder, "commit",
 		"-F", tmpFile.Name())
+	logrus.Debugf("Git commit: %s", out)
 	if err != nil {
-		return "", err
+		return out, err
 	}
 
 	elapsed := time.Since(start)

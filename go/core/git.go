@@ -79,7 +79,7 @@ type GitSettings struct {
 }
 
 func HasGitNative() bool {
-	out, _, err := RunCommand("git", "--version")
+	out, err := RunCommand("git", "--version")
 	return err == nil && strings.HasPrefix(out, "git")
 }
 
