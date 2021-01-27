@@ -28,7 +28,7 @@ func getProject(projectPath string) *core.Project {
 	}
 
 	current := core.GetSystemUser()
-	for _, user := range core.GetUserList(project){
+	for _, user := range core.GetUserList(project) {
 		if user == current {
 			return project
 		}

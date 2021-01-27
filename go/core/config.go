@@ -18,6 +18,7 @@ type Config struct {
 	Projects     map[string]string
 	Secret       string
 	OwnerLock    bool
+	UseGitNative bool
 }
 
 var defaultConfig = Config{
@@ -26,6 +27,7 @@ var defaultConfig = Config{
 	Passwords:    map[string]string{},
 	Projects:     map[string]string{},
 	Secret:       getSecret(),
+	UseGitNative: HasGitNative(),
 }
 
 func getSecret() string {

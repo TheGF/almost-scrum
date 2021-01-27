@@ -12,11 +12,11 @@ import (
 
 
 
-type GitProgram struct{}
+type GitNative struct{}
 
-var statusRe = regexp.MustCompile(`\s+(\w+)\s+.*`)
+var statusRe = regexp.MustCompile(`\s*([\?\w]+)\s+(.*)`)
 
-func (client GitProgram) GetStatus(project *Project) (GitStatus, error) {
+func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
@@ -66,21 +66,21 @@ func (client GitProgram) GetStatus(project *Project) (GitStatus, error) {
 	return gitStatus, nil
 }
 
-func (client GitProgram) Pull(project *Project) error {
+func (client GitNative) Pull(project *Project, user string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
 	_, _, err := RunCommand("git", "-C", gitFolder, "pull")
 	if err != nil {
-		return err
+		return "",err
 	}
 
 	elapsed := time.Since(start)
 	logrus.Infof("Pull completed in %s", elapsed)
-	return nil
+	return "",nil
 }
 
-func (client GitProgram) Push(project *Project) error {
+func (client GitNative) Push(project *Project, user string) error {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
@@ -94,7 +94,7 @@ func (client GitProgram) Push(project *Project) error {
 	return nil
 }
 
-func (client GitProgram) Commit(project *Project, commitInfo CommitInfo) (string, error) {
+func (client GitNative) Commit(project *Project, commitInfo CommitInfo) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
@@ -103,7 +103,7 @@ func (client GitProgram) Commit(project *Project, commitInfo CommitInfo) (string
 	}
 
 	defer os.Remove(tmpFile.Name())
-	message := prepareMessage(commitInfo)
+	message := prepareGitMessage(commitInfo)
 	logrus.Debugf("Git message:\n%s", message)
 
 	if _, err = tmpFile.WriteString(message); err != nil {

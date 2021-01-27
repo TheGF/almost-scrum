@@ -2,6 +2,7 @@ package core
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -124,3 +125,27 @@ func OpenBrowser(url string) error {
 	logrus.Debugf("Open browser at %s", url)
 	return exec.Command(cmd, args...).Start()
 }
+
+
+func RunProgram(command string, arg ...string) error {
+	cmd := exec.Command(command, arg...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func RunCommand(command string, arg ...string) (out string, es string, err error) {
+	var o bytes.Buffer
+	var e bytes.Buffer
+
+	cmd := exec.Command(command, arg...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = bufio.NewWriter(&o)
+	cmd.Stderr = bufio.NewWriter(&e)
+	if err = cmd.Run(); err != nil {
+		return "","",err
+	}
+	return o.String(), e.String(), err
+}
+

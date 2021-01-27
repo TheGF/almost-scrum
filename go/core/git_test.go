@@ -6,12 +6,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var gitClient = GitNative{}
 
 func TestStatus(t *testing.T) {
 	project, err := OpenProject("../../.ash")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
-	gitStatus, err := GetGitStatus(project)
+	gitStatus, err := gitClient.GetStatus(project)
 	t.Logf("Gitfiles %v", gitStatus)
 }
 
@@ -31,7 +32,7 @@ func TestCommit(t *testing.T) {
 		Files:    []string{},
 	}
 
-	hash, err := GitCommit(project, commitInfo)
+	hash, err := gitClient.Commit(project, commitInfo)
 	t.Logf("GitCommit %v", hash)
 }
 
@@ -39,7 +40,7 @@ func TestPush(t *testing.T) {
 	project, err := OpenProject("../../.ash")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
-	GitPush(project, GetSystemUser())
+	gitClient.Push(project, GetSystemUser())
 }
 
 func TestSetGitCredentials(t *testing.T) {

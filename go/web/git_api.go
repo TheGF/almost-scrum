@@ -15,13 +15,15 @@ func gitRoute(group *gin.RouterGroup) {
 	group.PUT("/projects/:project/git/credentials", putGitCredentialsAPI)
 }
 
+
 func getGitStatusAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
+	git := core.GetGitClient(project)
 
-	status, err := core.GetGitStatus(project)
+	status, err := git.GetStatus(project)
 	if err != nil {
 		logrus.Warnf("Cannot get Git status in project %s: %v", project.Path, err)
 		_ = c.Error(err)
@@ -36,6 +38,7 @@ func postGitCommitAPI(c *gin.Context) {
 	if project = getProject(c); project == nil {
 		return
 	}
+	git := core.GetGitClient(project)
 
 	var commitInfo core.CommitInfo
 	if err := c.BindJSON(&commitInfo); core.IsErr(err, "Invalid JSON") {
@@ -43,14 +46,14 @@ func postGitCommitAPI(c *gin.Context) {
 		return
 	}
 
-	hash, err := core.GitCommit(project, commitInfo)
+	hash, err := git.Commit(project, commitInfo)
 	if err != nil {
 		logrus.Warnf("Cannot commit content project %s: %v", project.Path, err)
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "cannot commit content: %v", err)
 		return
 	}
-	c.JSON(http.StatusOK, hash.String())
+	c.JSON(http.StatusOK, hash)
 }
 
 func postGitPullAPI(c *gin.Context) {
@@ -58,8 +61,9 @@ func postGitPullAPI(c *gin.Context) {
 	if project = getProject(c); project == nil {
 		return
 	}
+	git := core.GetGitClient(project)
 
-	commit, err := core.GitPull(project, "")
+	commit, err := git.Pull(project, getWebUser(c))
 	if err != nil {
 		logrus.Warnf("Cannot pull content project %s: %v", project.Path, err)
 		_ = c.Error(err)
@@ -74,8 +78,9 @@ func postGitPushAPI(c *gin.Context) {
 	if project = getProject(c); project == nil {
 		return
 	}
+	git := core.GetGitClient(project)
 
-	err := core.GitPush(project, getWebUser(c))
+	err := git.Push(project, getWebUser(c))
 	if err != nil {
 		logrus.Warnf("Cannot push content project %s: %v", project.Path, err)
 		_ = c.Error(err)

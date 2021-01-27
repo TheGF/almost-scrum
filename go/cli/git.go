@@ -103,7 +103,8 @@ func printStatus(status core.GitStatus) {
 func processCommit(projectPath string, global bool) {
 	project := getProject(projectPath)
 
-	status, err := core.GetGitStatus(project)
+	git := core.GetGitClient(project)
+	status, err := git.GetStatus(project)
 	abortIf(err, "Ops. Something went wrong with your Git Repo. Check integrity with Git."+
 		"Error is: %v")
 
@@ -137,7 +138,7 @@ func processCommit(projectPath string, global bool) {
 		commitInfo.Files = append(commitInfo.Files, file)
 	}
 
-	hash, err := core.GitCommit(project, commitInfo)
+	hash, err := git.Commit(project, commitInfo)
 	abortIf(err, "")
 
 	color.Green("Commit completed. Hash: %v", hash)

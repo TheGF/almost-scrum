@@ -1,15 +1,15 @@
 package core
 
 import (
+	"almost-scrum/assets"
+	"crypto/aes"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"crypto/aes"
-	"encoding/hex"
-	"almost-scrum/assets"
 
 	"github.com/sirupsen/logrus"
 )
@@ -18,7 +18,8 @@ type ProjectConfig struct {
 	CurrentBoard    string        `yaml:"currentStore"`
 	PropertyModel   []PropertyDef `yaml:"propertyModel"`
 	IncludeLibInGit bool          `yaml:"includeLibInGit"`
-	CipherKey	string		`yaml:"cipherKey"`
+	CipherKey       string        `yaml:"cipherKey"`
+	UseGitNative    bool          `yaml:"useGitNative"`
 }
 
 type PropertyDef struct {
@@ -31,10 +32,10 @@ type PropertyDef struct {
 
 // Project is the basic information about a scrum project.
 type Project struct {
-	Path   string
-	Config ProjectConfig
+	Path           string
+	Config         ProjectConfig
 	EncryptionSeed string
-	Index  *Index
+	Index          *Index
 }
 
 // LoadTheProjectConfig
@@ -79,6 +80,16 @@ func OpenProject(path string) (*Project, error) {
 		Config: projectConfig,
 	}, nil
 }
+
+func GetGitClient(project *Project) GitClient {
+	if project.Config.UseGitNative {
+		return GitNative{}
+	} else {
+		return GoGit{}
+	}
+}
+
+
 
 func ListProjectTemplates() []string {
 	var templates []string
@@ -125,6 +136,7 @@ func InitProject(path string) (*Project, error) {
 		return nil, err
 	}
 
+
 	if _, err := ReadProjectConfig(path); err == nil {
 		logrus.Warnf("InitProject - Cannot initialize project. Project %s already exists", path)
 		return &Project{Path: path}, ErrExists
@@ -139,6 +151,8 @@ func InitProject(path string) (*Project, error) {
 		}
 	}
 
+	config := LoadConfig()
+
 	// Create the project configuration
 	projectConfig := ProjectConfig{
 		CurrentBoard: "backlog",
@@ -150,6 +164,7 @@ func InitProject(path string) (*Project, error) {
 				"", "3"},
 		},
 		CipherKey: GenerateRandomString(64),
+		UseGitNative: config.UseGitNative,
 	}
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {
 		logrus.Errorf("InitProject - Cannot create config file in %s", path)
@@ -232,14 +247,14 @@ func CreateBoard(project *Project, name string) error {
 	return os.MkdirAll(p, 0777)
 }
 
-func EncryptStringForProject(project *Project, value string) (string, error){
+func EncryptStringForProject(project *Project, value string) (string, error) {
 	c, err := aes.NewCipher([]byte(project.Config.CipherKey))
 	if err != nil {
 		return "", err
 	}
 
 	// allocate space for ciphered data
-	padding := (aes.BlockSize - len(value) % aes.BlockSize) % aes.BlockSize
+	padding := (aes.BlockSize - len(value)%aes.BlockSize) % aes.BlockSize
 	out := make([]byte, len(value)+padding)
 	in := make([]byte, len(out))
 	for idx := range out {
@@ -252,7 +267,7 @@ func EncryptStringForProject(project *Project, value string) (string, error){
 	return hex.EncodeToString(out), nil
 }
 
-func DecryptStringForProject(project *Project, value string) (string, error){
+func DecryptStringForProject(project *Project, value string) (string, error) {
 	ciphertext, _ := hex.DecodeString(value)
 
 	c, err := aes.NewCipher([]byte(project.Config.CipherKey))
