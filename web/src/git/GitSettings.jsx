@@ -1,31 +1,8 @@
 import {
-    Box,
-    Button,
-    Input,
-    InputGroup,
-    InputRightElement,
-    VStack,
-    HStack,
-    Center,
-    StackDivider,
-    Spacer
+    Button, FormControl, FormHelperText, FormLabel, HStack, Input,
+    InputGroup, InputRightElement, Spacer, Switch, VStack
 } from "@chakra-ui/react";
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react"
-import {
-    Accordion,
-    AccordionItem,
-    AccordionButton,
-    AccordionPanel,
-    AccordionIcon,
-} from "@chakra-ui/react"
-import {
-    FormControl,
-    FormLabel,
-    FormErrorMessage,
-    FormHelperText,
-} from "@chakra-ui/react"
-import { Switch } from "@chakra-ui/react"
-import { React, useContext, useState, useEffect } from "react";
+import { React, useContext, useEffect, useState } from "react";
 import Server from '../server';
 import UserContext from '../UserContext';
 
@@ -49,11 +26,32 @@ function GitSettings(props) {
         Server.putGitSettings(project, settings)
     }
 
+    function setUsername(e) {
+        const username = e && e.target.value
+        const settings = {
+            ...gitSettings,
+            username: username,
+        }
+        setGitSettings(settings)
+        Server.putGitSettings(project, settings)
+    }
+
+    function setPassword(e) {
+        const password = e && e.target.value
+        const settings = {
+            ...gitSettings,
+            password: password,
+        }
+        setGitSettings(settings)
+        Server.putGitSettings(project, settings)
+    }
+
+
     return gitSettings ? <VStack spacing={10}>
         <FormControl id="git-native-form" maxWidth="30em">
             <HStack>
                 <FormLabel>Use Git Native Client</FormLabel>
-                <Spacer/>
+                <Spacer />
                 <Switch id="git-native" isChecked={gitSettings.useGitNative} onChange={switchNativeGit} />
             </HStack>
             <FormHelperText>
@@ -62,12 +60,16 @@ function GitSettings(props) {
         </FormControl>
         <FormControl id="credentials" maxWidth="30em">
             <FormLabel>Username</FormLabel>
-            <Input type="username" value={gitSettings.username} />
+            <Input type="username" 
+                value={gitSettings.username}
+                onChange={setUsername} />
             <FormLabel>Password</FormLabel>
             <InputGroup size="md">
                 <Input
                     pr="4.5rem"
+                    value={gitSettings.password}
                     type={showPassword ? "text" : "password"}
+                    onChange={setPassword} 
                     placeholder="Enter password"
                 />
                 <InputRightElement width="4.5rem">

@@ -79,14 +79,33 @@ type GitSettings struct {
 }
 
 func HasGitNative() bool {
-	out, err := RunCommand("git", "--version")
+	out, err := UseCommand("git", "--version")
 	return err == nil && strings.HasPrefix(out, "git")
 }
 
-func GetGitSettings(project *Project, user string) (GitSettings, error){
+func GetGitCredentials(project *Project, user string) (username string, password string, err error) {
+	userInfo, err := GetUserInfo(project, user)
+	if err != nil {
+		return "", "", err
+	}
+
+	credentials, ok := userInfo.Credentials["GitUserPass"]
+	if ok {
+		credentials, _ = DecryptStringForProject(project, credentials)
+		idx := strings.Index(credentials, ":")
+		return credentials[0:idx], credentials[1+idx:], nil
+	} else {
+		return "","", ErrNoFound
+	}
+
+}
+
+func GetGitSettings(project *Project, user string) (GitSettings, error) {
+	username, _, _ := GetGitCredentials(project, user)
+
 	return 	GitSettings{
 		UseGitNative: project.Config.UseGitNative,
-		Username:     user,
+		Username:     username,
 		Password:     "",
 	}, nil
 }

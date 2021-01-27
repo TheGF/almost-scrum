@@ -12,6 +12,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // FindFileUpwards looks for the folder where a file with the specified name is present.
@@ -135,12 +136,12 @@ func RunProgram(command string, arg ...string) error {
 	return cmd.Run()
 }
 
-func RunCommand(command string, arg ...string) (out string, err error) {
+func UseCommand(command string, input string, arg ...string) (output string, err error) {
 	var buf bytes.Buffer
 
 	writer := bufio.NewWriter(&buf)
 	cmd := exec.Command(command, arg...)
-	cmd.Stdin = os.Stdin
+	cmd.Stdin = strings.NewReader(input)
 	cmd.Stdout = writer
 	cmd.Stderr = writer
 	if err = cmd.Run(); err != nil {

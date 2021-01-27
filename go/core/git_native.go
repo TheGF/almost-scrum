@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -20,7 +21,7 @@ func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
-	out, err := RunCommand("git", "-C", gitFolder, "status", "--porcelain")
+	out, err := UseCommand("git", "", "-C", gitFolder, "status", "--porcelain")
 	if err != nil {
 		return GitStatus{}, err
 	}
@@ -66,25 +67,38 @@ func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 	return gitStatus, nil
 }
 
+func getGitCredentialAsInput(project *Project, user string) string {
+	username, password, err := GetGitCredentials(project, user)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%s\n%s\n", username, password)
+}
+
 func (client GitNative) Pull(project *Project, user string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
-	out, err := RunCommand("git", "-C", gitFolder, "pull")
+	input := getGitCredentialAsInput(project, user)
+	output, err := UseCommand("git", input, "-C", gitFolder, "pull")
 	if err != nil {
 		return "",err
 	}
 
 	elapsed := time.Since(start)
 	logrus.Infof("Pull completed in %s", elapsed)
-	return out,nil
+	return output,nil
 }
+
+
 
 func (client GitNative) Push(project *Project, user string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
-	out, err := RunCommand("git", "-C", gitFolder, "push")
+
+	input := getGitCredentialAsInput(project, user)
+	out, err := UseCommand("git", input, "-C", gitFolder, "push")
 	if err != nil {
 		return out, err
 	}
@@ -115,13 +129,13 @@ func (client GitNative) Commit(project *Project, commitInfo CommitInfo) (string,
 	for _, file := range commitInfo.Files {
 		args = append(args, file)
 	}
-	out, err := RunCommand("git", args...)
+	out, err := UseCommand("git", "", args...)
 	logrus.Debugf("Git add: %s", out)
 	if err != nil {
 		return out, err
 	}
 
-	out, err = RunCommand("git", "-C", gitFolder, "commit",
+	out, err = UseCommand("git", "", "-C", gitFolder, "commit",
 		"-F", tmpFile.Name())
 	logrus.Debugf("Git commit: %s", out)
 	if err != nil {
