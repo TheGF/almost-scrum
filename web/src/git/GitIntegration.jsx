@@ -17,15 +17,19 @@ import GitPush from './GitPush';
 import GitSettings from './GitSettings';
 import T from "../core/T";
 
+
 function GitIntegration({ isOpen, onClose }) {
     const [gitStatus, setGitStatus] = useState(null)
     const [gitMessage, setGitMessage] = useState({ header: '', body: {} })
-    const [commitDone, setCommitDone] = useState(false)
 
-    function onCommit() {
+    function reset() {
         setGitStatus(null)
-        setGitMessage(null)
-        setCommitDone(true)
+        setGitMessage({ header: '', body: {} })
+    }
+
+    function close() {
+        reset()
+        onClose()
     }
 
     return <Modal isOpen={isOpen} onClose={onClose} size="full" top
@@ -39,8 +43,9 @@ function GitIntegration({ isOpen, onClose }) {
                     <TabList>
                         <Tab><T>files</T></Tab>
                         <Tab><T>message</T></Tab>
-                        <Tab isDisabled={!gitStatus || !gitMessage.header}
-                            onCommit={onCommit}><T>commit</T></Tab>
+                        <Tab isDisabled={!gitStatus || !gitMessage.header}>
+                            <T>commit</T>
+                        </Tab>
                         <Tab><T>push</T></Tab>
                         <Tab><T>settings</T></Tab>
                     </TabList>
@@ -53,20 +58,20 @@ function GitIntegration({ isOpen, onClose }) {
                             <GitMessage gitMessage={gitMessage} setGitMessage={setGitMessage} />
                         </TabPanel>
                         <TabPanel>
-                            <GitCommit gitStatus={gitStatus} gitMessage={gitMessage} />
+                            <GitCommit gitStatus={gitStatus} gitMessage={gitMessage} onCommit={reset} />
                         </TabPanel>
                         <TabPanel>
-                            <GitPush/>
+                            <GitPush />
                         </TabPanel>
                         <TabPanel>
-                            <GitSettings/>
+                            <GitSettings />
                         </TabPanel>
                     </TabPanels>
                 </Tabs>
             </ModalBody>
 
             <ModalFooter>
-                <Button colorScheme="blue" mr={3} onClick={onClose}>
+                <Button colorScheme="blue" mr={3} onClick={close}>
                     Close
             </Button>
             </ModalFooter>
