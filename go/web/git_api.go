@@ -47,14 +47,14 @@ func postGitCommitAPI(c *gin.Context) {
 		return
 	}
 
-	hash, err := git.Commit(project, commitInfo)
+	out, err := git.Commit(project, commitInfo)
 	if err != nil {
 		logrus.Warnf("Cannot commit content project %s: %v", project.Path, err)
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "cannot commit content: %v", err)
 		return
 	}
-	c.JSON(http.StatusOK, hash)
+	c.JSON(http.StatusOK, out)
 }
 
 func postGitPullAPI(c *gin.Context) {
@@ -64,14 +64,14 @@ func postGitPullAPI(c *gin.Context) {
 	}
 	git := core.GetGitClient(project)
 
-	commit, err := git.Pull(project, getWebUser(c))
+	out, err := git.Pull(project, getWebUser(c))
 	if err != nil {
 		logrus.Warnf("Cannot pull content project %s: %v", project.Path, err)
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "cannot commit content: %v", err)
 		return
 	}
-	c.JSON(http.StatusOK, commit)
+	c.JSON(http.StatusOK, out)
 }
 
 func postGitPushAPI(c *gin.Context) {
@@ -81,14 +81,14 @@ func postGitPushAPI(c *gin.Context) {
 	}
 	git := core.GetGitClient(project)
 
-	err := git.Push(project, getWebUser(c))
+	out, err := git.Push(project, getWebUser(c))
 	if err != nil {
 		logrus.Warnf("Cannot push content project %s: %v", project.Path, err)
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "cannot commit content: %v", err)
 		return
 	}
-	c.JSON(http.StatusOK, "")
+	c.JSON(http.StatusOK, out)
 }
 
 func putGitSettingsAPI(c *gin.Context) {

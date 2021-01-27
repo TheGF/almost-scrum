@@ -14,7 +14,7 @@ import UserContext from '../UserContext';
 function GitCommit(props) {
     const { project, info } = useContext(UserContext)
     const { gitStatus, gitMessage, onCommit } = props
-    const [gitHash, setGitHash] = useState(null)
+    const [commitOutput, setCommitOutput] = useState(null)
     const [commitInProgress, setCommitInProgress] = useState(false)
     const commitInfo = {
         user: info.loginUser,
@@ -26,8 +26,8 @@ function GitCommit(props) {
     function commit() {
         setCommitInProgress(true)
         Server.postGitCommit(project, commitInfo)
-            .then(setGitHash)
-            .then(_=>setCommitInProgress(false))
+            .then(setCommitOutput)
+            .then(_ => setCommitInProgress(false))
             .then(onCommit)
     }
 
@@ -42,21 +42,27 @@ function GitCommit(props) {
         <Td>{r[1]}</Td>
     </Tr>)
 
-    return <VStack>
-        <VStack textAlign="left">
-            <Table>
-                <Tbody>
-                    {table}
-                </Tbody>
-            </Table>
-        </VStack>
-        <HStack spacing={5}>
-            <Button size="lg" colorScheme="blue" isLoading={commitInProgress}
-                onClick={commit}>
-                Commit
+    return commitOutput ?
+        <Textarea
+            value={commitOutput}
+            size="lb"
+            resize="Vertical"
+        /> :
+        <VStack>
+            <VStack textAlign="left">
+                <Table>
+                    <Tbody>
+                        {table}
+                    </Tbody>
+                </Table>
+            </VStack>
+            <HStack spacing={5}>
+                <Button size="lg" colorScheme="blue" isLoading={commitInProgress}
+                    onClick={commit}>
+                    Commit
             </Button>
-        </HStack>
-    </VStack>
+            </HStack>
+        </VStack>
 
 }
 export default GitCommit;

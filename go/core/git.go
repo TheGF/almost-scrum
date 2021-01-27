@@ -25,7 +25,7 @@ type CommitInfo struct {
 type GitClient interface {
 	GetStatus(project *Project) (GitStatus, error)
 	Pull(project *Project, user string) (string, error)
-	Push(project *Project, user string) error
+	Push(project *Project, user string) (string, error)
 	Commit(project *Project, commitInfo CommitInfo) (string, error)
 }
 

@@ -14,7 +14,7 @@ import (
 
 type GitNative struct{}
 
-var statusRe = regexp.MustCompile(`\s*([\?\w]+)\s+(.*)`)
+var statusRe = regexp.MustCompile(`\s*([?\w]+)\s+(.*)`)
 
 func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 	start := time.Now()
@@ -80,18 +80,18 @@ func (client GitNative) Pull(project *Project, user string) (string, error) {
 	return "",nil
 }
 
-func (client GitNative) Push(project *Project, user string) error {
+func (client GitNative) Push(project *Project, user string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
-	_, _, err := RunCommand("git", "-C", gitFolder, "push")
+	out, es, err := RunCommand("git", "-C", gitFolder, "push")
 	if err != nil {
-		return err
+		return es, err
 	}
 
 	elapsed := time.Since(start)
 	logrus.Infof("Push completed in %s", elapsed)
-	return nil
+	return out, nil
 }
 
 func (client GitNative) Commit(project *Project, commitInfo CommitInfo) (string, error) {
@@ -119,13 +119,13 @@ func (client GitNative) Commit(project *Project, commitInfo CommitInfo) (string,
 		return "", err
 	}
 
-	hash, _, err := RunCommand("git", "-C", gitFolder, "commit",
+	out, _, err := RunCommand("git", "-C", gitFolder, "commit",
 		"-F", tmpFile.Name())
 	if err != nil {
 		return "", err
 	}
 
 	elapsed := time.Since(start)
-	logrus.Infof("Commit completed in %s. Hash: %v", elapsed, hash)
-	return hash, nil
+	logrus.Infof("Commit completed in %s. Output: %v", elapsed, out)
+	return out, nil
 }

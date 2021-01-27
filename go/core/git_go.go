@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/sirupsen/logrus"
@@ -10,7 +11,7 @@ import (
 	"time"
 )
 
-type GoGit struct {}
+type GoGit struct{}
 
 func (client GoGit) GetStatus(project *Project) (GitStatus, error) {
 	start := time.Now()
@@ -97,32 +98,32 @@ func (client GoGit) Pull(project *Project, user string) (string, error) {
 
 	elapsed := time.Since(start)
 	logrus.Infof("Pull completed in %s", elapsed)
-	return commit.String(), nil
+	return fmt.Sprintf("Pull completed in %s. Last commit id: %s", elapsed, commit.String()), nil
 }
 
- func (client GoGit) Push(project *Project, user string) error {
+func (client GoGit) Push(project *Project, user string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
 	r, err := git.PlainOpen(gitFolder)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	auth, err := getAuth(project, user)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = r.Push(&git.PushOptions{
 		Auth: auth,
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 	elapsed := time.Since(start)
 	logrus.Infof("Push completed in %s", elapsed)
-	return nil
+	return fmt.Sprintf("Push completed in %s", elapsed), nil
 }
 
 func (client GoGit) Commit(project *Project, commitInfo CommitInfo) (string, error) {
@@ -169,5 +170,5 @@ func (client GoGit) Commit(project *Project, commitInfo CommitInfo) (string, err
 	}
 	elapsed := time.Since(start)
 	logrus.Infof("Commit completed in %s. Hash: %v", elapsed, hash)
-	return hash.String(), nil
+	return fmt.Sprintf("Commit completed in %s. Hash: %s", elapsed, hash.String()), nil
 }
