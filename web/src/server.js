@@ -292,7 +292,7 @@ class Server {
     }
 
     static putGitSettings(project, settings) {
-        return axios.put(`/api/v1/projects/${project}/git/pull`, settings, getConfig())
+        return axios.put(`/api/v1/projects/${project}/git/settings`, settings, getConfig())
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }

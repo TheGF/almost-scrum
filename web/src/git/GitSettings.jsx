@@ -40,11 +40,12 @@ function GitSettings(props) {
     useEffect(getGitSettings, [])
 
     function switchNativeGit() {
-        setGitSettings({
+        const settings = {
             ...gitSettings,
             useGitNative: !gitSettings.useGitNative,
-        })
-        Server.putGitSettings(project, gitSettings)
+        }
+        setGitSettings(settings)
+        Server.putGitSettings(project, settings)
     }
 
     return gitSettings ? <VStack spacing={10}>
