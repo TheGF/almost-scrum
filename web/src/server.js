@@ -29,15 +29,36 @@ function setPendingTasks() {
         cancelInterval(interval)
     }
     for (const k in pendingSet) {
-        const [tm, project, board, name, content] = pendingSet[k];
+        const [tm, [resolve, reject], f, ...params] = pendingSet[k];
         if (tm < Date.now()) {
             delete pendingSet[k];
-            Server.setTask(project, board, name, content);
+
+            f(...params)
+                .then(resolve)
+                .catch(reject);
         }
     }
 }
 
 class Server {
+
+    static authenticate(username, password) {
+        const credentials = {
+            username: username,
+            password: password,
+        }
+        return axios.post("/auth/login", credentials, getConfig())
+            .then(r => {
+                const token = r.data && r.data.token;
+                localStorage.setItem("token", token)
+                return token
+            })
+    }
+
+    static isPortal() {
+        return axios.get('/auth/portal', getConfig())
+            .then(r => r.data);
+    }
 
     static getProjectsList() {
         return axios.get('/api/v1/projects', getConfig())
@@ -98,11 +119,13 @@ class Server {
     }
 
     static setTaskLater(project, board, name, content) {
-        const k = `${project}/${board}/${name}`
-        pendingSet[k] = [Date.now() + setDelay, project, board, name, content]
-        if (pendingInterval == null) {
-            pendingInterval = setInterval(setPendingTasks, setDelay)
-        }
+        return new Promise(function (resolve, reject) {
+            const k = `setTask:${project}/${board}/${name}`
+            pendingSet[k] = [Date.now() + setDelay, [resolve, reject], Server.setTask, project, board, name, content]
+            if (pendingInterval == null) {
+                pendingInterval = setInterval(setPendingTasks, setDelay)
+            }
+        })
     }
 
     static setTask(project, board, name, content) {
@@ -161,6 +184,17 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
+    static uploadFileToLibraryLater(project, path, file, name) {
+        return new Promise(function (resolve, reject) {
+            const k = `uploadFile:${project}/${path}/${name}`
+            pendingSet[k] = [Date.now() + setDelay, [resolve, reject], Server.uploadFileToLibrary, project,
+                path, file, name]
+            if (pendingInterval == null) {
+                pendingInterval = setInterval(setPendingTasks, setDelay)
+            }
+        })
+    }
+
     static deleteFromLibrary(project, path) {
         path = encodeURIComponent(path)
         return axios.delete(`/api/v1/projects/${project}/library${path}`, getConfig())
@@ -190,7 +224,7 @@ class Server {
     static listLibrary(project, path) {
         path = encodeURIComponent(path)
         return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
-            .then(r => r.data)
+            .then(r => r.data.filter(f => !f.name.startsWith('.')))
             .catch(loginWhenUnauthorized);
     }
 

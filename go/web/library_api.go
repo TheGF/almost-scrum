@@ -79,6 +79,7 @@ func uploadFileAPI(c *gin.Context) {
 			c.String(http.StatusInternalServerError, "Cannot upload to %s", path)
 			return
 		}
+		log.Debugf("File %s uploaded in %s", file.Filename, path)
 		listLibraryAPI(c)
 	} else {
 		if _, err := core.GetPathInLibrary(project, move); err != nil {
@@ -96,6 +97,29 @@ func uploadFileAPI(c *gin.Context) {
 	}
 }
 
+func putFileAPI(c *gin.Context) {
+	var project *core.Project
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	path := c.Param("path")
+	reader, err := c.Request.GetBody()
+	if err != nil {
+		log.Warnf("Cannot read body in save of file path %s: %v", path, err)
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "Cannot save file to %s", path)
+		return
+	}
+	if err := core.SetFileInLibrary(project, path, reader); err != nil {
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "Cannot save file to %s", path)
+		return
+	}
+	log.Debugf("File %s saved in %s", path)
+	c.String(http.StatusOK, "")
+}
+
 func deleteFileAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
@@ -111,7 +135,6 @@ func deleteFileAPI(c *gin.Context) {
 	}
 	c.String(http.StatusOK, "")
 }
-
 
 func getLibraryItemsAPI(c *gin.Context) {
 	var project *core.Project

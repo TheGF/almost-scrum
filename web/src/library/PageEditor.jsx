@@ -7,6 +7,8 @@ import { Box, Button, Center } from "@chakra-ui/react";
 import T from "../core/T";
 import UserContext from '../UserContext';
 import Server from '../server';
+import MarkdownEditor from '../core/MarkdownEditor';
+
 import {
     Modal,
     ModalOverlay,
@@ -21,22 +23,21 @@ function PageEditor(props) {
     const { project } = useContext(UserContext);
     const { page, setPage } = props
     const [content, setContent] = useState(null)
+    const [height, setHeight] = useState(1000)
     const [selectedTab, setSelectedTab] = useState("write");
 
     function getFromServer() {
         if (page) {
             Server.downloadFromlibrary(project, `${page}/index.md`)
                 .then(setContent)
+                .then(_ => {
+                    const h = document.getElementById('PageEditor') && document.getElementById('PageEditor').clientHeight-100
+                    if (h) setHeight(h-100);
+                })
         }
     }
     useEffect(getFromServer, [page])
 
-    const save = async function* (data) {
-        const name = `${Date.now()}`
-        await Server.uploadFileToLibrary(project, page, new Blob([data]), name)
-        yield `/api/v1/projects/${project}/library${page}/${name}`;
-        return true;
-    };
     function onClose() {
         setPage(null)
         setContent(null)
@@ -44,37 +45,37 @@ function PageEditor(props) {
 
     function onChange(value) {
         setContent(value)
+        Server.uploadFileToLibraryLater(project, page, new Blob([value]), 'index.md')
     }
 
     function Image(props) {
-        return <img {...props} style={{ maxWidth: '20%', maxHeight: '20%'}} />
+        const token = localStorage.token
+        if (token) {
+            const src = `${props.src}?token=${token}`
+            return <img {...props} style={{ maxWidth: '20%', maxHeight: '20%' }} src={src}/>
+        } else {
+            return <img {...props} style={{ maxWidth: '20%', maxHeight: '20%' }} />
+        }
     }
 
-    return <Modal isOpen={content} onClose={onClose} size="full" >
-        <ModalContent>
-            <ModalHeader>{page}</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-                <ReactMde
-                    value={content}
-                    onChange={onChange}
-                    selectedTab={selectedTab}
-                    onTabChange={setSelectedTab}
-                    generateMarkdownPreview={(markdown) =>
-                        Promise.resolve(<ReactMarkdown
-                            source={markdown}
-                            renderers={{ image: Image }}
-                        />)
-                    }
-                    paste={{
-                        saveImage: save
-                    }}
-                />
-            </ModalBody>
-            <ModalFooter>
+    return <Modal isOpen={content!=null} onClose={onClose} size="full">
+        <ModalContent >
+            <ModalHeader>
                 <Button colorScheme="blue" mr={3} onClick={onClose}>
                     Close
             </Button>
+            I{page}
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody id="PageEditor">
+                <MarkdownEditor
+                    value={content}
+                    onChange={onChange}
+                    imageFolder={page}
+                    height={height}
+                />
+            </ModalBody>
+            <ModalFooter>
             </ModalFooter>
         </ModalContent>
     </Modal>

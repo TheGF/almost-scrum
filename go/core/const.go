@@ -17,6 +17,9 @@ const ProjectUsersFolder = "users"
 // ProjectUsersFolder the folder containing users
 const ProjectLibraryFolder = "library"
 
+// ProjectUsersFolder the folder containing users
+const ProjectLibraryInlineImagesFolder = "library/.inline-images"
+
 // ProjectBoardsFolder the folder containing boards
 const ProjectBoardsFolder = "boards"
 
@@ -27,7 +30,7 @@ const IndexFile = "no-git-index.json"
 var (
 	// ProjectFolders is the required folders in the project
 	ProjectFolders = []string{"boards/backlog", "boards/sandbox", "boards/icebox",
-		ProjectLibraryFolder, ProjectUsersFolder}
+		ProjectLibraryFolder, ProjectUsersFolder, ProjectLibraryInlineImagesFolder}
 
 	// ErrNoFound occurs when an item is not found
 	ErrNoFound = errors.New("no such item")

@@ -1,20 +1,14 @@
-import { React, useEffect, useState, useContext } from "react";
-import ReactMde from "react-mde";
-import ReactMarkdown from "react-markdown";
-import "react-mde/lib/styles/css/react-mde-all.css";
-import { Box, Button, Center } from "@chakra-ui/react";
-import T from "../core/T";
-import UserContext from '../UserContext';
+import { Box, Center } from "@chakra-ui/react";
+import { React, useContext, useState } from "react";
+import MarkdownEditor from '../core/MarkdownEditor';
 import Server from '../server';
-
-
-
+import UserContext from '../UserContext';
 
 
 
 function TaskEditor(props) {
   const { project } = useContext(UserContext);
-  const { name, readOnly, tags, users } = props;
+  const { name, readOnly, tags, users, height } = props;
 
   function loadSuggestions(text, triggeredBy) {
     if (triggeredBy == '@') {
@@ -28,46 +22,14 @@ function TaskEditor(props) {
     if (triggeredBy == '#') {
       return Server.getSuggestions(project, `%23${text}`, 64)
         .then(tags => {
-          return tags.map( t => ({ preview: t, value: t}))
+          return tags.map(t => ({ preview: t, value: t }))
         })
     }
 
   }
 
-  const save = async function* (data) {
-    // Promise that waits for "time" milliseconds
-    const wait = function (time) {
-      return new Promise((a, r) => {
-        setTimeout(() => a(), time);
-      });
-    };
-
-    // Upload "data" to your server
-    // Use XMLHttpRequest.send to send a FormData object containing
-    // "data"
-    // Check this question: https://stackoverflow.com/questions/18055422/how-to-receive-php-image-data-over-copy-n-paste-javascript-with-xmlhttprequest
-
-    await wait(2000);
-    // yields the URL that should be inserted in the markdown
-    yield "https://picsum.photos/300";
-    await wait(2000);
-
-    // returns true meaning that the save was successful
-    return true;
-  };
-
   const { task, saveTask } = props
   const [value, setValue] = useState(task && task.description);
-
-  const features = {
-    name: "features",
-    icon: () => (
-      <Button colorScheme="yellow"><T>features</T></Button>
-    ),
-    execute: opts => {
-      opts.textApi.replaceSelection("NICE");
-    }
-  };
 
   function onChange(value) {
     setValue(value);
@@ -81,15 +43,14 @@ function TaskEditor(props) {
 </Center> : null
 
   return readOnly ? editMessage : <Box>
-    <ReactMde
+    <MarkdownEditor
       value={value}
+      height={height}
       onChange={onChange}
       disablePreview={true}
       loadSuggestions={loadSuggestions}
       suggestionTriggerCharacters={['@', '#']}
-      paste={{
-        saveImage: save
-      }}
+      imageFolder="/.inline-images"
     /></Box>;
 }
 

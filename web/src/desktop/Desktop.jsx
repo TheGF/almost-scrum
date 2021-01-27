@@ -8,8 +8,10 @@ import AskBoardName from './AskBoardName';
 import Header from './Header';
 import GitIntegration from '../git/GitIntegration';
 
-function Desktop() {
-    const { project, username } = useContext(UserContext);
+
+function Desktop(props) {
+    const { project, onExit } = props;
+    const [info, setInfo] = useState(null)
     const [board, setBoard] = useState('backlog');
     const [boards, setBoards] = useState([]);
     const [boardKey, setBoardKey] = useState(0);
@@ -17,6 +19,12 @@ function Desktop() {
     const [showGitIntegration, setShowGitIntegration] = useState(false);
 
     const askBoardName = useDisclosure(false)
+
+    function getInfo() {
+        Server.getProjectInfo(project)
+            .then(setInfo)
+    }
+    useEffect(getInfo, [])
 
     function listBoards() {
         Server.listBoards(project)
@@ -49,7 +57,10 @@ function Desktop() {
     const content = showLibrary ? <Library /> :
         <Board key={boardKey} name={board} boards={boards} />
 
-    return <>
+    const username  = info && info.systemUser
+    const userContext = { project, info, username }
+    return <UserContext.Provider value={userContext}>
+
         <GitIntegration isOpen={showGitIntegration}
             onClose={_ => setShowGitIntegration(false)} />
 
@@ -64,11 +75,12 @@ function Desktop() {
                 <Header boards={boards}
                     setShowGitIntegration={setShowGitIntegration}
                     onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
-                    onNewTask={onNewTask} onNewBoard={_ => askBoardName.onOpen()} />
+                    onNewTask={onNewTask} onNewBoard={_ => askBoardName.onOpen()}
+                    onExit={onExit} />
                 {content}
             </VStack>
         </Flex>
-    </>
+    </UserContext.Provider>
 }
 
 export default Desktop

@@ -2,12 +2,14 @@ package web
 
 import (
 	"almost-scrum/core"
+	"github.com/fatih/color"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 type ProjectMapping map[string]*core.Project
@@ -38,9 +40,63 @@ func openProject(name string, path string) error {
 	return nil
 }
 
+func searchForProject(repoPath string, name string, items ...string) bool {
+	elem := []string{repoPath, name}
+	p := filepath.Join(append(elem, items...)...)
+	if _, err := os.Stat(p); err != nil {
+		return false
+	}
+	if err := openProject(name, p); err != nil {
+		logrus.Warnf("Cannot open project %s in path %s: %v", name, p, err)
+	} else {
+		logrus.Infof("Added project %s (%s) to repo", name, p)
+	}
+	return true
+}
+
+func loadRepoProjects(repoPath string) error {
+	infos, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return err
+	}
+	for _, info := range infos {
+		if !info.IsDir() {
+			continue
+		}
+		name := info.Name()
+
+		if searchForProject(repoPath, name, core.ProjectConfigFile) {
+			continue
+		} else {
+			searchForProject(repoPath, name, core.ProjectFolder, core.ProjectConfigFile)
+		}
+	}
+	return nil
+}
+
+func loadGlobalProjects() {
+	config := core.LoadConfig()
+	for name := range config.Projects {
+		path := config.Projects[name]
+		_, err := core.OpenProject(path)
+		if err == nil {
+			logrus.Infof("Added project %s (%s) to repo", name, path)
+		} else {
+			logrus.Warnf("Project %s has invalid path %s", name, path)
+		}
+	}
+
+}
+
 //serverRoute add routes used in a server setup
-func serverRoute(group *gin.RouterGroup) {
+func serverRoute(group *gin.RouterGroup, repoPath string) {
 	group.GET("/projects", listProjectsAPI)
+
+	if err := loadRepoProjects(repoPath); err != nil {
+		color.Red("Cannot start server because of invalid repo folder %s: %v", repoPath, err)
+		os.Exit(1)
+	}
+	loadGlobalProjects()
 }
 
 //projectRoute add projects related api routes
@@ -51,20 +107,12 @@ func projectRoute(group *gin.RouterGroup) {
 }
 
 func listProjectsAPI(c *gin.Context) {
-	config := core.LoadConfig()
-
-	keys := make([]string, 0, len(config.Projects))
-	for k := range config.Projects {
-		path := config.Projects[k]
-		_, err := core.OpenProject(path)
-		if err == nil {
-			keys = append(keys, k)
-		} else {
-			log.Warnf("Project %s has invalid path %s", k, path)
-		}
-
+	var names []string
+	for key := range projectMapping {
+		names = append(names, key)
 	}
-	c.JSON(http.StatusOK, keys)
+
+	c.JSON(http.StatusOK, names)
 }
 
 type ProjectInfo struct {
@@ -107,7 +155,8 @@ func listBoardsAPI(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Cannot list boards: %v", err)
 		return
 	}
-	log.Debugf("listBoardsAPI - List boards in project: %v", boards)
+	logrus.Debugf("listBoardsAPI - List boards in project: %v", boards)
+
 	c.JSON(http.StatusOK, boards)
 }
 
@@ -123,6 +172,6 @@ func createBoardAPI(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Cannot create board: %v", err)
 		return
 	}
-	log.Debugf("createBoardAPI - Board %s created in project: %v", board, project)
+	logrus.Debugf("createBoardAPI - Board %s created in project: %v", board, project)
 	c.JSON(http.StatusCreated, board)
 }

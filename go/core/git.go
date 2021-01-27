@@ -159,7 +159,7 @@ func getAuth(project *Project, user string) (transport.AuthMethod, error) {
 	}
 }
 
-func GitPush(project *Project, user string) error {
+ func GitPush(project *Project, user string) error {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 

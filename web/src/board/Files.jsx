@@ -31,7 +31,7 @@ function Files(props) {
   }
   useEffect(saveFiles, [attachedFiles])
 
-  return <Tabs variant="soft-rounded" size="sm" index={tabIndex} onChange={setTabIndex}>
+  return <Tabs variant="soft-rounded" size="sm" index={tabIndex} onChange={setTabIndex} isLazy>
     <TabList>
       <Tab>Attached</Tab>
       <Tab>Full Library</Tab>

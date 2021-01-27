@@ -102,7 +102,7 @@ function Header(props) {
 
     const [activeBoard, setActiveBoard] = useState('backlog');
     const [boardKey, setBoardKey] = useState(0);
-    const { onNewTask, onNewBoard, setShowGitIntegration } = props;
+    const { onNewTask, onNewBoard, setShowGitIntegration, onExit } = props;
     const { colorMode, toggleColorMode } = useColorMode()
 
     function onSelectBoard(board) {
@@ -128,9 +128,13 @@ function Header(props) {
                     Git Integration
                     </MenuItem> : null}
                 <MenuItem>Help</MenuItem>
+                {onExit ? <>
+                    <MenuDivider />
+                    <MenuItem onClick={onExit}><T>back to portal</T></MenuItem>
+                </> : null}
             </MenuList>
         </Menu>
-        <Boards key={boardKey} 
+        <Boards key={boardKey}
             active={activeBoard} setActiveBoard={setActiveBoard}
             {...props} />
     </Stack>

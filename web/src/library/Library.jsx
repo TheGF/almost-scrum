@@ -15,6 +15,8 @@ import UserContext from '../UserContext';
 import Utils from '../core/utils';
 import PageEditor from './PageEditor';
 import { GiGrapes } from 'react-icons/gi';
+import { MdCreateNewFolder } from 'react-icons/md';
+import { VscNewFile } from 'react-icons/vsc';
 
 function Library(props) {
     const { project } = useContext(UserContext);
@@ -54,7 +56,7 @@ function Library(props) {
         Server.createFolderInLibrary(project, folder)
             .then(listFolder)
             .then(_ => {
-                const file = new Blob(['Change me'], {type: 'text/markdown'})
+                const file = new Blob(['Change me'], { type: 'text/markdown' })
                 Server.uploadFileToLibrary(project, folder, file, 'index.md')
             })
     }
@@ -120,7 +122,7 @@ function Library(props) {
     }
 
     function getAttachButton(file) {
-        if (!setAttachedFiles || file.dir) {
+        if (!setAttachedFiles || file.dir && !file.name.endsWith('.pg')) {
             return null
         }
         const p = `${path}/${file.name}`
@@ -185,7 +187,7 @@ function Library(props) {
     let hiddenInput = null
 
     return <VStack w="90%" align="left" >
-        <PageEditor page={page} setPage={setPage}/>
+        <PageEditor page={page} setPage={setPage} />
         <HStack w="90%" borderWidth="2" borderColor="gray">
             {breadcrumb}
             <Spacer />
@@ -201,13 +203,13 @@ function Library(props) {
             <Button onClick={_ => hiddenInput.click()}>
                 <T>Upload</T>
             </Button>
-            <Button onClick={newFolder}>
-                <T>New Folder</T>
+            <Button onClick={newFolder} title="Create New Folder">
+                <MdCreateNewFolder />
             </Button>
-            <Button onClick={newPage}>
-                <T>New Page</T>
+            <Button onClick={newPage} title="Create New Page">
+                <VscNewFile />
             </Button>
-            <IconButton onClick={listFolder}>
+            <IconButton onClick={listFolder} title="Reload">
                 <AiOutlineReload onClick={listFolder} />
             </IconButton>
         </HStack>

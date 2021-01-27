@@ -1,29 +1,28 @@
-import { ChakraProvider, theme } from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
 import { React, useEffect, useState } from 'react';
+import theme from './theme'
 import Desktop from './desktop/Desktop';
-import UserContext from './UserContext';
 import Server from './server';
+import Portal from './portal/Portal';
 
 
 function App() {
-  const project = '~'
+  const [portal, setPortal] = useState(null)
 
-  const [info, setInfo] = useState(null)
-  const username  = info && info.systemUser
-  const value = { project, info, username }
-
-  function getInfo() {
-    Server.getProjectInfo(project)
-      .then(setInfo)
+  function chooseMode() {
+    Server.isPortal()
+      .then(setPortal)
   }
-  useEffect(getInfo, [])
+  useEffect(chooseMode, [])
 
+  const entry = portal == null ? null :
+    portal ? <Portal /> : <Desktop project="~" />;
   return (
-    <UserContext.Provider value={value}>
-      <ChakraProvider theme={theme}>
-        <Desktop />
-      </ChakraProvider>
-    </UserContext.Provider>
+    <ChakraProvider theme={theme}  >
+      {/* <Global styles={globalStyles} />
+      <CSSReset /> */}
+      {entry}
+    </ChakraProvider>
   );
 }
 

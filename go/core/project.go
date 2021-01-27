@@ -9,6 +9,7 @@ import (
 	"strings"
 	"crypto/aes"
 	"encoding/hex"
+	"almost-scrum/assets"
 
 	"github.com/sirupsen/logrus"
 )
@@ -79,6 +80,44 @@ func OpenProject(path string) (*Project, error) {
 	}, nil
 }
 
+func ListProjectTemplates() []string {
+	var templates []string
+
+	for _, name := range assets.AssetNames() {
+		if !strings.HasPrefix(name, "assets") {
+			continue
+		}
+		templates = append(templates, name)
+	}
+	return templates
+}
+
+func InitProjectFromTemplate(path string, templateName string) (*Project, error) {
+	templateData, err := assets.Asset(templateName)
+	if err != nil {
+		return nil, err
+	}
+	UnzipFile(templateData, path)
+
+	projectConfig, err := ReadProjectConfig(path)
+	if err != nil {
+		logrus.Warnf("InitProjectFromTemplate - Template %s is corrupted: %v", templateName, err)
+		return nil, ErrNoFound
+	}
+
+	projectConfig.CipherKey = GenerateRandomString(64)
+
+	if err := WriteProjectConfig(path, &projectConfig); err != nil {
+		logrus.Errorf("InitProject - Cannot create config file in %s", path)
+		return nil, err
+	}
+
+	return &Project{
+		Path:   path,
+		Config: projectConfig,
+	}, nil
+}
+
 // InitProject initializes a new project in the specified directory
 func InitProject(path string) (*Project, error) {
 	path, err := filepath.Abs(path)
@@ -116,11 +155,6 @@ func InitProject(path string) (*Project, error) {
 		logrus.Errorf("InitProject - Cannot create config file in %s", path)
 		return nil, err
 	}
-
-	// Board a reference to the project in the global configuration
-	globalConfig := LoadConfig()
-	globalConfig.Projects[filepath.Base(path)] = path
-	SaveConfig(globalConfig)
 
 	return &Project{
 		Path:   path,

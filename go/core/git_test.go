@@ -48,7 +48,7 @@ func TestSetGitCredentials(t *testing.T) {
 
 	gitCredentials := GitCredentials{
 		Username: "mp",
-		Password: "122abd851b139cb1f73a1f1ded40c6047dd9c3d3",
+		Password: "Mariposa83$",//"122abd851b139cb1f73a1f1ded40c6047dd9c3d3",
 	}
 
 	SetGitCredentials(project, GetSystemUser(), gitCredentials)

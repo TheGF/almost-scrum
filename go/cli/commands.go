@@ -30,6 +30,7 @@ func usage() {
 		"\tusers add <id>    Add a user to current project\n" +
 		"\tusers del <id>     Remove a user to current project\n" +
 		"\tweb               Start the Web UI\n\n" +
+		"\tserver <repo>     Start the Web UI as portal for projects in repo folder\n\n" +
 		"\treindex [full]    Rebuild the search index \n\n" +
 		"",
 	)
@@ -154,7 +155,7 @@ func ProcessArgs() {
 	case "web":
 		web.StartWeb(projectPath, port, logLevel, commands[1:])
 	case "server":
-		web.StartServer(projectPath, port, logLevel, commands[1:])
+		web.StartServer(port, logLevel, commands[1:])
 
 	default:
 		flag.Usage()

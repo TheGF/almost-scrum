@@ -3,9 +3,23 @@ package cli
 import (
 	"almost-scrum/core"
 	"github.com/fatih/color"
+	"github.com/manifoldco/promptui"
 	"os"
 	"path/filepath"
 )
+
+func chooseTemplate() string {
+	templates := []string {"Empty"}
+	templates = append(templates, core.ListProjectTemplates()...)
+
+	prompt := promptui.Select{
+		Label: "Choose the project template",
+		Items: templates,
+	}
+
+	_, selected, _ := prompt.Run()
+	return selected
+}
 
 func processInit(projectPath string, _ []string) {
 
@@ -22,14 +36,21 @@ func processInit(projectPath string, _ []string) {
 	if !confirmAction("Do you want to create a project in %s", projectPath) {
 		return
 	}
-	project, err := core.InitProject(projectPath)
+
+	template := chooseTemplate()
+	var project *core.Project
+	if template == "Empty" {
+		project, err = core.InitProject(projectPath)
+	} else {
+		project, err = core.InitProjectFromTemplate(projectPath, template)
+	}
 	abortIf(err, "")
 
-	config, err := core.ReadProjectConfig(projectPath)
-	abortIf(err, "")
-
-	err = core.WriteProjectConfig(projectPath, &config)
-	abortIf(err, "")
+	//config, err := core.ReadProjectConfig(projectPath)
+	//abortIf(err, "")
+	//
+	//err = core.WriteProjectConfig(projectPath, &config)
+	//abortIf(err, "")
 
 	err = core.SetUserInfo(project, core.GetSystemUser(), &core.UserInfo{})
 	abortIf(err, "")

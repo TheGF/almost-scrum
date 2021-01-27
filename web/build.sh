@@ -1,5 +1,5 @@
 npm run build
-~/go/bin/go-bindata build/...
-sed -i 's/package main/package web/g' bindata.go
-mv bindata.go ../go/web/
+~/go/bin/go-bindata build/... assets/...
+sed -i 's/package main/package assets/g' bindata.go
+mv bindata.go ../go/assets/
 rm -rf ./build

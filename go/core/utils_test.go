@@ -1,6 +1,7 @@
 package core
 
 import (
+	"almost-scrum/assets"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -27,5 +28,11 @@ func TestFindFileUpwards(t *testing.T) {
 
 	path, _ = FindFileUpwards(".", ".git")
 	assert.Equal(t, "almost-scrum", filepath.Base(path))
+
+}
+
+func TestUnzipAsset(t *testing.T) {
+	data, _ := assets.Asset("assets/one-week-scrum.zip")
+	UnzipFile(data, "/tmp/")
 
 }

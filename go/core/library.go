@@ -1,6 +1,7 @@
 package core
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -83,6 +84,17 @@ func DeleteFileFromLibrary(project *Project, path string) error {
 func GetPathInLibrary(project *Project, path string) (string, error) {
 	path = filepath.Join(project.Path, ProjectLibraryFolder, path)
 	return filepath.Abs(path)
+}
+
+func SetFileInLibrary(project *Project, path string, reader io.ReadCloser) error {
+	path = filepath.Join(project.Path, ProjectLibraryFolder, path)
+	writer, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(writer, reader)
+	return err
 }
 
 // GetPathInLibrary returns the absolute path for a resource stored in the library.
