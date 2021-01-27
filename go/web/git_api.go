@@ -12,7 +12,8 @@ func gitRoute(group *gin.RouterGroup) {
 	group.POST("/projects/:project/git/commit", postGitCommitAPI)
 	group.POST("/projects/:project/git/push", postGitPushAPI)
 	group.POST("/projects/:project/git/pull", postGitPullAPI)
-	group.PUT("/projects/:project/git/credentials", putGitCredentialsAPI)
+	group.PUT("/projects/:project/git/settings", putGitSettingsAPI)
+	group.GET("/projects/:project/git/settings", getGitSettingsAPI)
 }
 
 
@@ -90,24 +91,40 @@ func postGitPushAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, "")
 }
 
-func putGitCredentialsAPI(c *gin.Context) {
+func putGitSettingsAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	var gitCredentials core.GitCredentials
-	if err := c.BindJSON(&gitCredentials); core.IsErr(err, "Invalid JSON") {
+	var gitSettings core.GitSettings
+	if err := c.BindJSON(&gitSettings); core.IsErr(err, "Invalid JSON") {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	err := core.SetGitCredentials(project, getWebUser(c), gitCredentials)
+	err := core.SetGitSettings(project, getWebUser(c), gitSettings)
 	if err != nil {
-		logrus.Warnf("Cannot save git credentials in project %s: %v", project.Path, err)
+		logrus.Warnf("Cannot save git settings in project %s: %v", project.Path, err)
 		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "cannot save git credentials: %v", err)
+		c.String(http.StatusInternalServerError, "cannot save git settings: %v", err)
 		return
 	}
 	c.JSON(http.StatusOK, "")
+}
+
+func getGitSettingsAPI(c *gin.Context) {
+	var project *core.Project
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	gitSettings, err := core.GetGitSettings(project, getWebUser(c))
+	if err != nil {
+		logrus.Warnf("Cannot get git settings in project %s: %v", project.Path, err)
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "cannot get git settings: %v", err)
+		return
+	}
+	c.JSON(http.StatusOK, gitSettings)
 }

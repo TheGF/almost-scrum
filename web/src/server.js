@@ -285,6 +285,18 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
+    static getGitSettings(project) {
+        return axios.get(`/api/v1/projects/${project}/git/settings`, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static putGitSettings(project, settings) {
+        return axios.put(`/api/v1/projects/${project}/git/pull`, settings, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
 }
 
 export default Server;

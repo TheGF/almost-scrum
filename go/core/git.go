@@ -23,12 +23,11 @@ type CommitInfo struct {
 }
 
 type GitClient interface {
- 	GetStatus(project *Project) (GitStatus, error)
+	GetStatus(project *Project) (GitStatus, error)
 	Pull(project *Project, user string) (string, error)
 	Push(project *Project, user string) error
 	Commit(project *Project, commitInfo CommitInfo) (string, error)
 }
-
 
 func prepareGitMessage(commitInfo CommitInfo) string {
 	var out bytes.Buffer
@@ -44,7 +43,6 @@ func prepareGitMessage(commitInfo CommitInfo) string {
 	}
 	return out.String()
 }
-
 
 func getAuth(project *Project, user string) (transport.AuthMethod, error) {
 	userInfo, err := GetUserInfo(project, user)
@@ -74,9 +72,10 @@ func getAuth(project *Project, user string) (transport.AuthMethod, error) {
 	}
 }
 
-type GitCredentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+type GitSettings struct {
+	UseGitNative bool   `json:"useGitNative"`
+	Username     string `json:"username"`
+	Password     string `json:"password"`
 }
 
 func HasGitNative() bool {
@@ -84,14 +83,27 @@ func HasGitNative() bool {
 	return err == nil && strings.HasPrefix(out, "git")
 }
 
-func SetGitCredentials(project *Project, user string, gitCredentials GitCredentials) error {
+func GetGitSettings(project *Project, user string) (GitSettings, error){
+	return 	GitSettings{
+		UseGitNative: project.Config.UseGitNative,
+		Username:     user,
+		Password:     "",
+	}, nil
+}
+
+func SetGitSettings(project *Project, user string, gitSettings GitSettings) error {
 	userInfo, err := GetUserInfo(project, user)
 	if err != nil {
 		return err
 	}
 
-	if gitCredentials.Password != "" {
-		credentials := fmt.Sprintf("%s:%s", gitCredentials.Username, gitCredentials.Password)
+	project.Config.UseGitNative = gitSettings.UseGitNative
+	if err = WriteProjectConfig(project.Path, &project.Config); err != nil {
+		return err
+	}
+
+	if gitSettings.Password != "" {
+		credentials := fmt.Sprintf("%s:%s", gitSettings.Username, gitSettings.Password)
 		credentials, err := EncryptStringForProject(project, credentials)
 		if err != nil {
 			return err
