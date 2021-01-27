@@ -45,8 +45,9 @@ function GitCommit(props) {
     return commitOutput ?
         <Textarea
             value={commitOutput}
-            size="lb"
+            size="md"
             resize="Vertical"
+            rows="10"
         /> :
         <VStack>
             <VStack textAlign="left">
