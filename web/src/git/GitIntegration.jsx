@@ -19,11 +19,11 @@ import T from "../core/T";
 
 
 function GitIntegration({ isOpen, onClose }) {
-    const [gitStatus, setGitStatus] = useState(null)
     const [gitMessage, setGitMessage] = useState({ header: '', body: {} })
+    const [stagedFiles, setStagedFiles] = useState([])
 
     function reset() {
-        setGitStatus(null)
+        setStagedFiles([])
         setGitMessage({ header: '', body: {} })
     }
 
@@ -43,7 +43,7 @@ function GitIntegration({ isOpen, onClose }) {
                     <TabList>
                         <Tab><T>files</T></Tab>
                         <Tab><T>message</T></Tab>
-                        <Tab isDisabled={!gitStatus || !gitMessage.header}>
+                        <Tab isDisabled={!stagedFiles || !gitMessage.header}>
                             <T>commit</T>
                         </Tab>
                         <Tab><T>push</T></Tab>
@@ -52,13 +52,13 @@ function GitIntegration({ isOpen, onClose }) {
 
                     <TabPanels>
                         <TabPanel>
-                            <GitFiles gitStatus={gitStatus} setGitStatus={setGitStatus} />
+                            <GitFiles stagedFiles={stagedFiles} setStagedFiles={setStagedFiles} />
                         </TabPanel>
                         <TabPanel>
                             <GitMessage gitMessage={gitMessage} setGitMessage={setGitMessage} />
                         </TabPanel>
                         <TabPanel>
-                            <GitCommit gitStatus={gitStatus} gitMessage={gitMessage} onCommit={reset} />
+                            <GitCommit stagedFiles={stagedFiles} gitMessage={gitMessage} onCommit={reset} />
                         </TabPanel>
                         <TabPanel>
                             <GitPush />

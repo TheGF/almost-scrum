@@ -93,11 +93,17 @@ func addComment(project *core.Project, info core.TaskInfo, commitInfo core.Commi
 }
 
 func printStatus(status core.GitStatus) {
+	untrackedFiles := make([]string, 0)
 	color.Green("Changes staged for commit:")
-	for _, staged := range status.StagedFiles {
-		color.Red("        %s", staged)
+	for file, change := range status.Files {
+		if change != core.GitUntracked {
+			color.Red("       %s %s", change, file)
+		} else {
+			untrackedFiles = append(untrackedFiles, file)
+		}
 	}
-	color.Green("\nUntracked files: %s", strings.Join(status.UntrackedFiles, " "))
+	color.Green("\nUntracked files: %s", strings.Join(untrackedFiles, " "))
+	color.Green("\nAsh files: %s", strings.Join(status.AshFiles, " "))
 }
 
 func processCommit(projectPath string, global bool) {
@@ -108,7 +114,7 @@ func processCommit(projectPath string, global bool) {
 	abortIf(err, "Ops. Something went wrong with your Git Repo. Check integrity with Git."+
 		"Error is: %v")
 
-	if len(status.StagedFiles) == 0 && len(status.AshFiles) == 0 {
+	if len(status.Files) == 0 && len(status.AshFiles) == 0 {
 		color.Green("Nothing to commit. Bye")
 		return
 	}
@@ -134,8 +140,10 @@ func processCommit(projectPath string, global bool) {
 	for _, file := range status.AshFiles {
 		commitInfo.Files = append(commitInfo.Files, file)
 	}
-	for _, file := range status.StagedFiles {
-		commitInfo.Files = append(commitInfo.Files, file)
+	for file, change := range status.Files {
+		if change != core.GitUntracked {
+			commitInfo.Files = append(commitInfo.Files, file)
+		}
 	}
 
 	hash, err := git.Commit(project, commitInfo)

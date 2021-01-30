@@ -9,10 +9,20 @@ import (
 	"strings"
 )
 
+type GitChange string
+
+const (
+	GitModified  GitChange = "M"
+	GitAdd                 = "A"
+	GitDeleted             = "D"
+	GitRenamed             = "R"
+	GitCopied              = "C"
+	GitUntracked           = "?"
+)
+
 type GitStatus struct {
-	AshFiles       []string `json:"ashFiles"`
-	StagedFiles    []string `json:"stagedFiles"`
-	UntrackedFiles []string `json:"untrackedFiles"`
+	AshFiles []string             `json:"ashFiles"`
+	Files    map[string]GitChange `json:"files"`
 }
 
 type CommitInfo struct {
@@ -95,15 +105,34 @@ func GetGitCredentials(project *Project, user string) (username string, password
 		idx := strings.Index(credentials, ":")
 		return credentials[0:idx], credentials[1+idx:], nil
 	} else {
-		return "","", ErrNoFound
+		return "", "", ErrNoFound
 	}
 
+}
+
+func SetGitCredentials(project *Project, user string, gitUsername string, gitPassword string) error {
+	userInfo, err := GetUserInfo(project, user)
+	if err != nil {
+		return err
+	}
+
+	credentials := fmt.Sprintf("%s:%s", gitUsername, gitPassword)
+	credentials, err = EncryptStringForProject(project, credentials)
+	if err != nil {
+		return err
+	}
+	userInfo.Credentials["GitUserPass"] = credentials
+
+	if err := SetUserInfo(project, user, &userInfo); err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetGitSettings(project *Project, user string) (GitSettings, error) {
 	username, _, _ := GetGitCredentials(project, user)
 
-	return 	GitSettings{
+	return GitSettings{
 		UseGitNative: project.Config.UseGitNative,
 		Username:     username,
 		Password:     "",
@@ -111,25 +140,13 @@ func GetGitSettings(project *Project, user string) (GitSettings, error) {
 }
 
 func SetGitSettings(project *Project, user string, gitSettings GitSettings) error {
-	userInfo, err := GetUserInfo(project, user)
-	if err != nil {
-		return err
-	}
-
 	project.Config.UseGitNative = gitSettings.UseGitNative
-	if err = WriteProjectConfig(project.Path, &project.Config); err != nil {
+	if err := WriteProjectConfig(project.Path, &project.Config); err != nil {
 		return err
 	}
 
 	if gitSettings.Password != "" {
-		credentials := fmt.Sprintf("%s:%s", gitSettings.Username, gitSettings.Password)
-		credentials, err := EncryptStringForProject(project, credentials)
-		if err != nil {
-			return err
-		}
-		userInfo.Credentials["GitUserPass"] = credentials
-
-		if err := SetUserInfo(project, user, &userInfo); err != nil {
+		if err := SetGitCredentials(project, user, gitSettings.Username, gitSettings.Password); err != nil {
 			return err
 		}
 	}

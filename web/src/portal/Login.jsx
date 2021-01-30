@@ -42,22 +42,23 @@ function Login({ isOpen, onToken }) {
             <ModalHeader>Welcome to Almost Scrum</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-                <FormControl id="username">
+                <FormControl id="ash-username">
                     <FormLabel><T>username</T></FormLabel>
-                    <Input type="text" onChange={e => e && e.target && setUsername(e.target.value)} />
+                    <Input type="text" onChange={e => e && e.target
+                        && setUsername(e.target.value)} />
                 </FormControl>
                 <FormControl id="username">
                     <FormLabel><T>password</T></FormLabel>
                     <InputGroup size="md">
                         <Input
-                            id="password"
+                            id="ash-password"
                             pr="4.5rem"
                             type={showPassword ? "text" : "password"}
                             onChange={e => e && e.target && setPassword(e.target.value)}
                         />
                         <InputRightElement width="4.5rem">
-                            <Button h="1.75rem" size="sm" 
-                            onClick={e => setShowPassword(!showPassword)}>
+                            <Button h="1.75rem" size="sm"
+                                onClick={e => setShowPassword(!showPassword)}>
                                 {showPassword ? "Hide" : "Show"}
                             </Button>
                         </InputRightElement>

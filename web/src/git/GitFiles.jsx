@@ -3,20 +3,37 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { React, useContext, useState } from "react";
+import T from '../core/T';
 import Server from '../server';
 import UserContext from '../UserContext';
 
+const change2descr = {
+    'A': 'added',
+    'M': 'modified',
+    'R': 'renamed',
+    'D': 'deleted',
+    '?': 'untracked',
+}
+
 function GitFiles(props) {
     const { project } = useContext(UserContext)
-    const { gitStatus, setGitStatus } = props;
+    const { stagedFiles, setStagedFiles } = props
+    const [gitStatus, setGitStatus] = useState(null)
     const [gettingStatus, setGettingStatus] = useState(false);
     const [pullInProgress, setPullInProgress] = useState(false);
 
     function getStatus() {
         setGettingStatus(true)
         Server.getGitStatus(project)
-            .then(setGitStatus)
-            .then(_ => setGettingStatus(false))
+            .then(status => {
+                const stagedFiles = status ? Object.keys(status.files)
+                    .filter(file => status.files[file] != '?')
+                    .concat(status.ashFiles) : []
+
+                setGitStatus(status)
+                setStagedFiles(stagedFiles)
+                setGettingStatus(false)
+            })
     }
 
     function pull() {
@@ -27,43 +44,28 @@ function GitFiles(props) {
 
     function getRows(gitStatus) {
         if (!gitStatus) {
-            return [null, null];
+            return [];
         }
-        const { stagedFiles, untrackedFiles } = gitStatus;
 
         function switchFileStage(file) {
             const idx = stagedFiles.indexOf(file);
             if (idx != -1) {
                 stagedFiles.splice(idx, 1);
-                untrackedFiles.push(file);
             } else {
-                const idx = untrackedFiles.indexOf(file);
-                untrackedFiles.splice(idx, 1);
                 stagedFiles.push(file);
             }
-            setGitStatus({
-                ...gitStatus,
-                stagedFiles: stagedFiles,
-                untrackedFiles: untrackedFiles
-            });
+            setStagedFiles(stagedFiles);
         }
 
-        const staged = stagedFiles && stagedFiles.sort().map(file => <Tr>
+        return Object.keys(gitStatus.files).sort().map(file => <Tr>
             <Td>{file}</Td>
-            <Td><Switch isChecked={true}
+            <Td><T>{change2descr[gitStatus.files[file]]}</T></Td>
+            <Td><Switch isChecked={stagedFiles.includes(file)}
                 onChange={_ => switchFileStage(file)} /></Td>
         </Tr>);
-
-        const untracked = untrackedFiles && untrackedFiles.sort().map(file => <Tr>
-            <Td>{file}</Td>
-            <Td><Switch isChecked={false}
-                onChange={_ => switchFileStage(file)} /></Td>
-        </Tr>);
-
-        return [staged, untracked];
     }
 
-    const [staged, untracked] = getRows(gitStatus)
+    const rows = getRows(gitStatus)
 
     return <VStack>
         <HStack>
@@ -75,12 +77,12 @@ function GitFiles(props) {
                 <Thead>
                     <Tr>
                         <Th>File</Th>
+                        <Th>Change</Th>
                         <Th>Staged</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {staged}
-                    {untracked}
+                    {rows}
                 </Tbody>
             </Table>
         </Flex>

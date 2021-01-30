@@ -16,7 +16,7 @@ func openEditor(project *core.Project, board string, name string) {
 		os.Exit(1)
 	}
 
-	prompt := promptui.Prompt{Label: "Please enter to reindex and complete"}
+	prompt := promptui.Prompt{Label: "press enter to reindex and complete"}
 	prompt.Run()
 	_ = core.ReIndex(project)
 }

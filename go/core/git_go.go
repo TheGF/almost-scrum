@@ -33,32 +33,24 @@ func (client GoGit) GetStatus(project *Project) (GitStatus, error) {
 	}
 
 	gitStatus := GitStatus{
-		AshFiles:       make([]string, 0),
-		StagedFiles:    make([]string, 0),
-		UntrackedFiles: make([]string, 0),
+		AshFiles: make([]string, 0),
+		Files:    make(map[string]GitChange),
 	}
+
 	for name, state := range status {
 		parts := strings.Split(name, string(os.PathSeparator))
 		if len(parts) == 0 {
 			continue
 		}
+
 		if parts[0] == ProjectFolder {
-			if parts[1] == ProjectBoardsFolder && state.Worktree == git.Unmodified {
-				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
-			} else if parts[1] == ProjectLibraryFolder && project.Config.IncludeLibInGit &&
-				state.Worktree == git.Unmodified {
+			if parts[1] == ProjectBoardsFolder || (project.Config.IncludeLibInGit && parts[1] != ProjectLibraryFolder) {
 				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
 			}
 		} else {
-			switch state.Worktree {
-			case git.Modified, git.Added, git.Deleted, git.Renamed:
-				gitStatus.StagedFiles = append(gitStatus.StagedFiles, name)
-			case git.Untracked:
-				gitStatus.UntrackedFiles = append(gitStatus.UntrackedFiles, name)
-			}
+			gitStatus.Files[name] = GitChange(state.Worktree)
 		}
 	}
-
 	elapsed := time.Since(start)
 	logrus.Infof("Git Status completed in %s", elapsed)
 	return gitStatus, nil

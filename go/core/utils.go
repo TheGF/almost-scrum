@@ -140,6 +140,7 @@ func UseCommand(command string, input string, arg ...string) (output string, err
 	var buf bytes.Buffer
 
 	writer := bufio.NewWriter(&buf)
+	logrus.Debugf("UseCommand - Exec %s%v", command, arg)
 	cmd := exec.Command(command, arg...)
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Stdout = writer
@@ -147,6 +148,21 @@ func UseCommand(command string, input string, arg ...string) (output string, err
 	if err = cmd.Run(); err != nil {
 		return buf.String(), err
 	}
-	return buf.String(), err
+
+	out := buf.String()
+	logrus.Debugf("UseCommand - Out: %s", out)
+	return out, err
 }
 
+
+func EscapeSpaceInPath(path string) string {
+	var escapeExpr string
+
+	switch runtime.GOOS {
+	case "windows":
+		escapeExpr = "^ "
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		escapeExpr = `\ `
+	}
+	return strings.ReplaceAll(path, " ", escapeExpr)
+}

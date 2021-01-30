@@ -50,8 +50,9 @@ func TestSetGitCredentials(t *testing.T) {
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	gitCredentials := GitSettings{
-		Username: "mp",
-		Password: "Mariposa83$",//"122abd851b139cb1f73a1f1ded40c6047dd9c3d3",
+		UseGitNative: true,
+		Username: "TheGF",
+		Password: "Mariposa83$",
 	}
 
 	SetGitSettings(project, GetSystemUser(), gitCredentials)

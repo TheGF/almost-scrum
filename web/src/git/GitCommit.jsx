@@ -13,14 +13,14 @@ import UserContext from '../UserContext';
 
 function GitCommit(props) {
     const { project, info } = useContext(UserContext)
-    const { gitStatus, gitMessage, onCommit } = props
+    const { stagedFiles, gitMessage, onCommit } = props
     const [commitOutput, setCommitOutput] = useState(null)
     const [commitInProgress, setCommitInProgress] = useState(false)
     const commitInfo = {
         user: info.loginUser,
         header: gitMessage.header,
         body: gitMessage.body,
-        files: gitStatus && [...gitStatus.ashFiles, ...gitStatus.stagedFiles] || [],
+        files: stagedFiles || [],
     }
 
     function commit() {
@@ -34,11 +34,13 @@ function GitCommit(props) {
     const summary = [
         ['User', commitInfo.user],
         ['Header', commitInfo.header],
-        ['Tasks', Object.keys(commitInfo.body).join(' ')],
-        ['Staged Files', commitInfo.files.join(' ')],
+        ['Tasks', commitInfo.files.filter(file => file.startsWith('.ash/boards/'))
+            .map(file => file.replace(/^\.ash\/boards\//g, '')).join(' ')],
+        ['Library', commitInfo.files.filter(file => file.startsWith('.ash/library')).join(' ')],
+        ['Staged Files', commitInfo.files.filter(file => !file.startsWith('.ash/')).join(' ')],
     ]
-    const table = summary.map(r => <Tr>
-        <Td key={r[0]}>{r[0]}</Td>
+    const table = summary.map(r => <Tr key={r[0]}>
+        <Td>{r[0]}</Td>
         <Td>{r[1]}</Td>
     </Tr>)
 

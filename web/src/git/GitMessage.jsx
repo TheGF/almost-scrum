@@ -43,7 +43,10 @@ function GitMessage(props) {
     const comments = infos ? infos.map(info => <TaskComment key={info.name}
         gitMessage={gitMessage} setGitMessage={setGitMessage} {...info} />) : null
     return <VStack >
-        <Input placeholder="Message header" value={gitMessage.header} isRequired
+        <Input id="git-message-header"
+            placeholder="Git message header"
+            autoComplete="off"
+            value={gitMessage.header} isRequired
             onChange={changeHeader}></Input>
         <HStack>
             <Spacer />
