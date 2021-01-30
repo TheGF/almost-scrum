@@ -8,7 +8,7 @@ import MarkdownView from './MarkdownView';
 
 function MarkdownEditor(props) {
     const { project } = useContext(UserContext);
-    const { imageFolder, height, ...more } = props
+    const { imageFolder, height, onSave, ...more } = props
     const [value, setValue] = useState(null)
     const [selectedTab, setSelectedTab] = useState("write");
 
@@ -33,6 +33,7 @@ function MarkdownEditor(props) {
             return <img {...props} style={{ maxWidth: '20%', maxHeight: '20%' }} />
         }
     }
+
 
     console.log('Height', height)
 

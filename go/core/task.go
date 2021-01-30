@@ -44,6 +44,7 @@ type Task struct {
 	Properties  map[string]string `json:"properties"`
 	Parts       []Part            `json:"parts"`
 	Files       []string          `json:"files"`
+	ConflictId  string            `json:"conflictId"`
 }
 
 // ListBoardTasks list the tasks in the board

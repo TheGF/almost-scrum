@@ -40,4 +40,6 @@ var (
 
 	// ErrExists occurs when an item exists even though it should not exist
 	ErrExists = errors.New("already exists")
+
+	ErrMergeConflict = errors.New("merge conflict")
 )

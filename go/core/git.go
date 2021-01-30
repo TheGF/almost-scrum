@@ -6,6 +6,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/sirupsen/logrus"
+	"regexp"
 	"strings"
 )
 
@@ -151,4 +152,70 @@ func SetGitSettings(project *Project, user string, gitSettings GitSettings) erro
 		}
 	}
 	return nil
+}
+
+var mergeConflictRegex = regexp.MustCompile(`(?s)(.*)<<<<<<< HEAD(.*)=======(.*)>>>>>>> (\w+)`)
+
+func FindGitConflict(input string) string {
+	match := mergeConflictRegex.FindStringSubmatch(input)
+	if len(match) == 0 {
+		return ""
+	}
+	return match[4]
+}
+
+type GitSolveConflict int
+
+const (
+	GitSolveConflictWithHead GitSolveConflict = iota
+	GitSolveConflictWithRemote
+)
+
+const (
+	mergeStart = "<<<<<<< HEAD"
+	mergeSplit = "======="
+	mergeEnd   = ">>>>>>>"
+)
+
+const (
+	mergeCommon int = iota
+	mergeHead
+	mergeRemote
+)
+
+func ResolveGitConflict(input string, gitSolveConflict GitSolveConflict) string {
+	var b bytes.Buffer
+	var state int
+
+	lines := strings.Split(input, "\n")
+
+	for _, line := range lines {
+		if line == mergeStart {
+			state = mergeHead
+			continue
+		}
+		if line == mergeSplit {
+			state = mergeRemote
+			continue
+		}
+		if strings.HasPrefix(line, mergeEnd) {
+			state = mergeCommon
+			continue
+		}
+
+		switch state {
+		case mergeCommon:
+			b.WriteString(line)
+		case mergeHead:
+			if gitSolveConflict == GitSolveConflictWithHead {
+				b.WriteString(line)
+			}
+		case mergeRemote:
+			if gitSolveConflict == GitSolveConflictWithRemote {
+				b.WriteString(line)
+			}
+
+		}
+	}
+	return b.String()
 }

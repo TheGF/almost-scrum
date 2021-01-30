@@ -132,11 +132,24 @@ func renderFiles(task *Task, output *bytes.Buffer) {
 	}
 }
 
+
+
+
 func ReadTask(path string, task *Task) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
+
+	task.ConflictId = FindGitConflict(string(data))
+	if task.ConflictId != "" {
+		task.Description = string(data)
+		task.Properties = map[string]string{}
+		task.Parts = []Part{}
+		task.Files = []string{}
+		return nil
+	}
+
 	return ParseTask(data, task)
 }
 
@@ -187,6 +200,8 @@ func splitInParagraph(input []byte) []paragraph {
 
 	return paragraphs
 }
+
+
 
 func ParseTask(input []byte, task *Task) error {
 	var description bytes.Buffer

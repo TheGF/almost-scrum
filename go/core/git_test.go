@@ -16,7 +16,6 @@ func TestStatus(t *testing.T) {
 	t.Logf("Gitfiles %v", gitStatus)
 }
 
-
 func TestCommit(t *testing.T) {
 	project, err := OpenProject("../../.ash")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
@@ -24,14 +23,14 @@ func TestCommit(t *testing.T) {
 	status, err := gitClient.GetStatus(project)
 
 	commitInfo := CommitInfo{
-		User:     "mp",
-		Header:   "This is just a test",
+		User:   "mp",
+		Header: "This is just a test",
 		Body: map[string]string{
 			"task 1": "a comment",
 			"task 2": "another comment",
 			"task 3": "final comment",
 		},
-		Files:    status.StagedFiles,
+		Files: status.AshFiles,
 	}
 
 	hash, err := gitClient.Commit(project, commitInfo)
@@ -51,9 +50,38 @@ func TestSetGitCredentials(t *testing.T) {
 
 	gitCredentials := GitSettings{
 		UseGitNative: true,
-		Username: "TheGF",
-		Password: "Mariposa83$",
+		Username:     "TheGF",
+		Password:     "Mariposa83$",
 	}
 
 	SetGitSettings(project, GetSystemUser(), gitCredentials)
+}
+
+func TestGitConflict(t *testing.T) {
+const input = `
+Replace with the task description
+Just doing some random changes to test conflicts
+<<<<<<< HEAD
+Ok more changes needed.
+
+### Properties
+=======
+And more changes
+### Properties
+- Points: 52
+>>>>>>> f975cd6da9c8108c7a08ef6606bc97be5fcbac55
+- Owner: @mp
+- Points: 5
+- Status: #Start
+### Progress
+### Files
+`
+
+	id := FindGitConflict(input)
+	assert.NotEmpty(t, id)
+
+	solved := ResolveGitConflict(input, GitSolveConflictWithHead)
+	assert.NotEmpty(t, solved)
+
+
 }

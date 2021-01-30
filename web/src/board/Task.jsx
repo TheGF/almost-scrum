@@ -3,13 +3,15 @@ import {
     Box, Button, Editable, EditableInput, EditablePreview,
     HStack,
     IconButton, Select, Slider,
-
+    Text, Textarea,
     SliderFilledTrack,
     SliderThumb, SliderTrack, Spacer, Tab, TabList, TabPanel, TabPanels,
-    Tabs
+    Tabs,
+    VStack,
+    ButtonGroup
 } from "@chakra-ui/react";
 import { React, useContext, useEffect, useState } from "react";
-import { BsTrash, FiSave, MdVerticalAlignTop } from "react-icons/all";
+import { BsTrash, FiSave, GiRadioactive, MdVerticalAlignTop, GrCompliance } from "react-icons/all";
 import T from "../core/T";
 import Utils from '../core/utils';
 import Server from '../server';
@@ -21,6 +23,8 @@ import Progress from './Progress';
 import Properties from './Properties';
 import TaskEditor from './TaskEditor';
 import TaskViewer from './TaskViewer';
+import MarkdownEditor from '../core/MarkdownEditor';
+import { getDefaultToolbarCommands } from 'react-mde'
 
 
 
@@ -36,7 +40,7 @@ function Task(props) {
     const [candidateOwner, setCandidateOwner] = useState(null)
     const [height, setHeight] = useState(400)
 
-    useEffect(_=>setCompact(props.compact), [props.compact])
+    useEffect(_ => setCompact(props.compact), [props.compact])
 
     function getTags(task) {
         function extractTags(text) {
@@ -84,7 +88,7 @@ function Task(props) {
     function saveTask(task) {
         setSaving(true)
         Server.setTaskLater(project, board, name, task)
-            .then(_=>setSaving(false))
+            .then(_ => setSaving(false))
     }
 
     function renameTask(title) {
@@ -142,30 +146,64 @@ function Task(props) {
     const tags = task ? getTags(task).map(tag => <Badge key={tag} colorScheme="purple">
         {tag}
     </Badge>) : null;
-    const header = task && <HStack spacing={3}>
-        <label>{id}.</label>
-        <Editable defaultValue={title} borderWidth="1px" minW="300px"
+
+
+
+    function getHeader() {
+
+        const label = <label>{id}.</label>
+        const name = <Editable defaultValue={title} borderWidth="1px" minW="300px"
             borderColor="blue" onSubmit={title => renameTask(title)}>
             <EditablePreview />
             <EditableInput />
         </Editable>
-        <Spacer onClick={_ => setCompact(!compact)} style={{cursor: 'pointer'}}/>
-        {compact ? <HStack h="2em" spacing={2}>{tags}</HStack> : null}
-        <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
-        <span title="Task Progress" style={{ width: '3em', textAlign: 'center' }}>{progress}</span>
-        <Select value={board} title="Assign the Board" w="10em" onChange={onBoardChanged}>
+        const compactSwitch = <Spacer onClick={_ => setCompact(!compact)} style={{ cursor: 'pointer' }} />
+        const tagsGroup = compact ? <HStack h="2em" spacing={2}>{tags}</HStack> : null
+        const touchButton = <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
+        const taskProgress = <span title="Task Progress" style={{ width: '3em', textAlign: 'center' }}>{progress}</span>
+        const assignBoard = <Select value={board} title="Assign the Board" w="10em" onChange={onBoardChanged}>
             {boardList}
         </Select>
-        <Select value={owner} title="Assign the Owner" w="10em" onChange={changeOwner}>
+        const assignOwner = <Select value={owner} title="Assign the Owner" w="10em" onChange={changeOwner}>
             {userList}
         </Select>
-        {saving ?
+        const deleteButton = saving ?
             <IconButton title="Saving..." icon={<FiSave />} /> :
             <IconButton title="Delete the task" icon={<BsTrash />}
                 onClick={_ => setOpenConfirmDelete(true)} />
-        }
 
-    </HStack>
+        const confirmChangeOwner = <ConfirmChangeOwner owner={owner} candidateOwner={candidateOwner}
+            setCandidateOwner={setCandidateOwner} onConfirm={confirmCandidateOwner} />
+        const confirmDelete = <ConfirmDelete isOpen={openConfirmDelete} setIsOpen={setOpenConfirmDelete}
+            onConfirm={deleteTask} />
+
+
+
+        const header = task.conflictId ? <HStack spacing={3}>
+            {label}
+            {name}
+            {compactSwitch}
+            <Badge colorScheme="red"><T>Conflicted Task</T></Badge>
+            <GiRadioactive />
+            {deleteButton}
+            {confirmDelete}
+        </HStack> :
+            <HStack spacing={3}>
+                {label}
+                {name}
+                {compactSwitch}
+                {tagsGroup}
+                {touchButton}
+                {taskProgress}
+                {assignBoard}
+                {assignOwner}
+                {confirmChangeOwner}
+                {deleteButton}
+                {confirmDelete}
+            </HStack>
+        return header
+    }
+
 
     function onChange(index) {
         if (index == 0) {
@@ -181,55 +219,133 @@ function Task(props) {
         <SliderThumb />
     </Slider>
 
-    const body = task && !compact ? <Box h={height} ><HStack spacing={3} >
-        <ConfirmChangeOwner owner={owner} candidateOwner={candidateOwner}
-            setCandidateOwner={setCandidateOwner} onConfirm={confirmCandidateOwner} />
-        <ConfirmDelete isOpen={openConfirmDelete} setIsOpen={setOpenConfirmDelete}
-            onConfirm={deleteTask} />
-        <Tabs w="100%" onChange={onChange} isLazy>
-            <TabList>
-                <Tab key="view"><T>view</T></Tab>
-                <Tab key="edit"><T>edit</T></Tab>
-                <Tab key="properties"><T>properties</T></Tab>
-                <Tab key="progress"><T>progress</T></Tab>
-                <Tab key="files"><T>files</T></Tab>
-                <Spacer key="spacer" />
-                <HStack h="2em" spacing={2} key="tags">{tags}</HStack>
-                <div width="2em" />
-                <Spacer maxWidth="2em" />
-                {heightSelector}
-            </TabList>
+    function setDescription(description) {
+        const t = {
+            ...task,
+            description: description,
+        }
+        setTask(t)
+    }
 
-            <TabPanels>
-                <TabPanel key="view" padding={0}>
-                    <TaskViewer height={height} task={task} saveTask={saveTask} searchKeys={searchKeys} />
-                </TabPanel>
-                <TabPanel key="edit" padding={0}>
-                    <TaskEditor task={task} saveTask={saveTask} users={users} height={height}
-                        readOnly={readOnly} />
-                </TabPanel>
-                <TabPanel key="properties" >
-                    <Properties task={task} saveTask={saveTask} users={users} readOnly={readOnly} />
-                </TabPanel>
-                <TabPanel key="progress" >
-                    <Progress task={task} readOnly={readOnly}
-                        saveTask={task => {
-                            saveTask(task);
-                            updateProgress(task);
-                        }} />
-                </TabPanel>
-                <TabPanel>
-                    <Files task={task} saveTask={saveTask} readOnly={readOnly} />
-                </TabPanel>
-            </TabPanels>
-        </Tabs>
-    </HStack> </Box> : ''
+    function markAndSave(opts) {
+        const t = {
+            ...task,
+            description: opts.initialState.text,
+            conflictId: '',
+        }
+        setTask(t)
+        saveTask(t)
+        props.onBoardChanged && props.onBoardChanged()
+    }
 
-    return task ? <Box p={1} w="100%" borderWidth="3px" overflow="hidden">
-        {header}
-        {body}
-    </Box> : ''
+    function getBody() {
+        if (compact) {
+            return ''
+        }
 
+        if (task.conflictId) {
+            const saveCommand = {
+                name: "Save and Resolved",
+                icon: () => (
+                    <Button>Mark solved and Save <FiSave/></Button>
+                ),
+                execute: markAndSave
+            };
+
+            const toolbarCommands = [...getDefaultToolbarCommands(), ["save-resolve"]]
+
+            return <Box h={height} >
+                <Tabs w="100%" onChange={onChange} isLazy>
+                    <TabList>
+                        <Tab key="conflict"><T>conflict</T></Tab>
+                        <Tab key="edit"><T>manual edit - be careful!</T></Tab>
+                    </TabList>
+
+                    <TabPanels>
+                        <TabPanel key="conflict" padding={0}>
+                            <VStack spacing="5" align="left">
+                                <Text fontSize="lg">Merge Conflict</Text>
+                                <Text colorScheme="red">The task containts a Git conflict.
+                                This happens when the same task has been
+                                modified by different users at the same time.
+                                    <br />
+                                    You can solve the problem by using the local copy or the remote one. Or you can edit manually the file.
+                                </Text>
+                                <ButtonGroup colorScheme="green">
+                                    <Button>Use the local copy (Head)</Button>
+                                    <Button>Use the origin ({task.conflictId})</Button>
+                                </ButtonGroup>
+                            </VStack>
+                        </TabPanel>
+                        <TabPanel key="edit" padding={0}>
+                            <MarkdownEditor
+                                commands={{
+                                    "save-resolve": saveCommand
+                                }}
+                                toolbarCommands={toolbarCommands}
+                                value={task.description}
+                                height={height + 20}
+                                onChange={setDescription}
+                                disablePreview={true}
+                                paste={null}
+                            />
+                        </TabPanel>
+                    </TabPanels>
+                </Tabs>
+            </Box>
+        }
+
+
+        return <Box h={height} ><HStack spacing={3} >
+            <Tabs w="100%" onChange={onChange} isLazy>
+                <TabList>
+                    <Tab key="view"><T>view</T></Tab>
+                    <Tab key="edit"><T>edit</T></Tab>
+                    <Tab key="properties"><T>properties</T></Tab>
+                    <Tab key="progress"><T>progress</T></Tab>
+                    <Tab key="files"><T>files</T></Tab>
+                    <Spacer key="spacer" />
+                    <HStack h="2em" spacing={2} key="tags">{tags}</HStack>
+                    <div width="2em" />
+                    <Spacer maxWidth="2em" />
+                    {heightSelector}
+                </TabList>
+
+                <TabPanels>
+                    <TabPanel key="view" padding={0}>
+                        <TaskViewer height={height} task={task} saveTask={saveTask} searchKeys={searchKeys} />
+                    </TabPanel>
+                    <TabPanel key="edit" padding={0}>
+                        <TaskEditor task={task} saveTask={saveTask} users={users} height={height}
+                            readOnly={readOnly} />
+                    </TabPanel>
+                    <TabPanel key="properties" >
+                        <Properties task={task} saveTask={saveTask} users={users} readOnly={readOnly} />
+                    </TabPanel>
+                    <TabPanel key="progress" >
+                        <Progress task={task} readOnly={readOnly}
+                            saveTask={task => {
+                                saveTask(task);
+                                updateProgress(task);
+                            }} />
+                    </TabPanel>
+                    <TabPanel>
+                        <Files task={task} saveTask={saveTask} readOnly={readOnly} />
+                    </TabPanel>
+                </TabPanels>
+            </Tabs>
+        </HStack> </Box>
+        return body
+    }
+
+
+    if (!task) {
+        return null
+    }
+    return <Box p={1} w="100%" borderWidth="3px" overflow="hidden">
+        {getHeader()}
+        {getBody()}
+    </Box>
 }
 
 export default Task;
