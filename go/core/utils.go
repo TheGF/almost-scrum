@@ -145,10 +145,7 @@ func UseCommand(command string, input string, arg ...string) (output string, err
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Stdout = writer
 	cmd.Stderr = writer
-	if err = cmd.Run(); err != nil {
-		return buf.String(), err
-	}
-
+	err = cmd.Run()
 	out := buf.String()
 	logrus.Debugf("UseCommand - Out: %s", out)
 	return out, err

@@ -66,9 +66,12 @@ func postGitPullAPI(c *gin.Context) {
 
 	out, err := git.Pull(project, getWebUser(c))
 	if err != nil {
-		logrus.Warnf("Cannot pull content project %s: %v", project.Path, err)
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "cannot commit content: %v", err)
+		logrus.Warnf("Cannot pull content project %s:%s\n %v", project.Path, out, err)
+		if out != "" {
+			c.String(http.StatusConflict, "%s", out)
+		} else {
+			c.String(http.StatusInternalServerError, "%v", err)
+		}
 		return
 	}
 	c.JSON(http.StatusOK, out)
@@ -83,9 +86,13 @@ func postGitPushAPI(c *gin.Context) {
 
 	out, err := git.Push(project, getWebUser(c))
 	if err != nil {
-		logrus.Warnf("Cannot push content project %s: %v", project.Path, err)
+		logrus.Warnf("Cannot push content project %s:%s\n %v", project.Path, out, err)
 		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "cannot commit content: %v", err)
+		if out != "" {
+			c.String(http.StatusConflict, "%s", out)
+		} else {
+			c.String(http.StatusInternalServerError, "%v", err)
+		}
 		return
 	}
 	c.JSON(http.StatusOK, out)

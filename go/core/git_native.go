@@ -176,7 +176,7 @@ func (client GitNative) Commit(project *Project, commitInfo CommitInfo) (string,
 	}
 
 	addArgs := []string {"-C", gitFolder, "add"}
-	rmArgs := []string {"-C", gitFolder, "add", "-u"}
+	rmArgs := []string {"-C", gitFolder, "rm"}
 	for _, file := range commitInfo.Files {
 		change, found := gitStatus.Files[file]
 		if found && change == GitDeleted {

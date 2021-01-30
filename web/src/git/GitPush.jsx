@@ -9,25 +9,44 @@ import Server from '../server';
 import UserContext from '../UserContext';
 
 function GitPush(props) {
-    const { project, info } = useContext(UserContext)
+    const { project } = useContext(UserContext)
     const [pushInProgress, setPushInProgress] = useState(false)
     const [pushOutput, setPushOutput] = useState(null)
 
-    function push() {
-        setPushInProgress(true)
-        Server.postGitPush(project)
-            .then(setPushOutput)
-            .then(_ => setPushInProgress(false))
+    function setOutput(ok, msg, details) {
+        setPushOutput({
+            ok: ok,
+            msg: msg,
+            details: details
+        })
+        setPushInProgress(false)
     }
 
-    return <VStack>
+    function push() {
+        setPushOutput(null)
+        setPushInProgress(true)
+        Server.postGitPush(project)
+            .then(data => setOutput(true, 'All Good!', data))
+            .catch(r => {
+                const msg = r.status == 409 ?
+                    'Data on remote server is in conflict. ' +
+                    'Try to pull the content before push' :
+                    'something went wrong'
+                setOutput(false, msg, r.data)
+            })
+    }
+
+    return <VStack spacing={5}>
         <Button size="lg" colorScheme="blue" isLoading={pushInProgress}
             onClick={push}>
             Push
         </Button>
         {pushOutput ? <>
+            <Text fontSize="lg" color={pushOutput.ok ? 'green' : 'red'}>
+                {pushOutput.msg}
+            </Text>
             <Textarea
-                value={pushOutput}
+                value={pushOutput.details}
                 size="md"
                 resize="Vertical"
                 rows="6"

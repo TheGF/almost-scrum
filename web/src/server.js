@@ -5,6 +5,8 @@ function loginWhenUnauthorized(r) {
         localStorage.removeItem('username');
         localStorage.removeItem('token');
         window.location.assign(window.location.href);
+    } else {
+        return Promise.reject(r.response);
     }
 }
 

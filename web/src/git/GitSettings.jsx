@@ -1,8 +1,9 @@
 import {
-    Button, FormControl, FormHelperText, FormLabel, HStack, Input,
+    Button, Center, FormControl, FormHelperText, FormLabel, HStack, Input,
     InputGroup, InputRightElement, Spacer, Switch, VStack
 } from "@chakra-ui/react";
 import { React, useContext, useEffect, useState } from "react";
+import T from "../core/T";
 import Server from '../server';
 import UserContext from '../UserContext';
 
@@ -23,7 +24,6 @@ function GitSettings(props) {
             useGitNative: !gitSettings.useGitNative,
         }
         setGitSettings(settings)
-        Server.putGitSettings(project, settings)
     }
 
     function setUsername(e) {
@@ -33,7 +33,6 @@ function GitSettings(props) {
             username: username,
         }
         setGitSettings(settings)
-        Server.putGitSettings(project, settings)
     }
 
     function setPassword(e) {
@@ -43,9 +42,11 @@ function GitSettings(props) {
             password: password,
         }
         setGitSettings(settings)
-        Server.putGitSettings(project, settings)
     }
 
+    function saveSettings() {
+        Server.putGitSettings(project, settings)
+    }
 
     return gitSettings ? <VStack spacing={10}>
         <FormControl id="git-native-form" maxWidth="30em">
@@ -58,9 +59,9 @@ function GitSettings(props) {
                 Requires Git client to be installed in your system. When off, connect directly to Git (not recommended)
         </FormHelperText>
         </FormControl>
-        <FormControl id="credentials" maxWidth="30em">
+        <FormControl id="credentials" isRequired maxWidth="30em">
             <FormLabel>Username</FormLabel>
-            <Input type="username" 
+            <Input type="username"
                 value={gitSettings.username}
                 onChange={setUsername} />
             <FormLabel>Password</FormLabel>
@@ -69,7 +70,7 @@ function GitSettings(props) {
                     pr="4.5rem"
                     value={gitSettings.password}
                     type={showPassword ? "text" : "password"}
-                    onChange={setPassword} 
+                    onChange={setPassword}
                     placeholder="Enter password"
                 />
                 <InputRightElement width="4.5rem">
@@ -80,8 +81,11 @@ function GitSettings(props) {
                     </Button>
                 </InputRightElement>
             </InputGroup>
-            <FormHelperText>We'll encrypt your password</FormHelperText>
+            <FormHelperText><T>We'll encrypt your password</T></FormHelperText>
         </FormControl>
+        <Center>
+            <Button onClick={saveSettings}><T>save settings</T></Button>
+        </Center>
     </VStack > : null
 }
 export default GitSettings;
