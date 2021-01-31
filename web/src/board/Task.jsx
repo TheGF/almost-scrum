@@ -219,6 +219,29 @@ function Task(props) {
         <SliderThumb />
     </Slider>
 
+    function resolveConflict(target) {
+        const lines = task.description.split('\n');
+        const description = ''
+        let state = 'common'
+        for (const line of lines) {
+            if (line == '<<<<<<< HEAD') state = 'head'
+            else if (line == '=======') state = 'remote'
+            else if (line.startsWith('>>>>>>>')) state = 'common'
+            else if (state === 'common' ||
+                (state === 'head' && target == 'head') ||
+                (state === 'remote' && target == 'remote'))
+                description += `${line}\n`
+        }
+        const t = {
+            ...task,
+            description: description,
+            conflictId: '',
+        }
+        setTask(t)
+        saveTask(t)
+        props.onBoardChanged && props.onBoardChanged()
+    }
+
     function setDescription(description) {
         const t = {
             ...task,
@@ -247,7 +270,7 @@ function Task(props) {
             const saveCommand = {
                 name: "Save and Resolved",
                 icon: () => (
-                    <Button>Mark solved and Save <FiSave/></Button>
+                    <Button>Mark solved and Save <FiSave /></Button>
                 ),
                 execute: markAndSave
             };
@@ -272,8 +295,12 @@ function Task(props) {
                                     You can solve the problem by using the local copy or the remote one. Or you can edit manually the file.
                                 </Text>
                                 <ButtonGroup colorScheme="green">
-                                    <Button>Use the local copy (Head)</Button>
-                                    <Button>Use the origin ({task.conflictId})</Button>
+                                    <Button onClick={_ => resolveConflict('head')}>
+                                        Use the local copy (Head)
+                                    </Button>
+                                    <Button onClick={_ => resolveConflict('remote')}>
+                                        Use the origin ({task.conflictId})
+                                </Button>
                                 </ButtonGroup>
                             </VStack>
                         </TabPanel>

@@ -10,11 +10,13 @@ import { React, useContext, useState, useEffect } from "react";
 import Utils from '../core/utils';
 import Server from '../server';
 import UserContext from '../UserContext';
+import PageEditor from '../library/PageEditor';
 
 function AttachedFiles(props) {
     const { attachedFiles, setAttachedFiles, readOnly, onShowPath } = props;
-    const { project, info } = useContext(UserContext)
+    const { project } = useContext(UserContext)
     const [infos, setInfos] = useState([])
+    const [page, setPage] = useState(null)
 
     function getStat() {
         if (attachedFiles) {
@@ -36,7 +38,12 @@ function AttachedFiles(props) {
     }
 
     function onFileClick(info) {
-        Server.downloadFromlibrary(project, `${info.parent}/${info.name}`);
+        const p = `${info.parent}/${info.name}`
+        if (info.name.endsWith(".pg")) {
+            setPage(p)
+        } else {
+            Server.downloadFromlibrary(project, p);
+        }
     }
 
     function onFolderClick(folder) {
@@ -45,7 +52,7 @@ function AttachedFiles(props) {
 
 
     const rows = infos && infos.map(info => {
-        const folder = '/'+info.parent.replace('.', '').replace(/^\/+|\/+$/g, '')
+        const folder = '/' + info.parent.replace('.', '').replace(/^\/+|\/+$/g, '')
 
         return <Tr key={`${info.parent}/${info.name}`}>
             <Td><Link onClick={_ => onFileClick(info)}>{info.name}</Link></Td>
@@ -66,19 +73,22 @@ function AttachedFiles(props) {
         </Tr>
     })
 
-    return <Table>
-        <Thead>
-            <Tr>
-                <Th>Name</Th>
-                <Th>Folder</Th>
-                <Th>Modified</Th>
-                <Th>Size</Th>
-                <Th>Actions</Th>
-            </Tr>
-        </Thead>
-        <Tbody>
-            {rows}
-        </Tbody>
-    </Table>
+    return <>
+        <PageEditor page={page} setPage={setPage} />
+        <Table>
+            <Thead>
+                <Tr>
+                    <Th>Name</Th>
+                    <Th>Folder</Th>
+                    <Th>Modified</Th>
+                    <Th>Size</Th>
+                    <Th>Actions</Th>
+                </Tr>
+            </Thead>
+            <Tbody>
+                {rows}
+            </Tbody>
+        </Table>
+    </>
 }
 export default AttachedFiles;

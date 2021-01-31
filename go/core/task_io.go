@@ -6,6 +6,7 @@ import (
 	"github.com/russross/blackfriday/v2"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -125,10 +126,18 @@ func renderFiles(task *Task, output *bytes.Buffer) {
 	}
 	output.WriteString("### Files\n")
 
-	for _, val := range task.Files {
-		output.WriteString("- ")
-		output.WriteString(val)
-		output.WriteString("\n")
+	for _, file := range task.Files {
+		base := filepath.Base(file)
+		ext := filepath.Ext(base)
+		if ext != "" {
+			base = base[0:len(base)-len(ext)]
+		}
+
+		output.WriteString("- [")
+		output.WriteString(base)
+		output.WriteString("](")
+		output.WriteString(file)
+		output.WriteString(")\n")
 	}
 }
 

@@ -214,8 +214,8 @@ func ResolveGitConflict(input string, gitSolveConflict GitSolveConflict) string 
 			if gitSolveConflict == GitSolveConflictWithRemote {
 				b.WriteString(line)
 			}
-
 		}
+		b.WriteString("\n")
 	}
 	return b.String()
 }
