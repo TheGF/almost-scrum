@@ -1,6 +1,6 @@
 import {
   Center, Input, Select, Switch, Table, TableCaption, Tbody,
-  Td, Tr
+  Td, Tr, Flex
 } from '@chakra-ui/react';
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react"
 import { React, useContext, useState, useEffect } from "react";
@@ -10,8 +10,7 @@ import AttachedFiles from './AttachedFiles';
 import Library from '../library/Library';
 
 function Files(props) {
-  const { task, saveTask, readOnly } = props;
-  const { info } = useContext(UserContext)
+  const { task, saveTask, readOnly, height } = props;
   const [attachedFiles, setAttachedFiles] = useState(task.files || [])
   const [tabIndex, setTabIndex] = useState(0)
   const [path, setPath] = useState(0)
@@ -21,32 +20,32 @@ function Files(props) {
     setTabIndex(1)
   }
 
-  function saveFiles() {
-    if (task.files != attachedFiles) {
-      saveTask({
-        ...task,
-        files: attachedFiles,
-      })
-    }
+  function setAttachedFilesAndSave(files) {
+    setAttachedFiles(files)
+    saveTask({
+      ...task,
+      files: files,
+    })
   }
-  useEffect(saveFiles, [attachedFiles])
 
-  return <Tabs variant="soft-rounded" size="sm" index={tabIndex} onChange={setTabIndex} isLazy>
-    <TabList>
-      <Tab>Attached</Tab>
-      <Tab>Full Library</Tab>
-    </TabList>
+  return <Tabs variant="soft-rounded" size="sm" index={tabIndex}
+      onChange={setTabIndex} isLazy>
+      <TabList>
+        <Tab>Attached</Tab>
+        <Tab>Full Library</Tab>
+      </TabList>
 
-    <TabPanels>
-      <TabPanel>
-        <AttachedFiles attachedFiles={attachedFiles} setAttachedFiles={setAttachedFiles}
-          onShowPath={showPath} readOnly={readOnly} />
-      </TabPanel>
-      <TabPanel>
-        <Library attachedFiles={attachedFiles} setAttachedFiles={!readOnly && setAttachedFiles}
-          path={path} />
-      </TabPanel>
-    </TabPanels>
-  </Tabs>
+      <TabPanels>
+        <TabPanel>
+          <AttachedFiles attachedFiles={attachedFiles} setAttachedFiles={setAttachedFilesAndSave}
+            onShowPath={showPath} readOnly={readOnly} height={height}/>
+        </TabPanel>
+        <TabPanel>
+          <Library attachedFiles={attachedFiles} height={height}
+            setAttachedFiles={!readOnly && setAttachedFilesAndSave}
+            path={path} />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
 }
 export default Files;

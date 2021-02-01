@@ -11,6 +11,7 @@ import (
 func libraryRoute(group *gin.RouterGroup) {
 	group.GET("/projects/:project/library/*path", listLibraryAPI)
 	group.PUT("/projects/:project/library/*path", createFolderAPI)
+	group.POST("/projects/:project/library", uploadFileAPI)
 	group.POST("/projects/:project/library/*path", uploadFileAPI)
 	group.DELETE("/projects/:project/library/*path", deleteFileAPI)
 	group.POST("/projects/:project/library-stat", getLibraryItemsAPI)
@@ -56,6 +57,7 @@ func createFolderAPI(c *gin.Context) {
 }
 
 func uploadFileAPI(c *gin.Context) {
+	log.Debug("Upload file request")
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
@@ -127,7 +129,8 @@ func deleteFileAPI(c *gin.Context) {
 	}
 
 	path := c.Param("path")
-	if err := core.DeleteFileFromLibrary(project, path); err != nil {
+	_, recursive := c.GetQuery("recursive")
+	if err := core.DeleteFileFromLibrary(project, path, recursive); err != nil {
 		log.Warnf("Cannot delete path %s: %v", path, err)
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot delete file")

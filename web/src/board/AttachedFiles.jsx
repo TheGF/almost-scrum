@@ -4,7 +4,7 @@ import {
     Link,
     Table,
     Tbody,
-    Td, Th, Thead, Tr
+    Td, Th, Thead, Tr, Flex
 } from '@chakra-ui/react';
 import { React, useContext, useState, useEffect } from "react";
 import Utils from '../core/utils';
@@ -13,7 +13,7 @@ import UserContext from '../UserContext';
 import PageEditor from '../library/PageEditor';
 
 function AttachedFiles(props) {
-    const { attachedFiles, setAttachedFiles, readOnly, onShowPath } = props;
+    const { attachedFiles, setAttachedFiles, readOnly, onShowPath, height } = props;
     const { project } = useContext(UserContext)
     const [infos, setInfos] = useState([])
     const [page, setPage] = useState(null)
@@ -29,12 +29,13 @@ function AttachedFiles(props) {
     useEffect(getStat, [attachedFiles])
 
     function detach(info) {
-        const p = `${info.parent}/${info.name}`
+        const p = `${info.parent}/${info.name}`.replace('//','/')
         const idx = attachedFiles.indexOf(p)
-        setAttachedFiles([
+        const files = [
             ...attachedFiles.slice(0, idx),
             ...attachedFiles.slice(idx + 1)
-        ])
+        ]
+        setAttachedFiles(files)
     }
 
     function onFileClick(info) {
@@ -42,7 +43,7 @@ function AttachedFiles(props) {
         if (info.name.endsWith(".pg")) {
             setPage(p)
         } else {
-            Server.downloadFromlibrary(project, p);
+            Server.openFromlibrary(project, p);
         }
     }
 
@@ -50,6 +51,11 @@ function AttachedFiles(props) {
         onShowPath(folder)
     }
 
+    function deleteFile(info) {
+        const p = `${info.parent}/${info.name}`
+        Server.deleteFromLibrary(project, p)
+            .then(_ => detach(info))
+    }
 
     const rows = infos && infos.map(info => {
         const folder = '/' + info.parent.replace('.', '').replace(/^\/+|\/+$/g, '')
@@ -64,7 +70,7 @@ function AttachedFiles(props) {
                     <Button onClick={_ => detach(info)} isReadOnly={readOnly}>
                         Detach
                         </Button>
-                    <Button onClick={_ => deleteFile(file)} isReadOnly={readOnly}>
+                    <Button onClick={_ => deleteFile(info)} isReadOnly={readOnly}>
                         Delete
                         </Button>
                 </ButtonGroup>
@@ -73,8 +79,10 @@ function AttachedFiles(props) {
         </Tr>
     })
 
-    return <>
+    return <Flex overflowY="auto"
+            h={height && height - 120}>
         <PageEditor page={page} setPage={setPage} />
+
         <Table>
             <Thead>
                 <Tr>
@@ -89,6 +97,6 @@ function AttachedFiles(props) {
                 {rows}
             </Tbody>
         </Table>
-    </>
+    </Flex>
 }
 export default AttachedFiles;

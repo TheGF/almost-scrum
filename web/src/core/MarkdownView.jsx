@@ -1,23 +1,13 @@
 
+import { Badge } from '@chakra-ui/react';
 import { React } from "react";
 import ReactMarkdown from "react-markdown";
 import "react-mde/lib/styles/css/react-mde-all.css";
 import gfm from 'remark-gfm';
-import { Badge } from '@chakra-ui/react';
-
+import MarkdownImage from './MarkdownImage';
 
 function MarkdownView(props) {
-    const { highlights, ...more } = props
-
-    function Image(props) {
-        const token = localStorage.token
-        if (token) {
-            const src = `${props.src}?token=${token}`
-            return <img {...props} style={{ maxWidth: '20%', maxHeight: '20%' }} src={src} />
-        } else {
-            return <img {...props} style={{ maxWidth: '20%', maxHeight: '20%' }} />
-        }
-    }
+    const { highlights, onChange, readOnly, value, ...more } = props
 
     function highlightWords(text) {
         let keyLocations = []
@@ -51,17 +41,21 @@ function MarkdownView(props) {
         return out
     }
 
+    function onImageUpdate(orig, update) {
+        onChange && onChange(value.replace(orig, update))
+    }
+
     function TextFilter(props) {
         return highlights ? highlightWords(props.value) : props.value
     }
 
     const renderers = {
-        image: Image,
+        image: (props) => <MarkdownImage onUpdate={onImageUpdate} readOnly={readOnly} {...props} />,
         text: TextFilter,
     }
 
-
     return <ReactMarkdown
+        source={value}
         plugins={[gfm]}
         renderers={renderers}
         {...more}

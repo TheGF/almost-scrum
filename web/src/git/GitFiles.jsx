@@ -54,7 +54,7 @@ function GitFiles(props) {
             } else {
                 stagedFiles.push(file);
             }
-            setStagedFiles(stagedFiles);
+            setStagedFiles([...stagedFiles]);
         }
 
         return Object.keys(gitStatus.files).sort().map(file => <Tr>

@@ -8,9 +8,9 @@ import MarkdownView from './MarkdownView';
 
 function MarkdownEditor(props) {
     const { project } = useContext(UserContext);
-    const { imageFolder, height, onSave, ...more } = props
+    const { imageFolder, height, onSave, disablePreview, ...more } = props
     const [value, setValue] = useState(null)
-    const [selectedTab, setSelectedTab] = useState("write");
+    const [selectedTab, setSelectedTab] = useState(disablePreview ? "write" : "preview");
 
     const saveImage = async function* (data) {
         const name = `${Date.now()}`
@@ -23,6 +23,7 @@ function MarkdownEditor(props) {
         setValue(value)
         props.onChange(value);
     }
+    
 
     function Image(props) {
         const token = localStorage.token
@@ -41,13 +42,15 @@ function MarkdownEditor(props) {
         key={height}
         value={value}
         onChange={onChange}
-        minEditorHeight={height-120}
-        maxEditorHeight={height-120}
+        disablePreview={disablePreview}
+        minEditorHeight={height - 120}
+        maxEditorHeight={height - 120}
         minPreviewHeight={height}
         selectedTab={selectedTab}
         onTabChange={setSelectedTab}
         generateMarkdownPreview={(markdown) =>
-            Promise.resolve(<MarkdownView source={markdown} />)
+            Promise.resolve(<MarkdownView value={markdown}
+                onChange={onChange} />)
         }
         paste={{
             saveImage: saveImage

@@ -340,14 +340,16 @@ function Task(props) {
 
                 <TabPanels>
                     <TabPanel key="view" padding={0}>
-                        <TaskViewer height={height} task={task} saveTask={saveTask} searchKeys={searchKeys} />
+                        <TaskViewer height={height} task={task} saveTask={saveTask} searchKeys={searchKeys}
+                            readOnly={readOnly} />
                     </TabPanel>
                     <TabPanel key="edit" padding={0}>
                         <TaskEditor task={task} saveTask={saveTask} users={users} height={height}
                             readOnly={readOnly} />
                     </TabPanel>
                     <TabPanel key="properties" >
-                        <Properties task={task} saveTask={saveTask} users={users} readOnly={readOnly} />
+                        <Properties task={task} saveTask={saveTask} users={users}
+                            height={height} readOnly={readOnly} />
                     </TabPanel>
                     <TabPanel key="progress" >
                         <Progress task={task} readOnly={readOnly}
@@ -357,7 +359,8 @@ function Task(props) {
                             }} />
                     </TabPanel>
                     <TabPanel>
-                        <Files task={task} saveTask={saveTask} readOnly={readOnly} />
+                        <Files task={task} saveTask={saveTask} readOnly={readOnly}
+                            height={height} />
                     </TabPanel>
                 </TabPanels>
             </Tabs>

@@ -75,9 +75,13 @@ func CreateFolderInLibrary(project *Project, path string) error {
 	return os.MkdirAll(path, 0755)
 }
 
-func DeleteFileFromLibrary(project *Project, path string) error {
+func DeleteFileFromLibrary(project *Project, path string, recursive bool) error {
 	path = filepath.Join(project.Path, ProjectLibraryFolder, path)
-	return os.Remove(path)
+	if recursive {
+		return os.RemoveAll(path)
+	} else {
+		return os.Remove(path)
+	}
 }
 
 // GetPathInLibrary returns the absolute path for a resource stored in the library.

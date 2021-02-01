@@ -167,7 +167,7 @@ class Server {
 
     static uploadFileToLibrary(project, path, file, name) {
         path = encodeURIComponent(path)
-        const config = getConfig();
+        const config = {}//getConfig();
         let formData = null;
 
         if (file) {
@@ -181,8 +181,9 @@ class Server {
             config.headers['Content-Type'] = 'multipart/form-data';
         }
 
-        return axios.post(`/api/v1/projects/${project}/library${path}`, formData, config)
-            .then(r => r.data)
+
+        return axios.post(`/api/v1/projects/${project}/library${path}`, formData, {config})
+            .then(r => r.data.filter(f => !f.name.startsWith('.')))
             .catch(loginWhenUnauthorized);
     }
 
@@ -197,9 +198,11 @@ class Server {
         })
     }
 
-    static deleteFromLibrary(project, path) {
+    static deleteFromLibrary(project, path, recursive) {
         path = encodeURIComponent(path)
-        return axios.delete(`/api/v1/projects/${project}/library${path}`, getConfig())
+        let url = `/api/v1/projects/${project}/library${path}`
+        if (recursive) { url += '?recursive'}
+        return axios.delete(url, getConfig(url))
             .then(r => r.data)
             .catch(loginWhenUnauthorized);
     }

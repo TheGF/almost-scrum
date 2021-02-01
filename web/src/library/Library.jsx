@@ -17,11 +17,14 @@ import PageEditor from './PageEditor';
 import { GiGrapes } from 'react-icons/gi';
 import { MdCreateNewFolder } from 'react-icons/md';
 import { VscNewFile } from 'react-icons/vsc';
+import { Box } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 
 function Library(props) {
     const { project } = useContext(UserContext);
-    const { attachedFiles, setAttachedFiles } = props
+    const { attachedFiles, setAttachedFiles, height } = props
     const [path, setPath] = useState(props.path || '')
+    const [uploading, setUploading] = useState(false)
 
     const [favorites, setFavorites] = useState(
         (localStorage.getItem('ash-lib-favs') || '').split(',').filter(f => f)
@@ -63,14 +66,16 @@ function Library(props) {
 
 
     function deleteFile(file) {
-        Server.deleteFromLibrary(project, `${path}/${file.name}`)
-            .than(listFolder)
+        Server.deleteFromLibrary(project, `${path}/${file.name}`, file.name.endsWith('.pg'))
+            .then(listFolder)
     }
 
     function uploadFile(evt) {
+        setUploading(true)
         const file = evt.target.files[0];
         file && Server.uploadFileToLibrary(project, path, file)
-            .then(setFiles);
+            .then(setFiles)
+            .then(_ => setUploading(false));
     }
 
     function onFileClick(file) {
@@ -115,10 +120,11 @@ function Library(props) {
 
     function detach(file) {
         const idx = attachedFiles.indexOf(file)
-        setAttachedFiles([
+        const files = [
             ...attachedFiles.slice(0, idx),
             ...attachedFiles.slice(idx + 1)
-        ])
+        ]
+        setAttachedFiles(files)
     }
 
     function getAttachButton(file) {
@@ -133,37 +139,43 @@ function Library(props) {
         }
     }
 
-    const rows = files.map(file => <Tr key={file.name}>
-        <Td>
-            <Editable defaultValue={file.name} isPreviewFocusable={false}
-                onSubmit={name => renameFile(file, name)}>
-                {({ isEditing, onEdit }) => (
-                    <HStack spacing={2}>
-                        <>
-                            {file.name.endsWith('.pg') ? <GiGrapes /> : Utils.fileIcon(file.dir, file.mime)}
-                            <Link href="#" onClick={_ => {
-                                if (!isEditing) onFileClick(file)
-                            }}>
-                                <EditablePreview
-                                    style={{ cursor: 'pointer', color: 'blue' }} />
-                            </Link>
-                            <EditableInput maxWidth={'90%'} />
-                        </>
-                        <IconButton variant="outline" size="xs" icon={<BiEdit />} onClick={
-                            onEdit
-                        } />
-                    </HStack>
-                )}
-            </Editable></Td>
-        <Td>{Utils.getFriendlyDate(file.modTime)}</Td>
-        <Td>{file.size}</Td>
-        <Td>
-            <ButtonGroup size="sm" spacing={2}>
-                {getAttachButton(file)}
-                <Button onClick={_ => deleteFile(file)}>Delete</Button>
-            </ButtonGroup>
-        </Td>
-    </Tr>)
+    const rows = files.map(file => {
+        const idx = file.name.lastIndexOf('.')
+        const ext = idx != -1 ? file.name.substr(idx + 1) : ''
+        const name = idx != -1 ? file.name.substr(0, idx) : file.name
+        return <Tr key={file.name}>
+            <Td>
+                <Editable defaultValue={name} isPreviewFocusable={false}
+                    onSubmit={name => renameFile(file, `${name}.${ext}`)}>
+                    {({ isEditing, onEdit }) => (
+                        <HStack spacing={2}>
+                            <>
+                                {ext.endsWith('.pg') ? <GiGrapes /> : Utils.fileIcon(file.dir, file.mime)}
+                                <Link href="#" onClick={_ => {
+                                    if (!isEditing) onFileClick(file)
+                                }}>
+                                    <EditablePreview
+                                        style={{ cursor: 'pointer', color: 'blue' }} />
+                                </Link>
+                                <EditableInput maxWidth={'90%'} />
+                                .{ext}
+                            </>
+                            <IconButton variant="outline" size="xs" icon={<BiEdit />} onClick={
+                                onEdit
+                            } />
+                        </HStack>
+                    )}
+                </Editable></Td>
+            <Td>{Utils.getFriendlyDate(file.modTime)}</Td>
+            <Td>{file.size}</Td>
+            <Td>
+                <ButtonGroup size="sm" spacing={2}>
+                    {getAttachButton(file)}
+                    <Button onClick={_ => deleteFile(file)}>Delete</Button>
+                </ButtonGroup>
+            </Td>
+        </Tr>
+    })
 
     const folders = path.split('/')
     let breadcrumbs = folders.reduce((acc, folder) => {
@@ -186,7 +198,7 @@ function Library(props) {
 
     let hiddenInput = null
 
-    return <VStack w="90%" align="left" >
+    return <VStack w="100%" align="left" >
         <PageEditor page={page} setPage={setPage} />
         <HStack w="90%" borderWidth="2" borderColor="gray">
             {breadcrumb}
@@ -200,7 +212,7 @@ function Library(props) {
                     ref={el => hiddenInput = el}
                     onChange={uploadFile} />
             </VisuallyHidden>
-            <Button onClick={_ => hiddenInput.click()}>
+            <Button onClick={_ => hiddenInput.click()} isLoading={uploading} >
                 <T>Upload</T>
             </Button>
             <Button onClick={newFolder} title="Create New Folder">
@@ -213,19 +225,22 @@ function Library(props) {
                 <AiOutlineReload onClick={listFolder} />
             </IconButton>
         </HStack>
-        <Table>
-            <Thead>
-                <Tr>
-                    <Th>Name</Th>
-                    <Th>Modified</Th>
-                    <Th>Size</Th>
-                    <Th>Actions</Th>
-                </Tr>
-            </Thead>
-            <Tbody>
-                {rows}
-            </Tbody>
-        </Table>
+        <Flex overflowY="auto"
+            h={height && height - 160}>
+            <Table w="100%">
+                <Thead>
+                    <Tr>
+                        <Th>Name</Th>
+                        <Th>Modified</Th>
+                        <Th>Size</Th>
+                        <Th>Actions</Th>
+                    </Tr>
+                </Thead>
+                <Tbody  >
+                    {rows}
+                </Tbody>
+            </Table>
+        </Flex>
     </VStack>
 }
 
