@@ -16,6 +16,7 @@ import GitCommit from "./GitCommit";
 import GitPush from './GitPush';
 import GitSettings from './GitSettings';
 import T from "../core/T";
+import GitPull from './GitPull';
 
 
 function GitIntegration({ isOpen, onClose }) {
@@ -39,8 +40,9 @@ function GitIntegration({ isOpen, onClose }) {
             <ModalHeader>Git Integration</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-                <Tabs>
+                <Tabs defaultIndex={1}>
                     <TabList>
+                        <Tab><T>pull</T></Tab>
                         <Tab><T>files</T></Tab>
                         <Tab><T>message</T></Tab>
                         <Tab isDisabled={!stagedFiles || !gitMessage.header}>
@@ -51,6 +53,9 @@ function GitIntegration({ isOpen, onClose }) {
                     </TabList>
 
                     <TabPanels>
+                        <TabPanel>
+                            <GitPull />
+                        </TabPanel>
                         <TabPanel>
                             <GitFiles stagedFiles={stagedFiles} setStagedFiles={setStagedFiles} />
                         </TabPanel>

@@ -36,12 +36,6 @@ function GitFiles(props) {
             })
     }
 
-    function pull() {
-        setPullInProgress(true)
-        Server.postGitPull(project)
-            .then(_ => setPullInProgress(false))
-    }
-
     function getRows(gitStatus) {
         if (!gitStatus) {
             return [];
@@ -68,10 +62,7 @@ function GitFiles(props) {
     const rows = getRows(gitStatus)
 
     return <VStack>
-        <HStack>
-            <Button onClick={getStatus} isLoading={gettingStatus}>Get Status</Button>
-            <Button onClick={pull} isLoading={pullInProgress}>Pull</Button>
-        </HStack>
+        <Button onClick={getStatus} isLoading={gettingStatus}>Get Status</Button>
         <Flex overflow="auto" h="20em" w="100%">
             <Table overflow="auto" >
                 <Thead>

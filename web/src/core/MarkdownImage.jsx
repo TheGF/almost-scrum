@@ -13,7 +13,7 @@ import {
     useDisclosure,
 } from "@chakra-ui/react"
 import { Radio, RadioGroup, Button } from "@chakra-ui/react"
-import { VStack, HStack, Stack } from "@chakra-ui/react"
+import { VStack, HStack, Stack, Box } from "@chakra-ui/react"
 import {
     Slider,
     SliderTrack,
@@ -79,7 +79,7 @@ function MarkdownImage(props) {
                 <ModalCloseButton />
                 <ModalBody>
                     <VStack spacing={5}>
-                        <HStack>
+                        <HStack >
                             <RadioGroup value={align} onChange={setAlign} >
                                 <Stack direction="row">
                                     <Radio value="left">Left</Radio>
