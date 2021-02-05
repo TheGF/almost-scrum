@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var gitClient = GitNative{}
+var gitClient = GoGit{} //GitNative{}
 
 func TestStatus(t *testing.T) {
 	project, err := OpenProject("../../.ash")
@@ -14,6 +14,13 @@ func TestStatus(t *testing.T) {
 
 	gitStatus, err := gitClient.GetStatus(project)
 	t.Logf("Gitfiles %v", gitStatus)
+}
+
+func TestClone(t *testing.T) {
+	out, err := gitClient.Clone("https://github.com/TheGF/AI.git", "/tmp")
+	assert.NotNilf(t, err, "Cannot clone: %w", err)
+
+	print(out)
 }
 
 func TestCommit(t *testing.T) {

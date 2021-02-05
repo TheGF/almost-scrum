@@ -34,6 +34,7 @@ type CommitInfo struct {
 }
 
 type GitClient interface {
+	Clone(url string, path string) (string, error)
 	GetStatus(project *Project) (GitStatus, error)
 	Pull(project *Project, user string) (string, error)
 	Push(project *Project, user string) (string, error)

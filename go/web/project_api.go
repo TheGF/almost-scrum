@@ -2,14 +2,15 @@ package web
 
 import (
 	"almost-scrum/core"
+	"fmt"
 	"github.com/fatih/color"
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
-
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+	"regexp"
 )
 
 type ProjectMapping map[string]*core.Project
@@ -54,11 +55,15 @@ func searchForProject(repoPath string, name string, items ...string) bool {
 	return true
 }
 
+var repository string
+
 func loadRepoProjects(repoPath string) error {
 	infos, err := ioutil.ReadDir(repoPath)
 	if err != nil {
 		return err
 	}
+
+	repository = repoPath
 	for _, info := range infos {
 		if !info.IsDir() {
 			continue
@@ -91,6 +96,9 @@ func loadGlobalProjects() {
 //serverRoute add routes used in a server setup
 func serverRoute(group *gin.RouterGroup, repoPath string) {
 	group.GET("/projects", listProjectsAPI)
+	group.POST("/projects", createProjectAPI)
+	group.GET("/users", listUsersAPI)
+	group.GET("/templates", listProjectTemplatesAPI)
 
 	if err := loadRepoProjects(repoPath); err != nil {
 		color.Red("Cannot start server because of invalid repo folder %s: %v", repoPath, err)
@@ -99,20 +107,141 @@ func serverRoute(group *gin.RouterGroup, repoPath string) {
 	loadGlobalProjects()
 }
 
-//projectRoute add projects related api routes
-func projectRoute(group *gin.RouterGroup) {
-	group.GET("/projects/:project/info", getProjectInfoAPI)
-	group.GET("/projects/:project/boards", listBoardsAPI)
-	group.PUT("/projects/:project/boards/:board", createBoardAPI)
-}
-
 func listProjectsAPI(c *gin.Context) {
-	var names []string
+	var names = make([]string, 0)
 	for key := range projectMapping {
 		names = append(names, key)
 	}
 
 	c.JSON(http.StatusOK, names)
+}
+
+type Authorization struct {
+	Users []string
+	Pam   bool
+}
+
+func listUsersAPI(c *gin.Context) {
+	var users []string
+
+	config := core.LoadConfig()
+
+	for user := range config.Passwords {
+		users = append(users, user)
+	}
+
+	c.JSON(http.StatusOK, users)
+}
+
+func listProjectTemplatesAPI(c *gin.Context) {
+	c.JSON(http.StatusOK, core.ListProjectTemplates())
+}
+
+type createOptions struct {
+	ProjectName  string   `json:"projectName"`
+	ImportFolder string   `json:"importPath"`
+	Templates    []string `json:"templates"`
+	Inject       bool     `json:"inject"`
+	GitUrl       string   `json:"gitUrl"`
+}
+
+func createProjectInFolder(c *gin.Context, name string, path string, templates []string, res string)  {
+	var err error
+	if len(templates) == 0 {
+		_, err = core.InitProject(path)
+	} else {
+		_, err = core.InitProjectFromTemplate(path, templates)
+	}
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	if err := openProject(name, path); err != nil {
+		c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))
+	} else {
+		c.String(http.StatusCreated, res)
+	}
+}
+
+var cloneUrl = regexp.MustCompile(`http.*\/([^\/]*?)(.git)?$`)
+func createProjectFromGit(c *gin.Context, createOptions createOptions) {
+	match := cloneUrl.FindStringSubmatch(createOptions.GitUrl)
+	if len(match) < 2 {
+		c.String(http.StatusBadRequest, "Unsupported URL '%s'", createOptions.GitUrl)
+		return
+	}
+	name := match[1]
+
+	gitClient := core.GetGitClientFromGlobalConfig()
+	responseBody, err := gitClient.Clone(createOptions.GitUrl, repository)
+	if err != nil {
+		c.String(http.StatusInternalServerError, responseBody)
+	}
+
+	path := filepath.Join(repository, name)
+	if err := openProject(name, path); err == nil {
+		c.String(http.StatusCreated, name)
+	} else if createOptions.Inject {
+		createProjectInFolder(c, name, path, createOptions.Templates, responseBody)
+	} else {
+		c.String(http.StatusBadRequest, "Folder %s does not contain a valid project",
+			createOptions.ImportFolder)
+	}
+}
+
+func importFolderFromPath(c *gin.Context, createOptions createOptions) {
+	path := createOptions.ImportFolder
+	if _, err := os.Stat(path); err != nil {
+		c.String(http.StatusBadRequest, "Folder %s does not exists", createOptions.ImportFolder)
+		return
+	}
+
+	name := filepath.Base(createOptions.ImportFolder)
+	if err := openProject(name, createOptions.ImportFolder); err == nil {
+		c.String(http.StatusCreated, name)
+	} else if createOptions.Inject {
+		createProjectInFolder(c, name, path, createOptions.Templates, name)
+	} else {
+		c.String(http.StatusBadRequest, "Folder %s does not contain a valid project",
+			createOptions.ImportFolder)
+	}
+}
+
+func createProjectFromScratch(c *gin.Context, createOptions createOptions) {
+	name := createOptions.ProjectName
+	path := filepath.Join(repository, name)
+	if _, err := os.Stat(path); err == nil {
+		c.String(http.StatusConflict, "Project %s already exists", createOptions.ProjectName)
+		return
+	}
+	createProjectInFolder(c, name, path, createOptions.Templates, name)
+}
+
+func createProjectAPI(c *gin.Context) {
+	var createOptions createOptions
+
+	if err := c.BindJSON(&createOptions); core.IsErr(err, "Invalid JSON") {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	if createOptions.GitUrl != "" {
+		createProjectFromGit(c, createOptions)
+	} else if createOptions.ImportFolder != "" {
+		importFolderFromPath(c, createOptions)
+	} else if createOptions.ProjectName != "" {
+		createProjectFromScratch(c, createOptions)
+	} else {
+		c.String(http.StatusBadRequest, "Invalid parameters")
+	}
+}
+
+//projectRoute add projects related api routes
+func projectRoute(group *gin.RouterGroup) {
+	group.GET("/projects/:project/info", getProjectInfoAPI)
+	group.GET("/projects/:project/boards", listBoardsAPI)
+	group.PUT("/projects/:project/boards/:board", createBoardAPI)
 }
 
 type ProjectInfo struct {

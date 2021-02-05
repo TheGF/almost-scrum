@@ -32,6 +32,8 @@ var (
 	ProjectFolders = []string{"boards/backlog", "boards/sandbox", "boards/icebox",
 		ProjectLibraryFolder, ProjectUsersFolder, ProjectLibraryInlineImagesFolder}
 
+	ProjectTemplatesPath = "assets/templates/"
+
 	// ErrNoFound occurs when an item is not found
 	ErrNoFound = errors.New("no such item")
 

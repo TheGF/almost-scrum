@@ -7,11 +7,38 @@ import (
 	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
 
 type GoGit struct{}
+
+
+var cloneUrl = regexp.MustCompile(`http.*\/([^\/]*?)(.git)?$`)
+
+func (client GoGit) Clone(url string, path string) (string, error) {
+	match := cloneUrl.FindStringSubmatch(url)
+	if len(match) < 2 {
+		return "Invalid url", ErrNoFound
+	}
+	name := match[1]
+	path = filepath.Join(path, name)
+	r, err := git.PlainClone(path, false, &git.CloneOptions{
+		URL:               url,
+		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+	})
+	if err != nil {
+		logrus.Warnf("Cannot clone git repository %s: %v", url, err)
+		return "", nil
+	}
+	ref, err := r.Head()
+	if err != nil {
+		logrus.Warnf("Cannot retrieve git head for path %s: %v", path, err)
+		return "", nil
+	}
+	return ref.Hash().String(), nil
+}
 
 func (client GoGit) GetStatus(project *Project) (GitStatus, error) {
 	start := time.Now()

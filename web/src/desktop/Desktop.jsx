@@ -59,7 +59,7 @@ function Desktop(props) {
 
     const username  = info && info.systemUser
     const userContext = { project, info, username }
-    return <UserContext.Provider value={userContext}>
+    return info ? <UserContext.Provider value={userContext}>
 
         <GitIntegration isOpen={showGitIntegration}
             onClose={_ => setShowGitIntegration(false)} />
@@ -80,7 +80,7 @@ function Desktop(props) {
                 {content}
             </VStack>
         </Flex>
-    </UserContext.Provider>
+    </UserContext.Provider> : null
 }
 
 export default Desktop

@@ -16,6 +16,18 @@ type GitNative struct{}
 
 var statusRe = regexp.MustCompile(`\s*([?\w])[?\w]?\s+(.*)`)
 
+func (client GitNative) Clone(url string, path string) (string, error) {
+	start := time.Now()
+	out, err := UseCommand("git", "", "-C", path, "clone", url)
+	if err != nil {
+		return out, err
+	}
+
+	elapsed := time.Since(start)
+	logrus.Infof("Git Clone completed in %s", elapsed)
+	return out, nil
+}
+
 func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
@@ -27,7 +39,7 @@ func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 
 	gitStatus := GitStatus{
 		AshFiles: make([]string, 0),
-		Files: make(map[string]GitChange),
+		Files:    make(map[string]GitChange),
 	}
 
 	lines := strings.Split(out, "\n")
@@ -175,8 +187,8 @@ func (client GitNative) Commit(project *Project, commitInfo CommitInfo) (string,
 		return "", err
 	}
 
-	addArgs := []string {"-C", gitFolder, "add"}
-	rmArgs := []string {"-C", gitFolder, "rm"}
+	addArgs := []string{"-C", gitFolder, "add"}
+	rmArgs := []string{"-C", gitFolder, "rm"}
 	for _, file := range commitInfo.Files {
 		change, found := gitStatus.Files[file]
 		if found && change == GitDeleted {

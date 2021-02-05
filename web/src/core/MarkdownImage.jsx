@@ -1,28 +1,14 @@
-
-
-import { React, useState, useEffect } from "react";
-import { Img } from '@chakra-ui/react';
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
-    useDisclosure,
-} from "@chakra-ui/react"
-import { Radio, RadioGroup, Button } from "@chakra-ui/react"
-import { VStack, HStack, Stack, Box } from "@chakra-ui/react"
-import {
-    Slider,
-    SliderTrack,
-    SliderFilledTrack,
-    SliderThumb,
-} from "@chakra-ui/react"
+    Button, HStack, Img, Modal, ModalBody, ModalCloseButton, ModalContent,
+    ModalFooter, ModalHeader, ModalOverlay, Radio, RadioGroup, Slider,
+    SliderFilledTrack, SliderThumb, SliderTrack, Stack, useDisclosure, VStack
+} from '@chakra-ui/react';
+import { React, useContext, useState } from "react";
+import UserContext from '../UserContext';
 
 function MarkdownImage(props) {
     const token = localStorage.token
+    const { project } = useContext(UserContext);
     const { readOnly } = props
     const [alt, _align, _size] = parseOptions()
     const [align, setAlign] = useState(_align)
@@ -69,7 +55,8 @@ function MarkdownImage(props) {
     }
 
     const onClick = readOnly ? null : onOpen
-    const src = token ? `${props.src}?token=${token}` : props.src
+    let src = props.src.replace('~library', `/api/v1/projects/${project}/library`)
+    src = token ? `${src}?token=${token}` : src
     return <>
         <Img alt={alt}{...getMore()} src={src} onClick={onClick} />
         <Modal isOpen={isOpen} onClose={onClose}>

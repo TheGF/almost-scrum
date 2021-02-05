@@ -9,12 +9,12 @@ import (
 )
 
 func userRoute(group *gin.RouterGroup) {
-	group.GET("/projects/:project/users", listUsersAPI)
-	group.GET("/projects/:project/users/:user", getUserAPI)
-	group.PUT("/projects/:project/users/:user", putUserAPI)
+	group.GET("/projects/:project/users", listProjectUsersAPI)
+	group.GET("/projects/:project/users/:user", getProjectUserAPI)
+	group.PUT("/projects/:project/users/:user", putProjectUserAPI)
 }
 
-func listUsersAPI(c *gin.Context) {
+func listProjectUsersAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
@@ -24,7 +24,7 @@ func listUsersAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-func getUserAPI(c *gin.Context) {
+func getProjectUserAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
@@ -41,7 +41,7 @@ func getUserAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, userInfo)
 }
 
-func putUserAPI(c *gin.Context) {
+func putProjectUserAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return

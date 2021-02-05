@@ -7,8 +7,17 @@ import (
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 )
+
+type LdapConfig struct {
+	Host         string
+	Base         string
+	Port         int
+	UseSSL       bool
+	BindDN       string
+	BindPassword string
+	UserFilter   string
+}
 
 //Config is the global configuration stored in the user's home directory.
 type Config struct {
@@ -19,6 +28,7 @@ type Config struct {
 	Secret       string
 	OwnerLock    bool
 	UseGitNative bool
+	LdapConfig   *LdapConfig
 }
 
 var defaultConfig = Config{
@@ -44,36 +54,6 @@ func getConfigPath() string {
 	configFolder := filepath.Join(home, ".config")
 	_ = os.MkdirAll(configFolder, os.FileMode(0755))
 	return filepath.Join(configFolder, "almost-scrum.yaml")
-}
-
-// SetPassword add a user with password to the global configuration.
-func SetPassword(user, password string) error {
-	config := LoadConfig()
-
-	if password == "" {
-		delete(config.Passwords, user)
-		SaveConfig(config)
-		return nil
-	}
-
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	if err != nil {
-		logrus.Errorf("SetUser - Cannot save user %s and password: %v", user, err)
-		return err
-	}
-	config.Passwords[user] = hex.EncodeToString(bytes)
-	SaveConfig(config)
-	logrus.Debugf("SetPassword - set password for user %s", user)
-	return nil
-}
-
-//CheckUser checks if a user has expected password
-func CheckUser(user, password string) bool {
-	config := LoadConfig()
-	hash, _ := hex.DecodeString(config.Passwords[user])
-
-	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
-	return err == nil
 }
 
 //LoadConfig returns the global configuration

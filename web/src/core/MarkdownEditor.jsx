@@ -15,7 +15,7 @@ function MarkdownEditor(props) {
     const saveImage = async function* (data) {
         const name = `${Date.now()}`
         await Server.uploadFileToLibrary(project, imageFolder, new Blob([data]), name)
-        yield `/api/v1/projects/${project}/library${imageFolder}/${name}`;
+        yield `~library${imageFolder}/${name}`;
         return true;
     };
 
@@ -24,17 +24,6 @@ function MarkdownEditor(props) {
         props.onChange(value);
     }
     
-
-    function Image(props) {
-        const token = localStorage.token
-        if (token) {
-            const src = `${props.src}?token=${token}`
-            return <img {...props} style={{ maxWidth: '20%', maxHeight: '20%' }} src={src} />
-        } else {
-            return <img {...props} style={{ maxWidth: '20%', maxHeight: '20%' }} />
-        }
-    }
-
 
     console.log('Height', height)
 

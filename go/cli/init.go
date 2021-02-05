@@ -8,16 +8,20 @@ import (
 	"path/filepath"
 )
 
-func chooseTemplate() string {
+func chooseTemplates() []string {
+	var selected []string
 	templates := []string {"Empty"}
 	templates = append(templates, core.ListProjectTemplates()...)
 
-	prompt := promptui.Select{
-		Label: "Choose the project template",
-		Items: templates,
-	}
+	for true {
+		prompt := promptui.Select{
+			Label: "Choose the project template",
+			Items: templates,
+		}
 
-	_, selected, _ := prompt.Run()
+		_, s, _ := prompt.Run()
+		selected = append(selected, s)
+	}
 	return selected
 }
 
@@ -37,12 +41,12 @@ func processInit(projectPath string, _ []string) {
 		return
 	}
 
-	template := chooseTemplate()
+	templates := chooseTemplates()
 	var project *core.Project
-	if template == "Empty" {
+	if len(templates) == 0 {
 		project, err = core.InitProject(projectPath)
 	} else {
-		project, err = core.InitProjectFromTemplate(projectPath, template)
+		project, err = core.InitProjectFromTemplate(projectPath, templates)
 	}
 	abortIf(err, "")
 

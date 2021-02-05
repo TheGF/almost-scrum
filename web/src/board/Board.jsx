@@ -27,6 +27,11 @@ function Board(props) {
     const [compact, setCompact] = useState(false)
     const spacerRef = useRef(null)
 
+    function onNewTask() {
+        Server.createTask(project, name, 'Click_and_Rename')
+            .then(_ => loadTaskList())
+    }
+
     function loadMore() {
         const filter = searchKeys.join(',')
         const start = infos.length
@@ -34,7 +39,7 @@ function Board(props) {
         Server.listTasks(project, name, filter, start, end)
             .then(items => {
                 items = [...infos, ...items]
-                setInfos(items)               
+                setInfos(items)
                 setHasMore(items.length == end)
                 console.log('Setting more = ', items.length == end)
             })
@@ -48,7 +53,7 @@ function Board(props) {
             loadMore()
         }
     }
-    useEffect(_ => {if (hasMore) setTimeout(checkSpace, 100)}, [infos, compact]);
+    useEffect(_ => { if (hasMore) setTimeout(checkSpace, 100) }, [infos, compact]);
 
     function loadTaskList() {
         infos.length = 0
@@ -68,13 +73,13 @@ function Board(props) {
             boards={boards} onBoardChanged={loadTaskList}
             users={users} searchKeys={searchKeys} />
     );
-    console.log('Has more ', hasMore);
-    return <VStack
+    return infos ? <VStack
         spacing={4}
         align="stretch"
         w="100%"
     >
-        <FilterPanel compact={compact} setCompact={setCompact} setSearchKeys={setSearchKeys} />
+        <FilterPanel compact={compact} setCompact={setCompact} setSearchKeys={setSearchKeys}
+            onNewTask={onNewTask} users={users}/>
         <InfiniteScroll
             dataLength={infos.length}
             next={loadMore}
@@ -84,7 +89,7 @@ function Board(props) {
             {tasks}
             <Spacer key={infos.length} ref={spacerRef} />
         </InfiniteScroll>
-    </VStack>
+    </VStack> : null
 
 }
 

@@ -1,16 +1,30 @@
-import { Button, HStack, Spacer } from "@chakra-ui/react";
+import { Button, HStack, Spacer, IconButton } from "@chakra-ui/react";
+import {
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverHeader,
+    PopoverBody,
+    PopoverFooter,
+    PopoverArrow,
+    PopoverCloseButton,
+} from "@chakra-ui/react"
 import { React, useContext, useEffect, useRef, useState } from "react";
-import { BsViewStacked, MdViewHeadline, RiFilterLine } from 'react-icons/all';
+import { BsViewStacked, MdViewHeadline, RiChatNewLine, RiFilterLine } from 'react-icons/all';
 import ReactTags from 'react-tag-autocomplete';
 import './reactTags.css'
 import Server from '../server';
 import UserContext from '../UserContext';
+import Filter from "./Filter";
+import Portal from '../portal/Portal';
 
 function FilterPanel(props) {
-    const { project } = useContext(UserContext);
-    const { compact, setCompact, setSearchKeys } = props;
+    const { project, info } = useContext(UserContext);
+    const { propertyModel } = info
+    const { compact, setCompact, setSearchKeys, onNewTask, users } = props;
     const [tags, setTags] = useState([])
     const [suggestions, setSuggestions] = useState([]);
+    const [showFilter, setShowFilter] = useState(false);
     const reactTags = useRef()
 
 
@@ -23,8 +37,8 @@ function FilterPanel(props) {
     function getSuggestions(prefix) {
         Server.getSuggestions(project, prefix)
             .then(keys => setSuggestions(
-                (keys || []).map((key, idx) => {
-                    return { id: idx, name: key }
+                (keys || []).map(key => {
+                    return { id: key, name: key }
                 })
             ))
     }
@@ -33,8 +47,8 @@ function FilterPanel(props) {
         setTags([...tags, tag])
     }
 
-    function deleteTagFromSearch(idx) {
-        setTags(tags.filter((tag, i) => i != idx))
+    function deleteTagFromSearch(id) {
+        setTags(tags.filter((tag, i) => i != id))
     }
 
     function onInputInSearch(query) {
@@ -56,8 +70,19 @@ function FilterPanel(props) {
         </Button>
 
 
+    const filterButton = <Popover placement="bottom-end" maxW={500} className="filter-pop" variant="responsive">
+        <PopoverTrigger>
+            <Button onClick={_ => setShowFilter(!showFilter)}>
+                <RiFilterLine />
+            </Button>
+        </PopoverTrigger>
+        <PopoverContent maxW={500}>
+            <Filter users={users} tags={tags} setTags={setTags}/>
+        </PopoverContent>
+    </Popover>
 
     return <HStack spacing={3}>
+        <IconButton title="New Task" icon={<RiChatNewLine />} onClick={onNewTask} />
         <ReactTags
             ref={reactTags}
             tags={tags}
@@ -67,15 +92,16 @@ function FilterPanel(props) {
             onAddition={addTagToSearch}
             function onInput={onInputInSearch}
         />
-
         <Spacer />
         {compactButton}
-        <Button title="TODO">
-            <RiFilterLine />
-        </Button>
-
-
+        {filterButton}
     </HStack >
+
+
+    // return <>
+    //     {bar}
+    //     {filter}
+    // </>
 }
 
 export default FilterPanel

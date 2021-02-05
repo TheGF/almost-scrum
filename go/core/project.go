@@ -23,12 +23,23 @@ type ProjectConfig struct {
 	UseGitNative    bool          `yaml:"useGitNative"`
 }
 
+type PropertyKind string
+
+const (
+	KindString PropertyKind = "String"
+	KindEnum   PropertyKind = "Enum"
+	KindBool   PropertyKind = "Bool"
+	KindUser   PropertyKind = "User"
+	KindTag    PropertyKind = "Tag"
+)
+
 type PropertyDef struct {
-	Name    string   `json:"name" yaml:"name"`
-	Kind    string   `json:"kind" yaml:"kind"`
-	Values  []string `json:"values" yaml:"values"`
-	Prefix  string   `json:"prefix" yaml:"prefix"`
-	Default string   `json:"default" yaml:"default"`
+	Name     string   `json:"name" yaml:"name"`
+	Kind     string   `json:"kind" yaml:"kind"`
+	Values   []string `json:"values" yaml:"values"`
+	Prefix   string   `json:"prefix" yaml:"prefix"`
+	Default  string   `json:"default" yaml:"default"`
+	IsFilter bool     `json:"isFilter" yaml:"isFilter"`
 }
 
 // Project is the basic information about a scrum project.
@@ -90,30 +101,40 @@ func GetGitClient(project *Project) GitClient {
 	}
 }
 
-
+func GetGitClientFromGlobalConfig() GitClient {
+	config := LoadConfig()
+	if config.UseGitNative {
+		return GitNative{}
+	} else {
+		return GoGit{}
+	}
+}
 
 func ListProjectTemplates() []string {
 	var templates []string
 
 	for _, name := range assets.AssetNames() {
-		if !strings.HasPrefix(name, "assets") {
+		if !strings.HasPrefix(name, ProjectTemplatesPath) || !strings.HasSuffix(name, ".zip") {
 			continue
 		}
-		templates = append(templates, name)
+		templates = append(templates, name[len(ProjectTemplatesPath):len(name)-len(".zip")])
 	}
 	return templates
 }
 
-func InitProjectFromTemplate(path string, templateName string) (*Project, error) {
-	templateData, err := assets.Asset(templateName)
-	if err != nil {
-		return nil, err
+func InitProjectFromTemplate(path string, templates []string) (*Project, error) {
+	for _, template := range templates {
+		template = fmt.Sprintf("%s%s.zip", ProjectTemplatesPath, template)
+		templateData, err := assets.Asset(template)
+		if err != nil {
+			return nil, err
+		}
+		UnzipFile(templateData, path)
 	}
-	UnzipFile(templateData, path)
 
 	projectConfig, err := ReadProjectConfig(path)
 	if err != nil {
-		logrus.Warnf("InitProjectFromTemplate - Template %s is corrupted: %v", templateName, err)
+		logrus.Warnf("InitProjectFromTemplate - cannot create project: %v", err)
 		return nil, ErrNoFound
 	}
 
@@ -137,7 +158,6 @@ func InitProject(path string) (*Project, error) {
 		return nil, err
 	}
 
-
 	if _, err := ReadProjectConfig(path); err == nil {
 		logrus.Warnf("InitProject - Cannot initialize project. Project %s already exists", path)
 		return &Project{Path: path}, ErrExists
@@ -158,13 +178,13 @@ func InitProject(path string) (*Project, error) {
 	projectConfig := ProjectConfig{
 		CurrentBoard: "backlog",
 		PropertyModel: []PropertyDef{
-			{"Owner", "User", nil, "", ""},
+			{"Owner", "User", nil, "", "", true},
 			{"Status", "Tag", []string{"#Draft", "#Started", "#Done"},
-				"", "#Draft"},
+				"", "#Draft", true},
 			{"Points", "Enum", []string{"1", "2", "3", "5", "7", "9", "12", "15", "21"},
-				"", "3"},
+				"", "3", false},
 		},
-		CipherKey: GenerateRandomString(64),
+		CipherKey:    GenerateRandomString(64),
 		UseGitNative: config.UseGitNative,
 	}
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {
@@ -256,7 +276,7 @@ func EncryptStringForProject(project *Project, value string) (string, error) {
 	out := ""
 	buf := make([]byte, c.BlockSize())
 	for l := 0; l < len(value); l += len(buf) {
-		end := l+len(buf)
+		end := l + len(buf)
 		if end > len(value) {
 			end = len(value)
 			buf[end-l] = 0

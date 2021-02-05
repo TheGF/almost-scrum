@@ -68,6 +68,46 @@ class Server {
             .catch(loginWhenUnauthorized);
     }
 
+    static getTemplatesList() {
+        return axios.get('/api/v1/templates', getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static createProject(name, templates) {
+        const body = {
+            projectName: name,
+            templates: templates,
+        }
+        return axios.post(`/api/v1/projects`, body, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static importProject(path, inject, templates) {
+        const body = {
+            importPath: path,
+            inject: inject,
+            templates: templates,
+        }
+        return axios.post(`/api/v1/projects`, body, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+    static cloneFromGit(url, inject, templates) {
+        const body = {
+            gitUrl: url,
+            inject: inject,
+            templates: templates,
+        }
+        return axios.post(`/api/v1/projects`, body, getConfig())
+            .then(r => r.data)
+            .catch(loginWhenUnauthorized);
+    }
+
+
+
     static getProjectInfo(project) {
         return axios.get(`/api/v1/projects/${project}/info`, getConfig())
             .then(r => r.data)
@@ -167,7 +207,7 @@ class Server {
 
     static uploadFileToLibrary(project, path, file, name) {
         path = encodeURIComponent(path)
-        const config = {}//getConfig();
+        const config = getConfig();
         let formData = null;
 
         if (file) {
@@ -216,7 +256,6 @@ class Server {
 
     static openFromlibrary(project, path) {
         path = encodeURIComponent(path)
-        //        return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
 
         const link = document.createElement("a");
         link.href = `/api/v1/projects/${project}/library${path}?token=${localStorage.token}`;

@@ -14,11 +14,13 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
+	github.com/jtblin/go-ldap-client v0.0.0-20170223121919-b73f66626b33
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/monirz/gotri v0.0.0-20200219181904-dacfb98c509f
+	github.com/msteinert/pam v0.0.0-20201130170657-e61372126161 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/sergi/go-diff v1.1.0 // indirect
@@ -32,7 +34,9 @@ require (
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
 	golang.org/x/text v0.3.2
 	google.golang.org/protobuf v1.25.0 // indirect
+	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	gopkg.in/ldap.v2 v2.5.1 // indirect
 	gopkg.in/src-d/go-git.v4 v4.13.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )

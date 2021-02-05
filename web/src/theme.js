@@ -53,6 +53,20 @@ const customTheme = {
         heading: `"Source Sans Pro",${theme.fonts.heading}`,
     },
     styles,
+    components: {
+        ...theme.components,
+        Popover: {
+            ...theme.components.Popover,
+            variants: {
+                responsive: {
+                  popper: {
+                    maxWidth: 'unset',
+                    width: 'unset'
+                  }
+                }
+            }
+        }
+    }
 };
 
 export default customTheme;
