@@ -139,7 +139,7 @@ function Library(props) {
         }
     }
 
-    const rows = files.map(file => {
+    const rows =  files && files.map(file => {
         const idx = file.name.lastIndexOf('.')
         const ext = idx != -1 ? file.name.substr(idx + 1) : ''
         const name = idx != -1 ? file.name.substr(0, idx) : file.name

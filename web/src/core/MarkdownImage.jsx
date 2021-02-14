@@ -56,6 +56,7 @@ function MarkdownImage(props) {
 
     const onClick = readOnly ? null : onOpen
     let src = props.src.replace('~library', `/api/v1/projects/${project}/library`)
+    src = src.replace('~public', ``)
     src = token ? `${src}?token=${token}` : src
     return <>
         <Img alt={alt}{...getMore()} src={src} onClick={onClick} />

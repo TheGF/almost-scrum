@@ -4,15 +4,15 @@ import (
 	"os"
 	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
-
-
 
 // UserInfo contains information about a user.
 type UserInfo struct {
-	Email string `json:"email"`
-	Icon  []byte `json:"icon"`
+	Name        string            `json:"name"`
+	Email       string            `json:"email"`
+	Office      string            `json:"office"`
+	Icon        []byte            `json:"icon"`
 	Credentials map[string]string `json:"credentials"`
 }
 
@@ -28,7 +28,7 @@ func GetUserList(project *Project) []string {
 			users = append(users, name[0:len(name)-len(ext)])
 		}
 	}
-
+	logrus.Debugf("Users in project %s: %v", project.Path, users)
 	return users
 }
 
@@ -36,7 +36,7 @@ func GetUserList(project *Project) []string {
 func GetUserInfo(project *Project, user string) (userInfo UserInfo, err error) {
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	if err = ReadYaml(path, &userInfo); err != nil {
-		log.Warnf("Invalid file %s: %v", path, err)
+		logrus.Warnf("Invalid file %s: %v", path, err)
 		return
 	}
 	return
@@ -46,16 +46,16 @@ func GetUserInfo(project *Project, user string) (userInfo UserInfo, err error) {
 func DelUserInfo(project *Project, user string) (err error) {
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	if err = os.Remove(path); err != nil {
-		log.Errorf("Cannot remove info for user %s: %v", user, err)
+		logrus.Errorf("Cannot remove info for user %s: %v", user, err)
 		return
 	}
-	log.Infof("User %s removed", user)
+	logrus.Infof("User %s removed", user)
 	return
 }
-
 
 //SetUserInfo saves the user info
 func SetUserInfo(project *Project, user string, userInfo *UserInfo) (err error) {
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	return WriteYaml(path, userInfo)
 }
+

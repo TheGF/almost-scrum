@@ -29,7 +29,7 @@ function GitPull(props) {
             .then(data => setOutput(true, 'All Good!', data))
             .catch(r => {
                 const msg = 'something went wrong'
-                setOutput(false, msg, r.data)
+                setOutput(false, msg, r.response.data)
             })
     }
 

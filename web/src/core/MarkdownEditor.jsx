@@ -25,8 +25,6 @@ function MarkdownEditor(props) {
     }
     
 
-    console.log('Height', height)
-
     return <ReactMde
         key={height}
         value={value}

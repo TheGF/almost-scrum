@@ -21,7 +21,7 @@ function AddProject(props) {
 
     return <Modal isOpen={isOpen} size="lg" >
         <ModalContent>
-            <ModalHeader>New Project</ModalHeader>
+            <ModalHeader>Add Project</ModalHeader>
             <ModalBody>
                 <Tabs>
                     <TabList>

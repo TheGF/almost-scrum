@@ -48,7 +48,7 @@ function CloneFromGit(props) {
         }
     }
 
-    const templatesList = templates.map(t => <ListItem onClick={_ => switchTemplate(t)}>
+    const templatesList = templates.sort().map(t => <ListItem onClick={_ => switchTemplate(t)}>
         {selectedTemplates.includes(t) ?
             <ListIcon as={FaRegCheckCircle} color="green.500" /> :
             <ListIcon as={FaRegCircle} color="green.500" />

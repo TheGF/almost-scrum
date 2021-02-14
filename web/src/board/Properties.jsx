@@ -1,13 +1,13 @@
 import {
     Center, Input, Select, Switch, Table, TableCaption, Tbody,
-    Td, Tr
+    Td, Tr, Box,
 } from '@chakra-ui/react';
 import { React, useContext, useState } from "react";
 import T from '../core/T';
 import UserContext from '../UserContext';
 
 function Properties(props) {
-    const { task, saveTask, readOnly, users } = props;
+    const { task, saveTask, readOnly, users, height } = props;
     const { info } = useContext(UserContext)
     const { propertyModel } = info
     const { properties } = task;
@@ -26,7 +26,7 @@ function Properties(props) {
         }
 
         function renderString() {
-            return <Input value={value} onChange={onChange} />
+            return <Input value={value} onChange={onChange} size="sm"/>
         }
 
         function renderEnum() {
@@ -89,7 +89,7 @@ function Properties(props) {
     const editMessage = readOnly ? <Center h="2em">
         Change owner if you want to edit the content
     </Center> : null
-    return <>
+    return <Box maxH={height-50} style={{ overflowY: 'auto' }}>
         {editMessage}
         <Table variant="striped" colorScheme="teal" size="sm">
             <TableCaption>Edit the properties of your project</TableCaption>
@@ -97,6 +97,6 @@ function Properties(props) {
                 {rows}
             </Tbody>
         </Table>
-    </>;
+    </Box>;
 }
 export default Properties;

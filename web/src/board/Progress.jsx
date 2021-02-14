@@ -84,7 +84,7 @@ function Progress(props) {
         <Table colorScheme="teal" size="sm">
             <TableCaption w="100%">
                 <HStack spacing={3}>
-                    <Center>Track your progress in increments</Center>
+                    <Center>Track your progress and acceptance criteria</Center>
                     <Spacer />
                 </HStack>
             </TableCaption>

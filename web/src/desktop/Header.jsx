@@ -1,16 +1,13 @@
 import {
-    Button, Menu, MenuButton,
-    MenuDivider, MenuItem,
-    MenuItemOption, MenuList,
-    MenuOptionGroup,
-    Stack,
-    useColorMode
+    Button, Menu, MenuButton, MenuDivider, MenuItem,
+    MenuList, Stack, useColorMode
 } from "@chakra-ui/react";
-import { React, useEffect, useState, useContext } from "react";
+import { React, useContext, useEffect, useState } from "react";
 import { BiChevronDown } from "react-icons/all";
 import T from "../core/T";
 import UserContext from '../UserContext';
-import GitIntegration from '../git/GitIntegration'
+import Settings from './Settings';
+import Help from '../help/Help';
 
 const visibleBoards = 5
 
@@ -102,6 +99,9 @@ function Header(props) {
 
     const [activeBoard, setActiveBoard] = useState('backlog');
     const [boardKey, setBoardKey] = useState(0);
+    const [showSettings, setShowSettings] = useState(false);
+    const [showHelp, setShowHelp] = useState(false);
+
     const { onNewTask, onNewBoard, setShowGitIntegration, onExit } = props;
     const { colorMode, toggleColorMode } = useColorMode()
 
@@ -111,12 +111,13 @@ function Header(props) {
     }
 
     return <Stack spacing={4} direction="row" align="center">
+        <Settings isOpen={showSettings} onClose={_ => setShowSettings(false)} />
+        <Help isOpen={showHelp} onClose={_ => setShowHelp(false)} />
         <Menu>
             <MenuButton as={Button} rightIcon={<BiChevronDown />}>
                 Actions
                 </MenuButton>
             <MenuList>
-                <MenuItem onClick={onNewTask}>New Task</MenuItem>
                 <MenuItem onClick={onNewBoard}>New Board</MenuItem>
                 <MenuDivider />
                 <MenuItem onClick={toggleColorMode}>
@@ -127,7 +128,12 @@ function Header(props) {
                     onClick={_ => setShowGitIntegration(true)}>
                     Git Integration
                     </MenuItem> : null}
-                <MenuItem>Help</MenuItem>
+                <MenuItem onClick={_ => setShowSettings(true)}>
+                    Users
+                </MenuItem>
+                <MenuItem onClick={_ => setShowHelp(true)}>
+                    Help
+                </MenuItem>
                 {onExit ? <>
                     <MenuDivider />
                     <MenuItem onClick={onExit}><T>back to portal</T></MenuItem>

@@ -12,12 +12,12 @@ import (
 )
 
 func tasksRoute(group *gin.RouterGroup) {
-	group.GET("/projects/:project/boards/:board", listStoryAPI)
-	group.GET("/projects/:project/boards/:board/:name", getStoryAPI)
-	group.POST("/projects/:project/boards/:board", postStoryAPI)
-	group.POST("/projects/:project/boards/:board/:name", postStoryAPI)
-	group.PUT("/projects/:project/boards/:board/:name", putStoryAPI)
-	group.DELETE("/projects/:project/boards/:board/:name", deleteStoryAPI)
+	group.GET("/projects/:project/boards/:board", listTaskAPI)
+	group.GET("/projects/:project/boards/:board/:name", getTaskAPI)
+	group.POST("/projects/:project/boards/:board", postTaskAPI)
+	group.POST("/projects/:project/boards/:board/:name", postTaskAPI)
+	group.PUT("/projects/:project/boards/:board/:name", putTaskAPI)
+	group.DELETE("/projects/:project/boards/:board/:name", deleteTaskAPI)
 }
 
 func getRange(c *gin.Context, max int) (start int, end int) {
@@ -47,7 +47,7 @@ func getRange(c *gin.Context, max int) (start int, end int) {
 	return start, end
 }
 
-func listStoryAPI(c *gin.Context) {
+func listTaskAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
@@ -81,7 +81,7 @@ func listStoryAPI(c *gin.Context) {
 	}
 }
 
-func getStoryAPI(c *gin.Context) {
+func getTaskAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
@@ -101,7 +101,7 @@ func getStoryAPI(c *gin.Context) {
 	}
 }
 
-func postStoryAPI(c *gin.Context) {
+func postTaskAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
@@ -145,7 +145,7 @@ func postStoryAPI(c *gin.Context) {
 	c.String(http.StatusOK, filepath.Join(board, name))
 }
 
-func putStoryAPI(c *gin.Context) {
+func putTaskAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
@@ -167,7 +167,7 @@ func putStoryAPI(c *gin.Context) {
 	c.String(http.StatusOK, "")
 }
 
-func deleteStoryAPI(c *gin.Context) {
+func deleteTaskAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return

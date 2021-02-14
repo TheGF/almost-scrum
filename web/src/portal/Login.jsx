@@ -1,39 +1,21 @@
 import {
-    AlertDialog, AlertDialogBody, AlertDialogContent,
-    AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
-    Button,
-    FormControl,
-    FormHelperText,
-    FormLabel,
-    Input,
-    InputGroup,
-    InputRightElement
+    Button, FormControl, FormHelperText, FormLabel, Input, InputGroup,
+    InputRightElement, Modal, ModalBody, ModalCloseButton, ModalContent,
+    ModalFooter, ModalHeader
 } from "@chakra-ui/react";
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
-} from "@chakra-ui/react"
-import { React, useEffect, useState } from "react";
+import { React, useState } from "react";
 import T from "../core/T";
 import Server from '../server';
 
-
-
-function Login({ isOpen, onToken }) {
+function Login({ isOpen, onAuthenticated }) {
     const [showPassword, setShowPassword] = useState(false)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState(null)
 
     function authenticate() {
-        const data = { username: username, password: password };
         Server.authenticate(username, password)
-            .then(r => onToken(r))
+            .then(r => onAuthenticated(r, password == 'changeme'))
             .catch(r => setError(`Invalid Credentials: ${r.message}`));
     }
 

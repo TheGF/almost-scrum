@@ -28,11 +28,11 @@ function GitPush(props) {
         Server.postGitPush(project)
             .then(data => setOutput(true, 'All Good!', data))
             .catch(r => {
-                const msg = r.status == 409 ?
+                const msg = r.response.status == 409 ?
                     'Data on remote server is in conflict. ' +
                     'Try to pull the content before push' :
                     'something went wrong'
-                setOutput(false, msg, r.data)
+                setOutput(false, msg, r.response.data)
             })
     }
 

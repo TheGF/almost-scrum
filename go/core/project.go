@@ -48,6 +48,7 @@ type Project struct {
 	Config         ProjectConfig
 	EncryptionSeed string
 	Index          *Index
+	TasksCount     int
 }
 
 // LoadTheProjectConfig
@@ -79,6 +80,7 @@ func FindProject(path string) (*Project, error) {
 	return nil, ErrNoFound
 }
 
+
 // OpenProject checks if the given path contains a project and creates an instance of Project.
 func OpenProject(path string) (*Project, error) {
 	projectConfig, err := ReadProjectConfig(path)
@@ -86,11 +88,20 @@ func OpenProject(path string) (*Project, error) {
 		return nil, ErrNoFound
 	}
 
-	logrus.Debugf("FindProject - Project found in %s", path)
-	return &Project{
+	project := &Project{
 		Path:   path,
 		Config: projectConfig,
-	}, nil
+		TasksCount: 0,
+	}
+
+	infos, err := ListTasks(project, "", "")
+	if err != nil {
+		return nil, err
+	}
+	project.TasksCount = len(infos)
+
+	logrus.Debugf("FindProject - Project found in %s", path)
+	return project, nil
 }
 
 func GetGitClient(project *Project) GitClient {
@@ -195,6 +206,7 @@ func InitProject(path string) (*Project, error) {
 	return &Project{
 		Path:   path,
 		Config: projectConfig,
+		TasksCount: 0,
 	}, nil
 }
 

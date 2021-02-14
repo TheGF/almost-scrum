@@ -105,7 +105,7 @@ function Task(props) {
     function changeOwner(evt) {
         const newOwner = evt && evt.target && evt.target.value;
         if (newOwner) {
-            if (owner == info.systemUser) {
+            if (owner == info.loginUser) {
                 task.properties['Owner'] = `@${newOwner}`;
                 saveTask(task)
                 setTask({ ...task })
@@ -132,7 +132,7 @@ function Task(props) {
 
     const owner = task && task.properties && task.properties['Owner']
         && task.properties['Owner'].substring(1)
-    const readOnly = owner != info.systemUser
+    const readOnly = owner != info.loginUser
 
     const [id, title] = name && name.split(/\.(.+)/) || ['', 'Something went wrong']
     const userList = users && users.map(u => <option key={u} value={u}>
@@ -157,7 +157,8 @@ function Task(props) {
             <EditablePreview />
             <EditableInput />
         </Editable>
-        const compactSwitch = <Spacer onClick={_ => setCompact(!compact)} style={{ cursor: 'pointer' }} />
+        const compactSwitch = <Spacer onClick={_ => setCompact(!compact)}
+            minW="1em" style={{ cursor: 'pointer' }} />
         const tagsGroup = compact ? <HStack h="2em" spacing={2}>{tags}</HStack> : null
         const touchButton = <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
         const taskProgress = <span title="Task Progress" style={{ width: '3em', textAlign: 'center' }}>{progress}</span>
@@ -348,11 +349,11 @@ function Task(props) {
                             readOnly={readOnly} />
                     </TabPanel>
                     <TabPanel key="properties" >
-                        <Properties task={task} saveTask={saveTask} users={users}
+                        <Properties task={task} saveTask={saveTask} users={users} height={height} 
                             height={height} readOnly={readOnly} />
                     </TabPanel>
                     <TabPanel key="progress" >
-                        <Progress task={task} readOnly={readOnly}
+                        <Progress task={task} readOnly={readOnly} height={height} 
                             saveTask={task => {
                                 saveTask(task);
                                 updateProgress(task);
@@ -365,7 +366,6 @@ function Task(props) {
                 </TabPanels>
             </Tabs>
         </HStack> </Box>
-        return body
     }
 
 

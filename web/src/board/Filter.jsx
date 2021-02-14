@@ -1,11 +1,12 @@
-import { Box, Checkbox, CheckboxGroup, FormControl, FormLabel, HStack, ButtonGroup, Button, Text } from "@chakra-ui/react";
+import { Box, Checkbox, CheckboxGroup, FormControl, FormLabel, HStack, 
+    ButtonGroup, Button, Text, VStack, } from "@chakra-ui/react";
 import { React, useContext } from "react";
 import UserContext from '../UserContext';
 import './reactTags.css';
 
 function Filter(props) {
     const { info } = useContext(UserContext);
-    const { propertyModel } = info
+    const { propertyModel } = info || {};
     const { users, tags, setTags } = props
 
     function switchTag(value) {
@@ -32,18 +33,18 @@ function Filter(props) {
 
     function getFieldFilter(field) {
         switch (field.kind) {
-            case 'User': return getTagFilter(field.name, users)
+            case 'User': return getTagFilter(field.name, users.map(u=>`@${u}`))
             case 'Tag': return getTagFilter(field.name, field.values)
             default: return null
         }
     }
 
-    const fields = propertyModel.filter(model => model.isFilter)
+    const fields = propertyModel && propertyModel.filter(model => model.isFilter)
         .map(getFieldFilter)
 
-    return <Box margin={3}>
+    return <VStack spacing={5} margin={4} align="left">
         {fields}
-    </Box>
+    </VStack>
 }
 
 export default Filter

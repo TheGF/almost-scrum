@@ -11,23 +11,45 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 type ProjectMapping map[string]*core.Project
+type ProjectUsers map[string][]string
 
 var projectMapping = make(ProjectMapping)
+var projectUsers = make(ProjectUsers)
+
+type NoAccess struct {
+	Message string `json:"message"`
+	Users []string `json:"users"`
+}
 
 // getProject resolves the URL parameters
 func getProject(c *gin.Context) *core.Project {
 	name := c.Param("project")
 
-	if project, found := projectMapping[name]; found {
-		return project
-	} else {
+	project, found := projectMapping[name]
+	if !found {
 		_ = c.Error(core.ErrNoFound)
 		c.String(http.StatusNotFound, "Project %s not found in configuration", name)
 		return nil
 	}
+
+	user := getWebUser(c)
+	users := projectUsers[name]
+	if _, found := core.FindStringInSlice(users, user); !found {
+		noAccess := NoAccess{
+			Message: "No access to project",
+			Users: users,
+		}
+		logrus.Warnf("User %s has no access to project %s. Valid users [%s]", user, name,
+			strings.Join(users, " "))
+		c.JSON(http.StatusForbidden, noAccess)
+		return nil
+	}
+
+	return project
 }
 
 func openProject(name string, path string) error {
@@ -38,6 +60,9 @@ func openProject(name string, path string) error {
 
 	_ = core.ReIndex(project)
 	projectMapping[name] = project
+	users := core.GetUserList(project)
+	projectUsers[name] = users
+	logrus.Infof("Open project %s for users [%s]", name, strings.Join(users, " "))
 	return nil
 }
 
@@ -49,9 +74,9 @@ func searchForProject(repoPath string, name string, items ...string) bool {
 	}
 	if err := openProject(name, p); err != nil {
 		logrus.Warnf("Cannot open project %s in path %s: %v", name, p, err)
-	} else {
-		logrus.Infof("Added project %s (%s) to repo", name, p)
+		return false
 	}
+	logrus.Infof("Added project %s (%s) to repo", name, p)
 	return true
 }
 
@@ -97,7 +122,7 @@ func loadGlobalProjects() {
 func serverRoute(group *gin.RouterGroup, repoPath string) {
 	group.GET("/projects", listProjectsAPI)
 	group.POST("/projects", createProjectAPI)
-	group.GET("/users", listUsersAPI)
+	group.GET("/user", getWebUserAPI)
 	group.GET("/templates", listProjectTemplatesAPI)
 
 	if err := loadRepoProjects(repoPath); err != nil {
@@ -121,17 +146,6 @@ type Authorization struct {
 	Pam   bool
 }
 
-func listUsersAPI(c *gin.Context) {
-	var users []string
-
-	config := core.LoadConfig()
-
-	for user := range config.Passwords {
-		users = append(users, user)
-	}
-
-	c.JSON(http.StatusOK, users)
-}
 
 func listProjectTemplatesAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, core.ListProjectTemplates())
@@ -147,21 +161,28 @@ type createOptions struct {
 
 func createProjectInFolder(c *gin.Context, name string, path string, templates []string, res string)  {
 	var err error
+	var project *core.Project
+
 	if len(templates) == 0 {
-		_, err = core.InitProject(path)
+		project, err = core.InitProject(path)
 	} else {
-		_, err = core.InitProjectFromTemplate(path, templates)
+		project, err = core.InitProjectFromTemplate(path, templates)
 	}
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	if err := openProject(name, path); err != nil {
-		c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))
-	} else {
-		c.String(http.StatusCreated, res)
+	user := getWebUser(c)
+	if err = core.SetUserInfo(project, user, &core.UserInfo{}); err != nil {
+		c.String(http.StatusInternalServerError, fmt.Sprintf("Cannot set user '%s' in project '%s'", user, name))
+		return
 	}
+	projectMapping[name] = project
+	projectUsers[name] = []string{user}
+
+	logrus.Infof("Project %s created by user '%s'", name, user)
+	c.String(http.StatusCreated, res)
 }
 
 var cloneUrl = regexp.MustCompile(`http.*\/([^\/]*?)(.git)?$`)
@@ -264,7 +285,7 @@ func getProjectInfoAPI(c *gin.Context) {
 
 	info := ProjectInfo{
 		SystemUser:    core.GetSystemUser(),
-		LoginUser:     core.GetSystemUser(),
+		LoginUser:     getWebUser(c),
 		CurrentBoard:  project.Config.CurrentBoard,
 		PropertyModel: project.Config.PropertyModel,
 		GitProject:    gitProject,

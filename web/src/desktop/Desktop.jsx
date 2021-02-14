@@ -7,6 +7,7 @@ import UserContext from '../UserContext';
 import AskBoardName from './AskBoardName';
 import Header from './Header';
 import GitIntegration from '../git/GitIntegration';
+import NoAccess from './NoAccess';
 
 
 function Desktop(props) {
@@ -17,31 +18,45 @@ function Desktop(props) {
     const [boardKey, setBoardKey] = useState(0);
     const [showLibrary, setShowLibrary] = useState(false);
     const [showGitIntegration, setShowGitIntegration] = useState(false);
+    const [noAccess, setNoAccess] = useState(null)
 
     const askBoardName = useDisclosure(false)
 
-    function getInfo() {
-        Server.getProjectInfo(project)
-            .then(setInfo)
+    function checkNoAccess(r) {
+        if (r.response && r.response.status == 403 && r.response.data.users && r.response.data.message) {
+            setNoAccess(r.response.data)
+            return r
+        }
+        return r
     }
-    useEffect(getInfo, [])
+
+    function exit() {
+        setNoAccess(null)
+        onExit()
+    }
+
+    function init() {
+        Server.addErrorHandler(10, checkNoAccess)
+        Server.getProjectInfo(project)
+            .then(info => {
+                setInfo(info)
+                listBoards()
+            })
+            .catch(checkNoAccess)
+    }
+    useEffect(init, [])
 
     function listBoards() {
         Server.listBoards(project)
             .then(setBoards)
+            .catch(checkNoAccess)
     }
-    useEffect(listBoards, []);
 
     function createBoard(name) {
         Server.createBoard(project, name)
             .then(askBoardName.onClose())
             .then(listBoards)
             .then(setBoard(name))
-    }
-
-    function onNewTask() {
-        Server.createTask(project, board, 'Click_and_Rename')
-            .then(_ => setBoardKey(1 + boardKey))
     }
 
     function onSelectLibrary() {
@@ -57,10 +72,9 @@ function Desktop(props) {
     const content = showLibrary ? <Library /> :
         <Board key={boardKey} name={board} boards={boards} />
 
-    const username  = info && info.systemUser
+    const username = info && info.systemUser
     const userContext = { project, info, username }
-    return info ? <UserContext.Provider value={userContext}>
-
+    const body = info ? <UserContext.Provider value={userContext}>
         <GitIntegration isOpen={showGitIntegration}
             onClose={_ => setShowGitIntegration(false)} />
 
@@ -75,12 +89,15 @@ function Desktop(props) {
                 <Header boards={boards}
                     setShowGitIntegration={setShowGitIntegration}
                     onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
-                    onNewTask={onNewTask} onNewBoard={_ => askBoardName.onOpen()}
+                    onNewBoard={_ => askBoardName.onOpen()}
                     onExit={onExit} />
                 {content}
             </VStack>
         </Flex>
     </UserContext.Provider> : null
+
+    return noAccess ? <NoAccess data={noAccess} onExit={exit} /> : body
+        
 }
 
 export default Desktop

@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 var config *core.Config
@@ -56,15 +56,15 @@ func setLogLevel(logLevel string) {
 	logLevel = strings.ToUpper(logLevel)
 	switch logLevel {
 	case "DEBUG":
-		log.SetLevel(log.DebugLevel)
+		logrus.SetLevel(logrus.DebugLevel)
 	case "INFO":
-		log.SetLevel(log.InfoLevel)
+		logrus.SetLevel(logrus.InfoLevel)
 	case "WARNING":
-		log.SetLevel(log.WarnLevel)
+		logrus.SetLevel(logrus.WarnLevel)
 	case "ERROR":
-		log.SetLevel(log.ErrorLevel)
+		logrus.SetLevel(logrus.ErrorLevel)
 	case "FATAL":
-		log.SetLevel(log.FatalLevel)
+		logrus.SetLevel(logrus.FatalLevel)
 	}
 }
 
@@ -158,6 +158,7 @@ func ProcessArgs() {
 		web.StartServer(port, logLevel, commands[1:])
 
 	default:
+		logrus.Debugf("Unknown command %s", commands[0])
 		flag.Usage()
 	}
 

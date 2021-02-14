@@ -117,5 +117,6 @@ func StartServer(port string, logLevel string, args []string) {
 	indexRoute(v1)
 	gitRoute(v1)
 
+	core.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%s", port))
 	r.Run(fmt.Sprintf(":%s", port))
 }

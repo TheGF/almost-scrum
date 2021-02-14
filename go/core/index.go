@@ -34,6 +34,7 @@ type Index struct {
 	StopWords  []string       `json:"stop_words"`
 	Ids        map[string]Ids `json:"ids"`
 	searchTree *gotri.Trie
+	modTime    time.Time
 }
 
 func SearchTask(project *Project, board string, matchAll bool, keys ...string) ([]TaskInfo, error) {
@@ -69,7 +70,6 @@ func SearchTask(project *Project, board string, matchAll bool, keys ...string) (
 	return infos[0:l], nil
 }
 
-
 func SuggestKeys(project *Project, prefix string, total int) []string {
 	suggestions := project.Index.searchTree.GetSuggestion(prefix, total)
 	if suggestions == nil {
@@ -78,25 +78,23 @@ func SuggestKeys(project *Project, prefix string, total int) []string {
 	return suggestions
 }
 
-func SearchTaskIds(project *Project, keys ...string) (Ids, error) {
-	idsSet, err := lookupTaskIds(project, keys...)
-	if IsErr(err, "cannot lookup ids on keys %v", keys) {
-		return Ids{}, err
-	}
-	ids := make(Ids, 0, len(idsSet))
-	for id := range idsSet {
-		ids = append(ids, id)
-	}
-	return ids, nil
-}
+//func SearchTaskIds(project *Project, keys ...string) (Ids, error) {
+//	idsSet, err := lookupTaskIds(project, keys...)
+//	if IsErr(err, "cannot lookup ids on keys %v", keys) {
+//		return Ids{}, err
+//	}
+//	ids := make(Ids, 0, len(idsSet))
+//	for id := range idsSet {
+//		ids = append(ids, id)
+//	}
+//	return ids, nil
+//}
 
 func lookupTaskIds(project *Project, keys ...string) (map[uint16]int, error) {
 	if project.Index == nil {
-		index, _, err := ReadIndex(project)
-		if IsErr(err, "cannot read index for %s", project.Path) {
+		if err := ReadIndex(project); IsErr(err, "cannot read index for %s", project.Path) {
 			return map[uint16]int{}, err
 		}
-		project.Index = index
 	}
 
 	idsSet := make(map[uint16]int)
@@ -153,73 +151,85 @@ func diffIds(a Ids, b Ids) (removed Ids, added Ids) {
 	return
 }
 
+func indexTask(project *Project, info TaskInfo, newStopWords *[]string) {
+	logrus.Debugf("ReIndex task %s/%s", info.Board, info.Name)
+
+	idsLimit := project.TasksCount / 10
+	if idsLimit < 10 {
+		idsLimit = 10
+	}
+
+	normal, special := getWordsInTask(project, info.Board, info.Name)
+	clearIndex(info.ID, project.Index)
+	mergeToIndex(info.ID, normal, project.Index, idsLimit, newStopWords)
+	mergeToIndex(info.ID, special, project.Index, -1, nil)
+}
+
+func showIndexChanges(project *Project) {
+	var oldIndex = Index{
+		StopWords:  make([]string, 0),
+		Ids:        make(map[string]Ids),
+		searchTree: new(gotri.Trie),
+	}
+	_ = ReadJSON(filepath.Join(project.Path, IndexFile), &oldIndex)
+
+	for key, value := range project.Index.Ids {
+		oldValue, found := oldIndex.Ids[key]
+		if found {
+			removed, added := diffIds(oldValue, value)
+			if len(added) > 0 || len(removed) > 0 {
+				logrus.Debugf("Index %s has been updated: %v\n"+
+					"Added: %v\nRemoved: %v\n",
+					key, value, added, removed)
+
+			}
+			if len(added) > 0 {
+				logrus.Debugf("Added references: %v", removed)
+			}
+			if len(removed) > 0 {
+				logrus.Debugf("Removed references: %v", removed)
+			}
+		} else {
+			logrus.Debugf("New index %s: %v", key, value)
+		}
+	}
+}
+
 func ReIndex(project *Project) error {
 	logrus.Debugf("Reindex project %s", project.Path)
 
-	index, modTime, err := ReadIndex(project)
-	if err != nil {
-		return err
+	if project.Index == nil {
+		if err := ReadIndex(project); err != nil {
+			return err
+		}
 	}
+
+	mergeStopWords(project.Index)
+	newStopWords := make([]string, 0)
 
 	infos, err := ListTasks(project, "", "")
 	if err != nil {
 		return err
 	}
 
-	mergeStopWords(index)
-	newStopWords := make([]string, 0)
-	idsLimit := len(infos) / 10
-	if idsLimit < 10 {
-		idsLimit = 10
-	}
-
 	for _, info := range infos {
-		if info.ModTime.Sub(modTime) > 0 {
-			logrus.Debugf("ReIndex task %s/%s", info.Board, info.Name)
-			normal, special := indexTask(project, info.Board, info.Name)
-			clearIndex(info.ID, index)
-			mergeToIndex(info.ID, normal, index, idsLimit, &newStopWords)
-			mergeToIndex(info.ID, special, index, -1, nil)
+		if info.ModTime.Sub(project.Index.modTime) > 0 {
+			indexTask(project, info, &newStopWords)
 		}
 	}
 
 	logrus.Debugf("New stop words: %v", newStopWords)
 	for _, word := range newStopWords {
-		delete(index.Ids, word)
+		delete(project.Index.Ids, word)
 	}
-	index.StopWords = append(index.StopWords, newStopWords...)
-	project.Index = index
+	project.Index.StopWords = append(project.Index.StopWords, newStopWords...)
 
 	if logrus.GetLevel() == logrus.DebugLevel {
-		oldIndex, _, err := ReadIndex(project)
-		if err == nil {
-			for key, value := range index.Ids {
-				oldValue, found := oldIndex.Ids[key]
-				if found {
-					removed, added := diffIds(oldValue, value)
-					if len(added) > 0 || len(removed) > 0 {
-						logrus.Debugf("Index %s has been updated: %v\n"+
-							"Added: %v\nRemoved: %v\n",
-							key, value, added, removed)
-
-					}
-					if len(added) > 0 {
-						logrus.Debugf("Added references: %v", removed)
-					}
-					if len(removed) > 0 {
-						logrus.Debugf("Removed references: %v", removed)
-					}
-				} else {
-					logrus.Debugf("New index %s: %v", key, value)
-				}
-			}
-
-		}
-
+		showIndexChanges(project)
 	}
 
 	BuiltSearchTree(project)
-	return WriteIndex(project, index)
+	return WriteIndex(project)
 }
 
 func clearIndex(id uint16, index *Index) {
@@ -279,7 +289,7 @@ func mergeStopWords(index *Index) {
 	}
 }
 
-func indexTask(project *Project, board string, name string) (normal []string, special []string) {
+func getWordsInTask(project *Project, board string, name string) (normal []string, special []string) {
 	p := filepath.Join(project.Path, "boards", board, name+TaskFileExt)
 	data, err := ioutil.ReadFile(p)
 	if err != nil {
@@ -314,9 +324,17 @@ func cleanText(text []byte) (normal []string, special []string) {
 	return normal, special
 }
 
+func UpdateSearchTree(index *Index, ids []string) {
+	for _, k := range ids {
+		index.searchTree.Add(k, k)
+		logrus.Debugf("Add key '%s' to index search tree", k)
+	}
+}
+
 func BuiltSearchTree(project *Project) {
 	for k := range project.Index.Ids {
 		project.Index.searchTree.Add(k, k)
+		logrus.Debugf("Add key '%s' to index search tree", k)
 	}
 	for _, propertyDef := range project.Config.PropertyModel {
 		if propertyDef.Kind == "Tag" && propertyDef.Values != nil {
@@ -327,33 +345,34 @@ func BuiltSearchTree(project *Project) {
 	}
 }
 
-func ReadIndex(project *Project) (*Index, time.Time, error) {
-	var index = Index{
-		StopWords:  make([]string, 0),
-		Ids:        make(map[string]Ids),
-		searchTree: new(gotri.Trie),
-	}
+func ReadIndex(project *Project) error {
 	p := filepath.Join(project.Path, IndexFile)
 	info, err := os.Stat(p)
 	if os.IsNotExist(err) {
-		return &index, time.Unix(0, 0), nil
+		project.Index = &Index{
+			StopWords:  make([]string, 0),
+			Ids:        make(map[string]Ids),
+			searchTree: new(gotri.Trie),
+			modTime:    time.Time{},
+		}
+		return nil
+	} else if err != nil {
+		return err
 	}
-	if err != nil {
-		return nil, time.Unix(0, 0), err
+	project.Index = &Index{
+		searchTree: new(gotri.Trie),
+		modTime:    info.ModTime(),
+	}
+	if err = ReadJSON(p, project.Index); err != nil {
+		return err
 	}
 
-	err = ReadJSON(p, &index)
-	if err != nil {
-		return nil, time.Unix(0, 0), err
-	}
-
-	project.Index = &index
 	BuiltSearchTree(project)
-	return &index, info.ModTime(), nil
+	return nil
 }
 
-func WriteIndex(project *Project, index *Index) error {
+func WriteIndex(project *Project) error {
 	p := filepath.Join(project.Path, IndexFile)
 
-	return WriteJSON(p, index)
+	return WriteJSON(p, project.Index)
 }

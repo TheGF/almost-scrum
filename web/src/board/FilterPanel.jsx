@@ -20,7 +20,7 @@ import Portal from '../portal/Portal';
 
 function FilterPanel(props) {
     const { project, info } = useContext(UserContext);
-    const { propertyModel } = info
+    const { propertyModel } = info || {}
     const { compact, setCompact, setSearchKeys, onNewTask, users } = props;
     const [tags, setTags] = useState([])
     const [suggestions, setSuggestions] = useState([]);
