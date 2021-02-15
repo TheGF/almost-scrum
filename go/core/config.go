@@ -64,8 +64,10 @@ func LoadConfig() *Config {
 	err := ReadYaml(configPath, &config)
 	if err != nil {
 		logrus.Warnf("Cannot read global configuration %s: %v", configPath, err)
+
 		SaveConfig(&defaultConfig)
-		return &defaultConfig
+		SetPassword("admin", "changeme")
+		return LoadConfig()
 	} else {
 		logrus.Debugf("Successfully loaded config from %s: %v", configPath, config)
 	}

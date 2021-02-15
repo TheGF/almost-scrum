@@ -112,8 +112,8 @@ func postTaskAPI(c *gin.Context) {
 	move := c.DefaultQuery("move", "")
 
 	if move == "" {
-		systemUser := core.GetSystemUser()
-		_, name, err := core.CreateTask(project, board, title, systemUser)
+		webUser := getWebUser(c)
+		_, name, err := core.CreateTask(project, board, title, webUser)
 		if core.IsErr(err, "cannot create task %s", title) {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return

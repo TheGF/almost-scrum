@@ -152,6 +152,7 @@ func CreateTask(project *Project, board string, title string, owner string) (*Ta
 		return nil, "", err
 	}
 
+	project.TasksCount += 1
 	return &task, name, nil
 }
 

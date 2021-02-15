@@ -46,7 +46,10 @@ function Login({ isOpen, onAuthenticated }) {
                         </InputRightElement>
                     </InputGroup>
                 </FormControl>
-                <FormHelperText>{error}</FormHelperText>
+                <FormHelperText>{error ?
+                    error :
+                    'Use admin:changeme the first time'
+                }</FormHelperText>
             </ModalBody>
 
             <ModalFooter>
