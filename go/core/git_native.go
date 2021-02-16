@@ -57,11 +57,20 @@ func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 		}
 
 		if parts[0] == ProjectFolder {
-			if parts[1] == ProjectBoardsFolder || (project.Config.IncludeLibInGit && parts[1] != ProjectLibraryFolder) {
+			switch parts[1] {
+			case ProjectBoardsFolder, ProjectConfigFile, ProjectUsersFolder:
 				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
+				logrus.Debugf("Add file '%s' to Git status", name)
+			case 	ProjectLibraryFolder:
+				if project.Config.IncludeLibInGit {
+					gitStatus.AshFiles = append(gitStatus.AshFiles, name)
+					logrus.Debugf("Add file '%s' to Git status", name)
+				}
 			}
 		} else {
-			gitStatus.Files[name] = GitChange(change)
+			ch := GitChange(change)
+			gitStatus.Files[name] = ch
+			logrus.Debugf("Add file '%s'=%s to Git status", name, ch)
 		}
 	}
 
@@ -70,14 +79,6 @@ func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 	return gitStatus, nil
 }
 
-//func escapeCredentials(value string) string {
-//	tokens := []string{"@", "#", "$", "%", "^", "*", `"`, `'`, "`", `\`}
-//
-//	for _, token := range tokens {
-//		value = strings.ReplaceAll(value, token, `\`+token)
-//	}
-//	return value
-//}
 
 func getGitCredentialAsInput(project *Project, user string) string {
 	username, password, err := GetGitCredentials(project, user)

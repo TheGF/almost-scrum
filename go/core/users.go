@@ -3,6 +3,7 @@ package core
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -34,6 +35,7 @@ func GetUserList(project *Project) []string {
 
 // GetUserInfo returns information about the specified user
 func GetUserInfo(project *Project, user string) (userInfo UserInfo, err error) {
+	user = strings.ToLower(user)
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	if err = ReadYaml(path, &userInfo); err != nil {
 		logrus.Warnf("Invalid file %s: %v", path, err)
@@ -44,6 +46,7 @@ func GetUserInfo(project *Project, user string) (userInfo UserInfo, err error) {
 
 //SetUserInfo saves the user info
 func DelUserInfo(project *Project, user string) (err error) {
+	user = strings.ToLower(user)
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	if err = os.Remove(path); err != nil {
 		logrus.Errorf("Cannot remove info for user %s: %v", user, err)
@@ -55,6 +58,7 @@ func DelUserInfo(project *Project, user string) (err error) {
 
 //SetUserInfo saves the user info
 func SetUserInfo(project *Project, user string, userInfo *UserInfo) (err error) {
+	user = strings.ToLower(user)
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	return WriteYaml(path, userInfo)
 }

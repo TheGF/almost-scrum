@@ -61,7 +61,11 @@ func GetSystemUser() string {
 		return username
 	} else {
 		u, _ := user.Current()
-		return u.Username
+		if strings.Contains(u.Username, "\\") {
+			return strings.ToLower(u.Username[strings.Index(u.Username, "\\")+1:])
+		} else {
+			return strings.ToLower(u.Username)
+		}
 	}
 }
 

@@ -1,0 +1,32 @@
+currentStore: backlog
+propertyModel:
+- name: Owner
+  kind: User
+  values: []
+  prefix: ""
+  default: ""
+- name: Status
+  kind: Tag
+  values:
+  - '#Draft'
+  - '#Started'
+  - '#Done'
+  prefix: ""
+  default: '#Draft'
+- name: Points
+  kind: Enum
+  values:
+  - "1"
+  - "2"
+  - "3"
+  - "5"
+  - "7"
+  - "9"
+  - "12"
+  - "15"
+  - "21"
+  prefix: ""
+  default: "3"
+includeLibInGit: true
+cipherKey: BpLnfgDsc2WD8F2q
+useGitNative: true
