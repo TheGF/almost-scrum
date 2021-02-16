@@ -200,7 +200,7 @@ func createProjectFromGit(c *gin.Context, createOptions createOptions) {
 		c.String(http.StatusInternalServerError, responseBody)
 	}
 
-	path := filepath.Join(repository, name)
+	path := filepath.Join(repository, name, core.ProjectFolder)
 	if err := openProject(name, path); err == nil {
 		c.String(http.StatusCreated, name)
 	} else if createOptions.Inject {

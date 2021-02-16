@@ -24,7 +24,7 @@ function CloneFromGit(props) {
 
     function cloneFromGit() {
         const m = /http.*\/([^\/]*?)(.git)?$/g.exec(url)
-        if (m && len(m) > 1) {
+        if (m && m.length > 1) {
             const name = m[1]
             setCloneInProgress(true)
             Server.cloneFromGit(url, injectProject, selectedTemplates)

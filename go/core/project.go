@@ -196,6 +196,7 @@ func InitProject(path string) (*Project, error) {
 				"", "3", false},
 		},
 		CipherKey:    GenerateRandomString(64),
+		IncludeLibInGit: true,
 		UseGitNative: config.UseGitNative,
 	}
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {
