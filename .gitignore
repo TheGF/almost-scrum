@@ -37,5 +37,7 @@ coverage.xml
 web/node_modules
 web/package-lock.json
 
+.ash/library/.resources/1610999342801
+
 #binary 
 ash
