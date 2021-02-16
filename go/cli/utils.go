@@ -33,7 +33,7 @@ func getProject(projectPath string) *core.Project {
 			return project
 		}
 	}
-	color.Red("I found the project but you are not a user. Bye")
+	color.Red("I found the project but you (%s) are not a user. Bye", current)
 	os.Exit(1)
 
 	return project

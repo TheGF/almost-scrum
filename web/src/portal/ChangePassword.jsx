@@ -52,9 +52,8 @@ function ChangePassword(props) {
                             <T>close</T>
                         </Button>
                     </ButtonGroup>
-                </VStack> :
+                </VStack>
             </ModalBody>
-
         </ModalContent>
     </Modal >
 }

@@ -50,9 +50,19 @@ func IsErr(err error, msg string, args ...interface{}) bool {
 	}
 }
 
+var username string = ""
+
+func SetSystemUser(user string) {
+	username = user
+}
+
 func GetSystemUser() string {
-	u, _ := user.Current()
-	return u.Username
+	if username != "" {
+		return username
+	} else {
+		u, _ := user.Current()
+		return u.Username
+	}
 }
 
 func FindStringInSlice(slice []string, val string) (int, bool) {

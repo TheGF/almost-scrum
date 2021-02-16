@@ -103,6 +103,7 @@ func ProcessArgs() {
 	var projectPath string
 	var logLevel string
 	var port string
+	var username string
 
 	config = core.LoadConfig()
 
@@ -113,11 +114,18 @@ func ProcessArgs() {
 	flag.StringVar(&logLevel, "d", "error",
 		"Log level to display")
 
+	flag.StringVar(&username, "u", "",
+		"Impersonate a different user")
+
 	flag.StringVar(&port, "port", "8375",
 		"HTTP port for the embedded web server")
 
 	flag.Parse()
 	setLogLevel(logLevel)
+
+	if username != "" {
+		core.SetSystemUser(username)
+	}
 
 	commands := os.Args[1+2*flag.NFlag():]
 	if len(commands) == 0 {
