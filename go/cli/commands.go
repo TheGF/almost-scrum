@@ -14,7 +14,7 @@ import (
 var config *core.Config
 
 func usage() {
-	fmt.Printf("usage: ash [-p <project-path>] <command> [<args>]\n\n" +
+	fmt.Printf("usage: ash [-p <project-path>] [-u <user>] [-v] [-a] <command> [<args>]\n\n" +
 		"These are the common Ash commands used in various situations.\n" +
 		"\tinit              Initialize a project in the project path\n" +
 		"\ttop [n]           Show top stories in current store\n" +
@@ -32,7 +32,11 @@ func usage() {
 		"\tweb               Start the Web UI\n\n" +
 		"\tserver <repo>     Start the Web UI as portal for projects in repo folder\n\n" +
 		"\treindex [full]    Rebuild the search index \n\n" +
-		"",
+		"Options\n"+
+		"\t-p <project-path> path where the current project is\n"+
+		"\t-u <user>         impersonate a specific user (only for console client)\n"+
+		"\t-v                shows verbose log\n"+
+		"\t-x                exit when the user closes the browser (only for web UI)\n\n",
 	)
 }
 
@@ -104,6 +108,8 @@ func ProcessArgs() {
 	var logLevel string
 	var port string
 	var username string
+	var verbose bool
+	var autoExit bool
 
 	config = core.LoadConfig()
 
@@ -120,7 +126,17 @@ func ProcessArgs() {
 	flag.StringVar(&port, "port", "8375",
 		"HTTP port for the embedded web server")
 
+	flag.BoolVar(&verbose, "v", false,
+		"shows verbose log")
+
+	flag.BoolVar(&autoExit, "x", false,
+		"exit when the user closes the browser (only for web UI)")
+
 	flag.Parse()
+
+	if verbose {
+		logLevel = "DEBUG"
+	}
 	setLogLevel(logLevel)
 
 	if username != "" {
@@ -161,9 +177,9 @@ func ProcessArgs() {
 	case "reindex":
 		processReIndex(projectPath, commands[1:])
 	case "web":
-		web.StartWeb(projectPath, port, logLevel, commands[1:])
+		web.StartWeb(projectPath, port, logLevel, autoExit, commands[1:])
 	case "server":
-		web.StartServer(port, logLevel, commands[1:])
+		web.StartServer(port, logLevel, autoExit, commands[1:])
 
 	default:
 		logrus.Debugf("Unknown command %s", commands[0])

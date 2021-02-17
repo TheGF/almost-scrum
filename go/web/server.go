@@ -3,30 +3,33 @@ package web
 import (
 	"almost-scrum/assets"
 	"almost-scrum/core"
+	"context"
 	"fmt"
 	"github.com/fatih/color"
 	"mime"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
-func staticHandler(c *gin.Context) {
-	p := c.Param("name")
-	//	p = fmt.Sprintf("%s%s", "data", p)
-	log.Debugf("Static request %s", p)
-	data, err := assets.Asset(p)
-	if err != nil {
-		log.Warnf("Cannot find resource %s: %v", p, err)
-		return
-	}
-	c.Writer.Write(data)
-}
+//func staticHandler(c *gin.Context) {
+//	p := c.Param("name")
+//	logrus.Debugf("Static request %s", p)
+//	data, err := assets.Asset(p)
+//	if err != nil {
+//		logrus.Warnf("Cannot find resource %s: %v", p, err)
+//		return
+//	}
+//	c.Writer.Write(data)
+//}
 
 func loadStaticContent(router *gin.Engine) {
 	for _, name := range assets.AssetNames() {
@@ -36,15 +39,15 @@ func loadStaticContent(router *gin.Engine) {
 		path := fmt.Sprintf("/%s", name[len("build"):])
 		data, err := assets.Asset(name)
 		if err != nil {
-			log.Errorf("Cannot read asset %s: %s", name, err)
+			logrus.Errorf("Cannot read asset %s: %s", name, err)
 			continue
 		}
 		router.GET(path, func(c *gin.Context) {
 			m := mime.TypeByExtension(filepath.Ext(path))
 			c.Data(http.StatusOK, m, data)
-			log.Debugf("Get content of %s with mime %v", path, m)
+			logrus.Debugf("Get content of %s with mime %v", path, m)
 		})
-		log.Debugf("Bound resource %s to %s", name, path)
+		logrus.Debugf("Bound resource %s to %s", name, path)
 	}
 	router.GET("/", func(c *gin.Context) {
 		data, _ := assets.Asset("build/index.html")
@@ -53,14 +56,83 @@ func loadStaticContent(router *gin.Engine) {
 
 }
 
-func setPortal(r *gin.Engine, portal bool) {
-	r.GET("/auth/portal", func (c *gin.Context){
-		c.JSON(http.StatusOK, portal)
+var knownClients = make([]string, 0)
+
+type hello struct {
+	Version string `json:"version"`
+	Portal bool `json:"portal"`
+}
+
+func setHello(r *gin.Engine, portal bool, autoExit bool) {
+	r.POST("/auth/hello", func (c *gin.Context){
+		id := c.DefaultQuery("id", "")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, "Provide an id parameter when you say hello")
+			return
+		}
+
+		if autoExit {
+			if _, found := core.FindStringInSlice(knownClients, id); found {
+				knownClients = append(knownClients, id)
+			}
+		}
+
+		c.JSON(http.StatusOK, hello{
+			Version: "0.5",
+			Portal:  portal,
+		})
 	})
 }
 
+func setBye(r *gin.Engine) {
+	r.POST("/auth/bye", func (c *gin.Context) {
+		id := c.DefaultQuery("id", "")
+		if id == "" {
+			c.String(http.StatusBadRequest, "Provide an id parameter when you say bye")
+			return
+		}
+
+		if idx, found := core.FindStringInSlice(knownClients, id); found {
+			knownClients = append(knownClients[0:idx], knownClients[idx+1:]...)
+			if err := srv.Shutdown(ctx); err != nil {
+				logrus.Fatal("Server forced to shutdown:", err)
+			}
+
+		}
+		c.String(http.StatusOK, "Have a good day")
+	})
+}
+
+var srv *http.Server
+var ctx context.Context
+
+func runServer(router *gin.Engine, addr string) {
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: router,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logrus.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	logrus.Println("Shutting down server...")
+
+
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	logrus.Println("Server exiting")
+}
+
 //StartWeb starts the embedded web UI. Only for local usage
-func StartWeb(projectPath string, port string, logLevel string, args []string) {
+func StartWeb(projectPath string, port string, logLevel string, autoExit bool, args []string) {
 	if strings.ToUpper(logLevel) != "DEBUG" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -71,8 +143,9 @@ func StartWeb(projectPath string, port string, logLevel string, args []string) {
 		os.Exit(1)
 	}
 
-	setPortal(r, false)
 	loadStaticContent(r)
+	setHello(r, false, autoExit)
+	setBye(r)
 	v1 := r.Group("/api/v1")
 
 	projectRoute(v1)
@@ -83,11 +156,11 @@ func StartWeb(projectPath string, port string, logLevel string, args []string) {
 	gitRoute(v1)
 
 	core.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%s", port))
-	r.Run(fmt.Sprintf(":%s", port))
+	runServer(r, fmt.Sprintf(":%s", port))
 }
 
 //StartServer starts the embedded server portal.
-func StartServer(port string, logLevel string, args []string) {
+func StartServer(port string, logLevel string, autoExit bool, args []string) {
 	if len(args) == 0 {
 		color.Red("Please provide repo folder")
 		os.Exit(1)
@@ -99,8 +172,9 @@ func StartServer(port string, logLevel string, args []string) {
 	repoPath := args[0]
 
 	r := gin.Default()
-	setPortal(r, true)
 	loadStaticContent(r)
+	setHello(r, true, autoExit)
+	setBye(r)
 
 	authMiddleware := getJWTMiddleware()
 	r.POST("/auth/login", authMiddleware.LoginHandler)
@@ -118,5 +192,5 @@ func StartServer(port string, logLevel string, args []string) {
 	gitRoute(v1)
 
 	core.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%s", port))
-	r.Run(fmt.Sprintf(":%s", port))
+	runServer(r, fmt.Sprintf(":%s", port))
 }

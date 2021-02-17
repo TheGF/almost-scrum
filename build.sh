@@ -17,3 +17,8 @@ chmod 0644 debian/almost-scrum-0.5/usr/share/doc/almost-scrum/*
 strip -s -o debian/almost-scrum-0.5/usr/bin/ash bin/ash_linux 
 fakeroot dpkg-deb --build debian/almost-scrum-0.5
 mv debian/almost-scrum-0.5.deb ../dist
+
+#Windows Package
+cd windows
+makensis ash-setup.nsi
+cd ..

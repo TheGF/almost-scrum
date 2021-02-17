@@ -22,7 +22,6 @@ function Login({ isOpen, onAuthenticated }) {
     return <Modal isOpen={isOpen} >
         <ModalContent>
             <ModalHeader>Welcome to Almost Scrum</ModalHeader>
-            <ModalCloseButton />
             <ModalBody>
                 <FormControl id="ash-username">
                     <FormLabel><T>username</T></FormLabel>

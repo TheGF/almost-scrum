@@ -5,11 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/project.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/project_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/project_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/assets/bindata.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cli/commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/commands.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_darwin" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_darwin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_linux" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_windows.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_windows.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/portal/CloneFromGit.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/portal/CloneFromGit.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -189,7 +195,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/web/server.go</url>
-          <line>86</line>
+          <line>159</line>
           <option name="timeStamp" value="44" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">

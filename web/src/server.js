@@ -72,11 +72,18 @@ class Server {
             .catch(errorHandler);
     }
 
-    static isPortal() {
-        return axios.get('/auth/portal', getConfig())
+    static hello(id) {
+        return axios.post(`/auth/hello?id=${id}`, null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
+
+    static bye(id) {
+        return axios.post(`/auth/bye?id=${id}`, null, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
 
     static getLocalUsers() {
         return axios.get('/api/v1/passwords', getConfig())

@@ -1,25 +1,35 @@
-import { Button, ChakraProvider, HStack, Text, useToast, VStack } from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
 import { React, useEffect, useState } from 'react';
-import theme from './theme'
 import Desktop from './desktop/Desktop';
-import Server from './server';
+import ErrorBoundary from './ErrorBoundary';
 import Portal from './portal/Portal';
-import ErrorBoundary from './ErrorBoundary'
-import { RiEmotionUnhappyLine } from 'react-icons/ri';
+import Server from './server';
+import theme from './theme';
 
+function uuidv4() {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
+let clientId = uuidv4()
 
 function App() {
-  const [portal, setPortal] = useState(null)
-  const toast = useToast()
+  const [hello, setHello] = useState(null)
 
   function chooseMode() {
-    Server.isPortal()
-      .then(setPortal)
+    Server.hello(clientId)
+      .then(setHello)
+      .then(_ => {
+        window.addEventListener('beforeunload', function(){
+          Server.bye(clientId);
+          alert('BYE')
+        })
+      })
   }
   useEffect(chooseMode, [])
 
-  const entry = portal == null ? null :
-    portal ? <Portal /> : <Desktop project="~" />;
+  const entry = hello == null ? null :
+    hello.portal ? <Portal /> : <Desktop project="~" />;
   return (
     <ChakraProvider theme={theme}  >
       <ErrorBoundary>{entry}</ErrorBoundary>
