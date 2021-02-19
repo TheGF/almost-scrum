@@ -54,7 +54,10 @@ function MarkdownImage(props) {
         props.onUpdate && props.onUpdate(orig, update)
     }
 
-    const onClick = readOnly ? null : onOpen
+    const onClick = readOnly ? null : e => {
+        e.stopPropagation()
+        onOpen(true)
+    }
     let src = props.src.replace('~library', `/api/v1/projects/${project}/library`)
     src = src.replace('~public', ``)
     src = token ? `${src}?token=${token}` : src

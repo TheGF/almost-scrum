@@ -172,6 +172,12 @@ class Server {
             .catch(errorHandler);
     }
 
+    static getUser(project, user) {
+        return axios.get(`/api/v1/projects/${project}/users/${user}`, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
     static delUser(project, user) {
         return axios.delete(`/api/v1/projects/${project}/users/${user}`, getConfig())
             .then(r => r.data)
@@ -313,6 +319,14 @@ class Server {
             .then(r => r.data)
             .catch(errorHandler);
     }
+
+    static localOpenFromLibrary(project, path) {
+        path = encodeURIComponent(path)
+        return axios.get(`/api/v1/projects/${project}/library${path}?local`, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
 
     static openFromlibrary(project, path) {
         path = encodeURIComponent(path)

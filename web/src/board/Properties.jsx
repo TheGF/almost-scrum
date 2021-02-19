@@ -86,13 +86,8 @@ function Properties(props) {
     }
 
     const rows = (propertyModel || []).map(propertyDef => renderProperty(propertyDef))
-    const editMessage = readOnly ? <Center h="2em">
-        Change owner if you want to edit the content
-    </Center> : null
     return <Box maxH={height-50} style={{ overflowY: 'auto' }}>
-        {editMessage}
         <Table variant="striped" colorScheme="teal" size="sm">
-            <TableCaption>Edit the properties of your project</TableCaption>
             <Tbody>
                 {rows}
             </Tbody>

@@ -1,17 +1,10 @@
 import {
-    Button, HStack, List, ListItem, VStack, IconButton, Input, Spacer, FormLabel
+    Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
+    Box, Button, ButtonGroup, HStack, Input, VStack
 } from "@chakra-ui/react";
-import {
-    Accordion,
-    AccordionItem,
-    AccordionButton,
-    AccordionPanel,
-    AccordionIcon,
-    Box
-} from "@chakra-ui/react"
-import { React, useState, useEffect, useContext } from "react";
+import { React, useContext, useEffect, useState } from "react";
+import { CgUserlane } from 'react-icons/all';
 import T from "../core/T";
-import { BsTrash, CgUserlane } from 'react-icons/all';
 import Server from '../server';
 import UserContext from '../UserContext';
 
@@ -43,13 +36,23 @@ function Users(props) {
             })
     }
 
-    const userList = users.sort().map(u => {
-        const isMe = u == info.loginUser
+    function UserProfile(props) {
+        const { user, isExpanded } = props;
+        const isMe = user == info.loginUser
+        const [userInfo, setUserInfo] = useState({})
 
-        return <AccordionItem>
+        function getUser() {
+            if (isExpanded) {
+                Server.getUser(project, user)
+                    .then(setUserInfo)
+            }
+        }
+        useEffect(getUser, [isExpanded]);
+
+        return <>
             <AccordionButton >
                 <Box flex="1" textAlign="left" >
-                    {isMe ? <HStack><b>{u}</b><CgUserlane/></HStack> : u}
+                    {isMe ? <HStack><b>{user}</b><CgUserlane /></HStack> : user}
                 </Box>
                 <AccordionIcon />
             </AccordionButton>
@@ -57,20 +60,33 @@ function Users(props) {
                 <VStack>
                     <HStack align="top">
                         <VStack w="100%">
-                            <Input placeholder="Name" type="text" />
-                            <Input placeholder="E-mail" type="email" />
-                            <Input placeholder="Office Location" type="text" />
+                            <Input placeholder="Name" type="text" value={userInfo.name}
+                                onChange={e => setUserInfo({ ...userInfo, name: e.target.value })} />
+                            <Input placeholder="E-mail" type="email" value={userInfo.email}
+                                onChange={e => setUserInfo({ ...userInfo, email: e.target.value })} />
+                            <Input placeholder="Office Location" value={userInfo.location}
+                                onChange={e => setUserInfo({ ...userInfo, location: e.target.value })} />
                         </VStack>
                         <Box minW="120px" h="120px" borderWidth={1}>
                         </Box>
                     </HStack>
-                    <Button w="100%" onClick={_ => delUser(u)} disabled={isMe}>
-                        Remove
-                    </Button>
+                    <ButtonGroup w="50%" >
+                        <Button onClick={_ => setUser(user, userInfo)}>
+                            Update
+                        </Button>
+                        <Button onClick={_ => delUser(u)} disabled={isMe}>
+                            Remove
+                        </Button>
+                    </ButtonGroup>
                 </VStack>
             </AccordionPanel>
-        </AccordionItem>
-    })
+        </>
+    }
+
+    const userList = users.sort().map(u => <AccordionItem>
+        {({ isExpanded }) => <UserProfile key={u} user={u} isExpanded={isExpanded} />}
+    </AccordionItem>)
+
 
     return <VStack align="left">
         <HStack>

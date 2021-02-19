@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -69,7 +70,7 @@ func listTaskAPI(c *gin.Context) {
 	log.Debugf("Search in %s, filter=%s, keys=%v %d", board, filter, keys, len(keys))
 	infos, err := core.SearchTask(project, board, true, keys...)
 	switch err {
-	case core.ErrNoFound:
+	case os.ErrNotExist:
 		_ = c.Error(err)
 		c.String(http.StatusNotFound, "Board %s does not exist", board)
 	case nil:

@@ -2,6 +2,10 @@ package core
 
 import "errors"
 
+
+// GitFolder is the default folder where git info is stored
+const AshVersion = "0.5.0"
+
 // GitFolder is the default folder where git info is stored
 const GitFolder = ".git"
 
@@ -26,6 +30,7 @@ const ProjectBoardsFolder = "boards"
 const TaskFileExt = ".md"
 
 const IndexFile = "no-git-index.json"
+
 
 var (
 	// ProjectFolders is the required folders in the project

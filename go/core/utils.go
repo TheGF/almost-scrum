@@ -131,7 +131,7 @@ func UnzipFile(data []byte, destination string) error {
 	return nil
 }
 
-func OpenBrowser(url string) error {
+func OpenUrl(url string) error {
 	var cmd string
 	var args []string
 
@@ -146,7 +146,7 @@ func OpenBrowser(url string) error {
 	}
 	args = append(args, url)
 
-	logrus.Debugf("Open browser at %s", url)
+	logrus.Debugf("Open url %s", url)
 	return exec.Command(cmd, args...).Start()
 }
 

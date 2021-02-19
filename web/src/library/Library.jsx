@@ -1,30 +1,28 @@
 import {
     Breadcrumb, BreadcrumbItem, BreadcrumbLink, Button, ButtonGroup,
-    Editable, EditableInput, EditablePreview,
-    HStack, Link, Spacer, Table, Tbody, Td, Th, Thead, Tr, VStack,
-    IconButton, VisuallyHidden
+    Editable, EditableInput, EditablePreview, Flex, HStack,
+    IconButton, Link, Spacer, Table, Tbody, Td, Th, Thead, Tr,
+    VisuallyHidden, VStack
 } from '@chakra-ui/react';
 import { React, useContext, useEffect, useState } from 'react';
 import { AiOutlineReload } from 'react-icons/ai';
 import { BiEdit } from 'react-icons/bi';
-import { CgRename } from 'react-icons/cg';
-import { GoHome } from 'react-icons/go';
-import T from '../core/T';
-import Server from '../server';
-import UserContext from '../UserContext';
-import Utils from '../core/utils';
-import PageEditor from './PageEditor';
 import { GiGrapes } from 'react-icons/gi';
+import { GoHome } from 'react-icons/go';
 import { MdCreateNewFolder } from 'react-icons/md';
 import { VscNewFile } from 'react-icons/vsc';
-import { Box } from '@chakra-ui/react';
-import { Flex } from '@chakra-ui/react';
+import T from '../core/T';
+import Utils from '../core/utils';
+import Server from '../server';
+import UserContext from '../UserContext';
+import PageEditor from './PageEditor';
 
 function Library(props) {
     const { project } = useContext(UserContext);
     const { attachedFiles, setAttachedFiles, height } = props
     const [path, setPath] = useState(props.path || '')
     const [uploading, setUploading] = useState(false)
+    const isLocalhost = Utils.isLocalhost()
 
     const [favorites, setFavorites] = useState(
         (localStorage.getItem('ash-lib-favs') || '').split(',').filter(f => f)
@@ -139,6 +137,17 @@ function Library(props) {
         }
     }
 
+    function openFile(file) {
+        const p = `${path}/${file.name}`
+        Server.localOpenFromLibrary(project, p)
+    }
+
+    function getOpenButton(file) {
+        if (!isLocalhost) return null;
+
+        return <Button onClick={_ => openFile(file)}>Open</Button>
+    }
+
     const rows =  files && files.map(file => {
         const idx = file.name.lastIndexOf('.')
         const ext = idx != -1 ? file.name.substr(idx + 1) : ''
@@ -171,6 +180,7 @@ function Library(props) {
             <Td>
                 <ButtonGroup size="sm" spacing={2}>
                     {getAttachButton(file)}
+                    {getOpenButton(file)}
                     <Button onClick={_ => deleteFile(file)}>Delete</Button>
                 </ButtonGroup>
             </Td>

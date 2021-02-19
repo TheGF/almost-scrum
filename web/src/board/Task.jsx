@@ -39,6 +39,8 @@ function Task(props) {
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false)
     const [candidateOwner, setCandidateOwner] = useState(null)
     const [height, setHeight] = useState(400)
+    const [tabIndex, setTabIndex] = useState(0)
+
 
     useEffect(_ => setCompact(props.compact), [props.compact])
 
@@ -206,10 +208,11 @@ function Task(props) {
     }
 
 
-    function onChange(index) {
+    function handleTabsChange(index) {
         if (index == 0) {
             setTask({ ...task, description: task.description });
         }
+        setTabIndex(index)
     }
 
     const heightSelector = <Slider min={200} max={900} defaultValue="400" w="8em"
@@ -279,7 +282,7 @@ function Task(props) {
             const toolbarCommands = [...getDefaultToolbarCommands(), ["save-resolve"]]
 
             return <Box h={height} >
-                <Tabs w="100%" onChange={onChange} isLazy>
+                <Tabs w="100%" index={tabIndex} onChange={handleTabsChange} isLazy>
                     <TabList>
                         <Tab key="conflict"><T>conflict</T></Tab>
                         <Tab key="edit"><T>manual edit - be careful!</T></Tab>
@@ -325,7 +328,7 @@ function Task(props) {
 
 
         return <Box h={height} ><HStack spacing={3} >
-            <Tabs w="100%" onChange={onChange} isLazy>
+            <Tabs w="100%" index={tabIndex} onChange={handleTabsChange} isLazy>
                 <TabList>
                     <Tab key="view"><T>view</T></Tab>
                     <Tab key="edit"><T>edit</T></Tab>
@@ -342,15 +345,11 @@ function Task(props) {
                 <TabPanels>
                     <TabPanel key="view" padding={0}>
                         <TaskViewer height={height} task={task} saveTask={saveTask} searchKeys={searchKeys}
-                            readOnly={readOnly} />
+                            readOnly={readOnly} startEdit={_=>handleTabsChange(1)}/>
                     </TabPanel>
                     <TabPanel key="edit" padding={0}>
                         <TaskEditor task={task} saveTask={saveTask} users={users} height={height}
                             readOnly={readOnly} />
-                    </TabPanel>
-                    <TabPanel key="properties" >
-                        <Properties task={task} saveTask={saveTask} users={users} height={height} 
-                            height={height} readOnly={readOnly} />
                     </TabPanel>
                     <TabPanel key="progress" >
                         <Progress task={task} readOnly={readOnly} height={height} 

@@ -5,16 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/core/localmimes.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/assets/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/assets/bindata.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cli/commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/commands.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/const.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/const.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/utils.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/library_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/library_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_darwin" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_darwin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/tasks_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/tasks_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_linux" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_windows.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_windows.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../web/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/board/Properties.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Properties.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/board/Task.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Task.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/board/TaskEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/TaskEditor.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/board/TaskViewer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/TaskViewer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/core/MarkdownImage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/core/MarkdownImage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/core/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/core/utils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Users.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Users.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/library/Library.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/Library.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/src/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -195,7 +208,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/web/server.go</url>
-          <line>159</line>
+          <line>183</line>
           <option name="timeStamp" value="44" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">

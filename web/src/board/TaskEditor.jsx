@@ -1,8 +1,9 @@
-import { Box, Center } from "@chakra-ui/react";
+import { Box, Center, HStack } from "@chakra-ui/react";
 import { React, useContext, useState } from "react";
 import MarkdownEditor from '../core/MarkdownEditor';
 import Server from '../server';
 import UserContext from '../UserContext';
+import Properties from './Properties';
 
 
 
@@ -43,15 +44,24 @@ function TaskEditor(props) {
 </Center> : null
 
   return readOnly ? editMessage : <Box>
-    <MarkdownEditor
-      value={value}
-      height={height}
-      onChange={onChange}
-      disablePreview={true}
-      loadSuggestions={loadSuggestions}
-      suggestionTriggerCharacters={['@', '#']}
-      imageFolder="/.inline-images"
-    /></Box>;
+    <HStack>
+      <Box w="90%" h={height}>
+      <MarkdownEditor
+        value={value}
+        height={height}
+        onChange={onChange}
+        disablePreview={true}
+        loadSuggestions={loadSuggestions}
+        suggestionTriggerCharacters={['@', '#']}
+        imageFolder="/.inline-images"
+      />
+      </Box>
+      <Box minW="240px" h={height-20}>
+      <Properties task={task} saveTask={saveTask} users={users} height={height}
+        height={height} readOnly={readOnly} />
+      </Box>
+    </HStack>
+  </Box>;
 }
 
 export default TaskEditor

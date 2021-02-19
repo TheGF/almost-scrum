@@ -143,12 +143,13 @@ func ProcessArgs() {
 		core.SetSystemUser(username)
 	}
 
-	commands := os.Args[1+2*flag.NFlag():]
-	if len(commands) == 0 {
+	nArg := flag.NArg()
+	if nArg == 0 {
 		flag.Usage()
 		return
 	}
 
+	commands := os.Args[len(os.Args)-nArg:]
 	global := matchGlobal(commands)
 	commands = replaceShortcuts(commands)
 	switch commands[0] {

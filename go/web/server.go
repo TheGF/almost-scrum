@@ -6,11 +6,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/getlantern/systray"
+	"log"
 	"mime"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -20,16 +23,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//func staticHandler(c *gin.Context) {
-//	p := c.Param("name")
-//	logrus.Debugf("Static request %s", p)
-//	data, err := assets.Asset(p)
-//	if err != nil {
-//		logrus.Warnf("Cannot find resource %s: %v", p, err)
-//		return
-//	}
-//	c.Writer.Write(data)
-//}
 
 func loadStaticContent(router *gin.Engine) {
 	for _, name := range assets.AssetNames() {
@@ -60,11 +53,11 @@ var knownClients = make([]string, 0)
 
 type hello struct {
 	Version string `json:"version"`
-	Portal bool `json:"portal"`
+	Portal  bool   `json:"portal"`
 }
 
 func setHello(r *gin.Engine, portal bool, autoExit bool) {
-	r.POST("/auth/hello", func (c *gin.Context){
+	r.POST("/auth/hello", func(c *gin.Context) {
 		id := c.DefaultQuery("id", "")
 		if id == "" {
 			c.JSON(http.StatusBadRequest, "Provide an id parameter when you say hello")
@@ -72,20 +65,23 @@ func setHello(r *gin.Engine, portal bool, autoExit bool) {
 		}
 
 		if autoExit {
-			if _, found := core.FindStringInSlice(knownClients, id); found {
+			if _, found := core.FindStringInSlice(knownClients, id); !found {
 				knownClients = append(knownClients, id)
+				logrus.Infof("New polite client %s added to the known list", id)
 			}
+		} else {
+			logrus.Debugf("New polite client %s but auto-exit is off", id)
 		}
 
 		c.JSON(http.StatusOK, hello{
-			Version: "0.5",
+			Version: core.AshVersion,
 			Portal:  portal,
 		})
 	})
 }
 
 func setBye(r *gin.Engine) {
-	r.POST("/auth/bye", func (c *gin.Context) {
+	r.POST("/auth/bye", func(c *gin.Context) {
 		id := c.DefaultQuery("id", "")
 		if id == "" {
 			c.String(http.StatusBadRequest, "Provide an id parameter when you say bye")
@@ -94,20 +90,52 @@ func setBye(r *gin.Engine) {
 
 		if idx, found := core.FindStringInSlice(knownClients, id); found {
 			knownClients = append(knownClients[0:idx], knownClients[idx+1:]...)
-			if err := srv.Shutdown(ctx); err != nil {
-				logrus.Fatal("Server forced to shutdown:", err)
-			}
 
+			if len(knownClients) == 0 {
+				logrus.Info("All client disconnected. Time to shutdown")
+
+				log.Println("Try nicely... waiting 5 seconds")
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				if err := srv.Shutdown(ctx); err != nil {
+					logrus.Fatal("Server forced to shutdown:", err)
+				}
+
+			}
 		}
 		c.String(http.StatusOK, "Have a good day")
 	})
 }
 
 var srv *http.Server
-var ctx context.Context
+
+func onReady() {
+
+	var iconExt string
+	if runtime.GOOS == "windows" {
+		iconExt = "ico"
+	} else {
+		iconExt = "png"
+	}
+	iconData := assets.Asset(fmt.Sprintf("assets/icons/grapes.%s", iconExt))
+	systray.SetIcon(iconData)
+	systray.SetTitle("Almost Scrum")
+	systray.SetTooltip("Pretty awesome")
+	_ = systray.AddMenuItem("Quit", "Quit the whole app")
+
+	// Sets the icon of a menu item. Only available on Mac and Windows.
+//	mQuit.SetIcon(icon.Data)
+}
+
+func onExit() {
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logrus.Fatalf("listen: %s\n", err)
+	}
+}
 
 func runServer(router *gin.Engine, addr string) {
-	srv := &http.Server{
+
+	srv = &http.Server{
 		Addr:    addr,
 		Handler: router,
 	}
@@ -118,17 +146,13 @@ func runServer(router *gin.Engine, addr string) {
 		}
 	}()
 
+
+	systray.Run(onReady, onExit)
+
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	logrus.Println("Shutting down server...")
-
-
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	logrus.Println("Server exiting")
 }
 
 //StartWeb starts the embedded web UI. Only for local usage
@@ -155,7 +179,7 @@ func StartWeb(projectPath string, port string, logLevel string, autoExit bool, a
 	indexRoute(v1)
 	gitRoute(v1)
 
-	core.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%s", port))
+	core.OpenUrl(fmt.Sprintf("http://127.0.0.1:%s", port))
 	runServer(r, fmt.Sprintf(":%s", port))
 }
 
@@ -191,6 +215,6 @@ func StartServer(port string, logLevel string, autoExit bool, args []string) {
 	indexRoute(v1)
 	gitRoute(v1)
 
-	core.OpenBrowser(fmt.Sprintf("http://127.0.0.1:%s", port))
+	core.OpenUrl(fmt.Sprintf("http://127.0.0.1:%s", port))
 	runServer(r, fmt.Sprintf(":%s", port))
 }
