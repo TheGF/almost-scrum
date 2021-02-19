@@ -117,8 +117,9 @@ func onReady() {
 	} else {
 		iconExt = "png"
 	}
-	iconData := assets.Asset(fmt.Sprintf("assets/icons/grapes.%s", iconExt))
-	systray.SetIcon(iconData)
+	if iconData, err := assets.Asset(fmt.Sprintf("assets/icons/grapes.%s", iconExt)); err == nil {
+		systray.SetIcon(iconData)
+	}
 	systray.SetTitle("Almost Scrum")
 	systray.SetTooltip("Pretty awesome")
 	_ = systray.AddMenuItem("Quit", "Quit the whole app")
