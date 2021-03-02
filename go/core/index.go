@@ -336,13 +336,17 @@ func BuiltSearchTree(project *Project) {
 		project.Index.searchTree.Add(k, k)
 		logrus.Debugf("Add key '%s' to index search tree", k)
 	}
-	for _, propertyDef := range project.Config.PropertyModel {
-		if propertyDef.Kind == "Tag" && propertyDef.Values != nil {
-			for _, value := range propertyDef.Values {
-				project.Index.searchTree.Add(value, value)
+
+	for _, model := range project.Models {
+		for _, propertyDef := range model.Properties {
+			if propertyDef.Kind == "Tag" && propertyDef.Values != nil {
+				for _, value := range propertyDef.Values {
+					project.Index.searchTree.Add(value, value)
+				}
 			}
 		}
 	}
+
 }
 
 func ReadIndex(project *Project) error {

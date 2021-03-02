@@ -21,6 +21,15 @@ const ProjectUsersFolder = "users"
 // ProjectUsersFolder the folder containing users
 const ProjectLibraryFolder = "library"
 
+
+// ProjectUsersFolder the folder containing users
+const ProjectArchiveFolder = "archive"
+
+
+// ProjectUsersFolder the folder containing users
+const ProjectModelsFolder = "models"
+
+
 // ProjectUsersFolder the folder containing users
 const ProjectLibraryInlineImagesFolder = "library/.inline-images"
 
@@ -31,6 +40,7 @@ const TaskFileExt = ".md"
 
 const IndexFile = "no-git-index.json"
 
+const TypeProperty = "Type"
 
 var (
 	// ProjectFolders is the required folders in the project
@@ -41,6 +51,9 @@ var (
 
 	// ErrNoFound occurs when an item is not found
 	ErrNoFound = errors.New("no such item")
+
+	// ErrNoFound occurs when an item is not found
+	ErrInvalidType = errors.New("invalid type")
 
 	// ErrTooMany occurs when too many items are found
 	ErrTooMany = errors.New("too many items")

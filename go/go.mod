@@ -15,6 +15,8 @@ require (
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
+	github.com/google/uuid v1.2.0 // indirect
+	github.com/hashicorp/go-version v1.2.1
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/jtblin/go-ldap-client v0.0.0-20170223121919-b73f66626b33
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
@@ -24,11 +26,13 @@ require (
 	github.com/monirz/gotri v0.0.0-20200219181904-dacfb98c509f
 	github.com/msteinert/pam v0.0.0-20201130170657-e61372126161 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shurcooL/go v0.0.0-20200502201357-93f07166e636 // indirect
 	github.com/shurcooL/markdownfmt v0.0.0-20191117054414-21fe95c248e9
 	github.com/sirupsen/logrus v1.7.0
+	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/stretchr/testify v1.6.1
 	github.com/ugorji/go v1.2.0 // indirect
 	github.com/yuin/goldmark v1.3.0

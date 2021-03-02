@@ -31,11 +31,11 @@ func AuthenticateWithLdap(user, password string) bool {
 
 // SetPassword add a user with password to the global configuration.
 func SetPassword(user, password string) error {
-	config := LoadConfig()
+	config := ReadConfig()
 
 	if password == "" {
 		delete(config.Passwords, user)
-		SaveConfig(config)
+		WriteConfig(config)
 		return nil
 	}
 
@@ -45,14 +45,14 @@ func SetPassword(user, password string) error {
 		return err
 	}
 	config.Passwords[user] = hex.EncodeToString(bytes)
-	SaveConfig(config)
+	WriteConfig(config)
 	logrus.Debugf("SetPassword - set password for user %s", user)
 	return nil
 }
 
 //CheckUser checks if a user has expected password
 func CheckUser(user, password string) bool {
-	config := LoadConfig()
+	config := ReadConfig()
 	hash, _ := hex.DecodeString(config.Passwords[user])
 
 	err := bcrypt.CompareHashAndPassword(hash, []byte(password))

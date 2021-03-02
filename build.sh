@@ -6,7 +6,7 @@ cd web
 
 #Go Build
 cd ../go
-export GOX_windows_amd64_LDFLAGS=-H=windowsgui
+export GOX_windows_amd64_LDFLAGS="-H=windowsgui"
 ~/go/bin/gox -osarch="linux/amd64 windows/amd64" -output="../sdist/bin/ash_{{.OS}}"
 #~/go/bin/gox -osarch="linux/amd64 windows/amd64 darwin/amd64" -output="../sdist/bin/ash_{{.OS}}"
 

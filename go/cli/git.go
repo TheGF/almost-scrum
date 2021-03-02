@@ -24,7 +24,7 @@ func selectTasks(project *core.Project, global bool) []core.TaskInfo {
 	if global {
 		board = ""
 	} else {
-		board = project.Config.CurrentBoard
+		board = project.Config.Public.CurrentBoard
 	}
 
 	infos, _ := core.ListTasks(project, board, "")

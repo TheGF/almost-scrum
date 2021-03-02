@@ -135,14 +135,14 @@ func GetGitSettings(project *Project, user string) (GitSettings, error) {
 	username, _, _ := GetGitCredentials(project, user)
 
 	return GitSettings{
-		UseGitNative: project.Config.UseGitNative,
+		UseGitNative: project.Config.Public.UseGitNative,
 		Username:     username,
 		Password:     "",
 	}, nil
 }
 
 func SetGitSettings(project *Project, user string, gitSettings GitSettings) error {
-	project.Config.UseGitNative = gitSettings.UseGitNative
+	project.Config.Public.UseGitNative = gitSettings.UseGitNative
 	if err := WriteProjectConfig(project.Path, &project.Config); err != nil {
 		return err
 	}

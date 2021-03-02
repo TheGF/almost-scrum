@@ -55,6 +55,19 @@ class Utils {
         return `${date} ${time}`;
     }
 
+    static getFriendlySize(size) {
+        if (size > 1024*1024*1024) {
+            return `${Math.floor(size/1024*1024*1024)}G`
+        }
+        if (size > 1024*1024) {
+            return `${Math.floor(size/1024*1024)}M`
+        }
+        if (size > 1024) {
+            return `${Math.floor(size/1024)}K`
+        }
+        return size
+    }
+    
     static lazyCall(key, action, callback = null) {
         pendingCalls[key] = {
             action: action,

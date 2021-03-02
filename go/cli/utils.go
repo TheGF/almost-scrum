@@ -53,7 +53,7 @@ func getBoard(project *core.Project, global bool) string {
 	if global {
 		return ""
 	} else {
-		return project.Config.CurrentBoard
+		return project.Config.Public.CurrentBoard
 	}
 }
 
@@ -61,7 +61,7 @@ func chooseBoard(project *core.Project) string {
 	boards, err := core.ListBoards(project)
 	abortIf(err, "")
 
-	cursorPos := sort.SearchStrings(boards, project.Config.CurrentBoard)
+	cursorPos := sort.SearchStrings(boards, project.Config.Public.CurrentBoard)
 	prompt := promptui.Select{
 		Label:     "Choose a board",
 		Items:     boards,

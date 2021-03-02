@@ -56,8 +56,8 @@ func getConfigPath() string {
 	return filepath.Join(configFolder, "almost-scrum.yaml")
 }
 
-//LoadConfig returns the global configuration
-func LoadConfig() *Config {
+//ReadConfig returns the global configuration
+func ReadConfig() *Config {
 	configPath := getConfigPath()
 
 	var config Config
@@ -65,17 +65,17 @@ func LoadConfig() *Config {
 	if err != nil {
 		logrus.Warnf("Cannot read global configuration %s: %v", configPath, err)
 
-		SaveConfig(&defaultConfig)
-		SetPassword("admin", "changeme")
-		return LoadConfig()
+		WriteConfig(&defaultConfig)
+		SetPassword(GetSystemUser(), "changeme")
+		return ReadConfig()
 	} else {
 		logrus.Debugf("Successfully loaded config from %s: %v", configPath, config)
 	}
 	return &config
 }
 
-//SaveConfig saves the global configuration
-func SaveConfig(config *Config) {
+//WriteConfig saves the global configuration
+func WriteConfig(config *Config) {
 	configPath := getConfigPath()
 	err := WriteYaml(configPath, config)
 	if err != nil {
@@ -84,3 +84,4 @@ func SaveConfig(config *Config) {
 	}
 	logrus.Debugf("Config saved to %s", configPath)
 }
+

@@ -14,7 +14,7 @@ import (
 var (
 	paragraphMatch = regexp.MustCompile(`#+\s+(\S+)[^#]+`)
 	lineMatch      = regexp.MustCompile(`#+\s+(\w+)|([^\n]+)`)
-	propertyMatch  = regexp.MustCompile(`\s*([^:]*):\s+(.*)`)
+	propertyMatch  = regexp.MustCompile(`\s*([^:]*):\s*(.*)`)
 	partMatch      = regexp.MustCompile(`\[([x ])]\s+(.+)`)
 	filesMatch     = regexp.MustCompile(`\[[^]]*]\([^)]+\)`)
 )
@@ -27,8 +27,9 @@ func parseProperties(node *blackfriday.Node, task *Task) {
 	}
 	key := match[1]
 	val := match[2]
+
 	task.Properties[key] = val
-	logrus.Debugf("ParseTask - found feature %s: %s", key, val)
+	logrus.Debugf("ParseTask - found property %s: %s", key, val)
 }
 
 func parseParts(node *blackfriday.Node, task *Task) {
@@ -231,5 +232,6 @@ func ParseTask(input []byte, task *Task) error {
 	}
 
 	task.Description = description.String()
+	logrus.Debugf("Task parse completed: %v", *task)
 	return nil
 }

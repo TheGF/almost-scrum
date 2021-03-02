@@ -1,23 +1,14 @@
 
-import { React, useEffect, useState, useContext } from "react";
-import ReactMde from "react-mde";
-import ReactMarkdown from "react-markdown";
-import "react-mde/lib/styles/css/react-mde-all.css";
-import { Box, Button, Center } from "@chakra-ui/react";
-import T from "../core/T";
-import UserContext from '../UserContext';
-import Server from '../server';
-import MarkdownEditor from '../core/MarkdownEditor';
-
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
-} from "@chakra-ui/react"
+    Button, Modal, ModalBody, ModalCloseButton, ModalContent,
+    ModalFooter, ModalHeader
+} from "@chakra-ui/react";
+import { React, useContext, useEffect, useState } from "react";
+import "react-mde/lib/styles/css/react-mde-all.css";
+import MarkdownEditor from '../core/MarkdownEditor';
+import Server from '../server';
+import UserContext from '../UserContext';
+
 
 function PageEditor(props) {
     const { project } = useContext(UserContext);

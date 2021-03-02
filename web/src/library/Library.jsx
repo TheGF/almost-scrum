@@ -1,28 +1,18 @@
 import {
-    Breadcrumb, BreadcrumbItem, BreadcrumbLink, Button, ButtonGroup,
-    Editable, EditableInput, EditablePreview, Flex, HStack,
-    IconButton, Link, Spacer, Table, Tbody, Td, Th, Thead, Tr,
-    VisuallyHidden, VStack
+    Breadcrumb, BreadcrumbItem, BreadcrumbLink, Flex, VStack
 } from '@chakra-ui/react';
 import { React, useContext, useEffect, useState } from 'react';
-import { AiOutlineReload } from 'react-icons/ai';
-import { BiEdit } from 'react-icons/bi';
-import { GiGrapes } from 'react-icons/gi';
 import { GoHome } from 'react-icons/go';
-import { MdCreateNewFolder } from 'react-icons/md';
-import { VscNewFile } from 'react-icons/vsc';
-import T from '../core/T';
-import Utils from '../core/utils';
 import Server from '../server';
 import UserContext from '../UserContext';
+import Bar from './Bar';
+import Files from './Files';
 import PageEditor from './PageEditor';
 
 function Library(props) {
     const { project } = useContext(UserContext);
     const { attachedFiles, setAttachedFiles, height } = props
     const [path, setPath] = useState(props.path || '')
-    const [uploading, setUploading] = useState(false)
-    const isLocalhost = Utils.isLocalhost()
 
     const [favorites, setFavorites] = useState(
         (localStorage.getItem('ash-lib-favs') || '').split(',').filter(f => f)
@@ -33,159 +23,57 @@ function Library(props) {
     function updateFavorites(path, oldPath) {
         if (path) {
             oldPath = oldPath || path
-            const fa = [path, ...favorites.filter(f => f != oldPath)].slice(0, 5)
+            const fa = [path, ...favorites.filter(f => f != oldPath)].slice(0, 4)
             localStorage.setItem('ash-lib-favs', fa)
             setFavorites(fa)
         }
     }
 
+    function changePath(path) {
+        if (path.endsWith('.pg')) {
+            setPage(path)
+        } else {
+            setPath(path)
+        }
+        updateFavorites(path)
+    }
+
+    function getNextVersion(file) {
+        const match = file.name.match(/(.*?)((\d+\.)+\d+)?(\.\w*)?$/)
+        if (match.length < 5) return null
+
+        const prefix = match[2] ? match[1] : `${match[1]}-`
+        const ext = match[4] || ''
+
+        const versions = files.map(file => {
+            const match = file.name.match(/(.*?)((\d+\.)+\d+)?(\.\w*)?$/)
+            if (match.length < 5) return null
+            if (match[1] != prefix) return null
+            return match[2]
+        }).filter(v => v).sort()
+        let version = null
+        if (versions.length) {
+            const last = versions[versions.length - 1]
+            const match = last.match(/((\d+\.)+)(\d+)/)
+            if (match.length == 4) {
+                const last_digit = parseInt(match[3], 10)
+                version = `${match[1]}${last_digit + 1}`
+            }
+        } 
+        return [prefix, version, ext]
+    }
+
+    function addPageAttribute(f) {
+        f.page = f.dir && f.name.endsWith('.pg')
+        f.dir = f.dir && !f.page
+        return f
+    }
+
     function listFolder() {
         Server.listLibrary(project, path)
-            .then(setFiles)
+            .then(files => setFiles(files.map(addPageAttribute)))
     }
     useEffect(listFolder, [path])
-
-    function newFolder() {
-        const cnt = files.filter(f => f.name.startsWith('new folder ')).length
-        Server.createFolderInLibrary(project, `${path}/new folder ${cnt}`)
-            .then(listFolder)
-    }
-
-    function newPage() {
-        const cnt = files.filter(f => f.name.startsWith('page-')).length
-        const folder = `${path}/page-${cnt}.pg`
-        Server.createFolderInLibrary(project, folder)
-            .then(listFolder)
-            .then(_ => {
-                const file = new Blob(['Change me'], { type: 'text/markdown' })
-                Server.uploadFileToLibrary(project, folder, file, 'index.md')
-            })
-    }
-
-
-    function deleteFile(file) {
-        Server.deleteFromLibrary(project, `${path}/${file.name}`, file.name.endsWith('.pg'))
-            .then(listFolder)
-    }
-
-    function uploadFile(evt) {
-        setUploading(true)
-        const file = evt.target.files[0];
-        file && Server.uploadFileToLibrary(project, path, file)
-            .then(setFiles)
-            .then(_ => setUploading(false));
-    }
-
-    function onFileClick(file) {
-        const p = [path, file.name].join('/')
-        if (file.dir) {
-            if (file.name.endsWith('.pg')) {
-                setPage(p)
-            } else {
-                setPath(p)
-                updateFavorites(p)
-            }
-        } else {
-            Server.openFromlibrary(project, p);
-        }
-    }
-
-    function renameFile(file, name) {
-        const p = `${path}/${name}`
-        const o = `${path}/${file.name}`
-        if (file.dir) {
-            Server.moveFileInLibrary(project, o, p)
-                .then(listFolder)
-        } else {
-            Server.moveFileInLibrary(project, o, p)
-                .then(_ => updateFavorites(p, o))
-                .then(listFolder)
-        }
-    }
-
-    function renderFavs() {
-        return favorites.map(p => {
-            const label = p.split('/').pop()
-            return <Button key={p} onClick={_ => setPath(p)} isActive={p == path}>
-                {label}
-            </Button>
-        })
-    }
-
-    function attach(file) {
-        setAttachedFiles([...attachedFiles, file])
-    }
-
-    function detach(file) {
-        const idx = attachedFiles.indexOf(file)
-        const files = [
-            ...attachedFiles.slice(0, idx),
-            ...attachedFiles.slice(idx + 1)
-        ]
-        setAttachedFiles(files)
-    }
-
-    function getAttachButton(file) {
-        if (!setAttachedFiles || file.dir && !file.name.endsWith('.pg')) {
-            return null
-        }
-        const p = `${path}/${file.name}`
-        if (attachedFiles.includes(p)) {
-            return <Button colorScheme="yellow" onClick={_ => detach(p)}>Detach</Button>
-        } else {
-            return <Button onClick={_ => attach(p)}>Attach</Button>
-        }
-    }
-
-    function openFile(file) {
-        const p = `${path}/${file.name}`
-        Server.localOpenFromLibrary(project, p)
-    }
-
-    function getOpenButton(file) {
-        if (!isLocalhost) return null;
-
-        return <Button onClick={_ => openFile(file)}>Open</Button>
-    }
-
-    const rows =  files && files.map(file => {
-        const idx = file.name.lastIndexOf('.')
-        const ext = idx != -1 ? file.name.substr(idx + 1) : ''
-        const name = idx != -1 ? file.name.substr(0, idx) : file.name
-        return <Tr key={file.name}>
-            <Td>
-                <Editable defaultValue={name} isPreviewFocusable={false}
-                    onSubmit={name => renameFile(file, `${name}.${ext}`)}>
-                    {({ isEditing, onEdit }) => (
-                        <HStack spacing={2}>
-                            <>
-                                {ext.endsWith('.pg') ? <GiGrapes /> : Utils.fileIcon(file.dir, file.mime)}
-                                <Link href="#" onClick={_ => {
-                                    if (!isEditing) onFileClick(file)
-                                }}>
-                                    <EditablePreview
-                                        style={{ cursor: 'pointer', color: 'blue' }} />
-                                </Link>
-                                <EditableInput maxWidth={'90%'} />
-                                .{ext}
-                            </>
-                            <IconButton variant="outline" size="xs" icon={<BiEdit />} onClick={
-                                onEdit
-                            } />
-                        </HStack>
-                    )}
-                </Editable></Td>
-            <Td>{Utils.getFriendlyDate(file.modTime)}</Td>
-            <Td>{file.size}</Td>
-            <Td>
-                <ButtonGroup size="sm" spacing={2}>
-                    {getAttachButton(file)}
-                    {getOpenButton(file)}
-                    <Button onClick={_ => deleteFile(file)}>Delete</Button>
-                </ButtonGroup>
-            </Td>
-        </Tr>
-    })
 
     const folders = path.split('/')
     let breadcrumbs = folders.reduce((acc, folder) => {
@@ -206,50 +94,17 @@ function Library(props) {
         {breadcrumbs}
     </Breadcrumb>
 
-    let hiddenInput = null
-
     return <VStack w="100%" align="left" >
         <PageEditor page={page} setPage={setPage} />
-        <HStack w="90%" borderWidth="2" borderColor="gray">
-            {breadcrumb}
-            <Spacer />
-            <ButtonGroup variant="outline">
-                {renderFavs()}
-            </ButtonGroup>
-            <Spacer />
-            <VisuallyHidden>
-                <input type="file"
-                    ref={el => hiddenInput = el}
-                    onChange={uploadFile} />
-            </VisuallyHidden>
-            <Button onClick={_ => hiddenInput.click()} isLoading={uploading} >
-                <T>Upload</T>
-            </Button>
-            <Button onClick={newFolder} title="Create New Folder">
-                <MdCreateNewFolder />
-            </Button>
-            <Button onClick={newPage} title="Create New Page">
-                <VscNewFile />
-            </Button>
-            <IconButton onClick={listFolder} title="Reload">
-                <AiOutlineReload onClick={listFolder} />
-            </IconButton>
-        </HStack>
+        <Bar path={path} changePath={changePath} getNextVersion={getNextVersion}
+            favorites={favorites} files={files} listFolder={listFolder} />
         <Flex overflowY="auto"
             h={height && height - 160}>
-            <Table w="100%">
-                <Thead>
-                    <Tr>
-                        <Th>Name</Th>
-                        <Th>Modified</Th>
-                        <Th>Size</Th>
-                        <Th>Actions</Th>
-                    </Tr>
-                </Thead>
-                <Tbody  >
-                    {rows}
-                </Tbody>
-            </Table>
+            <Files path={path} changePath={changePath}
+                files={files} listFolder={listFolder}
+                getNextVersion={getNextVersion}
+                attachedFiles={attachedFiles} setAttachedFiles={setAttachedFiles}
+                updateFavorites={updateFavorites} />
         </Flex>
     </VStack>
 }

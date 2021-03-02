@@ -9,8 +9,11 @@ import UserContext from '../UserContext';
 function Properties(props) {
     const { task, saveTask, readOnly, users, height } = props;
     const { info } = useContext(UserContext)
-    const { propertyModel } = info
     const { properties } = task;
+    const type = properties && properties['Type'] || null
+
+    const model = info && info.models && 
+        info.models.filter(m => m.name == type).shift() || []
 
     function renderProperty(propertyDef) {
         const { name, kind, values } = propertyDef
@@ -26,7 +29,7 @@ function Properties(props) {
         }
 
         function renderString() {
-            return <Input value={value} onChange={onChange} size="sm"/>
+            return <Input value={value} onChange={onChange} size="sm" />
         }
 
         function renderEnum() {
@@ -85,13 +88,20 @@ function Properties(props) {
         </Tr>
     }
 
-    const rows = (propertyModel || []).map(propertyDef => renderProperty(propertyDef))
-    return <Box maxH={height-50} style={{ overflowY: 'auto' }}>
+    const rows = model.properties.map(propertyDef => renderProperty(propertyDef))
+    if (type == null) {
+        return <font size="md">Corrupted task: no Type found</font>
+    } 
+    if (model.length == 0) {
+        return <font size="md">Corrupted task: invalid Type {type}</font>
+    }
+
+    return <Box maxH={height - 50} style={{ overflowY: 'auto' }}>
         <Table variant="striped" colorScheme="teal" size="sm">
             <Tbody>
                 {rows}
             </Tbody>
         </Table>
-    </Box>;
+    </Box>
 }
 export default Properties;

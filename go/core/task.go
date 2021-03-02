@@ -2,6 +2,7 @@
 package core
 
 import (
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"path"
@@ -133,27 +134,38 @@ func ExtractTaskId(name string) (uint16, string) {
 	return uint16(id), match[2]
 }
 
-func CreateTask(project *Project, board string, title string, owner string) (*Task, string, error) {
+func CreateTask(project *Project, board string, title string, type_ string, owner string) (*Task, string, error) {
 	task := Task{
-		Description: "Replace with the task description",
+		Description: "",
 		Properties:  map[string]string{},
 		Parts:       []Part{},
 		Files:       []string{},
 	}
 
-	for _, propertyDef := range project.Config.PropertyModel {
-		value := propertyDef.Default
-		task.Properties[propertyDef.Name] = value
-	}
-	task.Properties["Owner"] = "@" + owner
+	for _, model := range project.Models {
+		if model.Name == type_ {
+			if err := ParseTask(model.Template, &task); err != nil {
+				return nil, "", err
+			}
+			for _, property := range model.Properties {
+				if _, found := task.Properties[property.Name]; !found {
+					task.Properties[property.Name] = property.Default
+					logrus.Debugf("Set property %s = %s", property.Name, property.Default)
+				}
+			}
+			task.Properties["Type"] = type_
+			task.Properties["Owner"] = "@" + owner
 
-	name := NewTaskName(project, title)
-	if err := SetTask(project, board, name, &task); err != nil {
-		return nil, "", err
-	}
+			name := NewTaskName(project, title)
+			if err := SetTask(project, board, name, &task); err != nil {
+				return nil, "", err
+			}
 
-	project.TasksCount += 1
-	return &task, name, nil
+			project.TasksCount += 1
+			return &task, name, nil
+		}
+	}
+	return nil, "", ErrInvalidType
 }
 
 //SetTask a story in the Board

@@ -7,7 +7,8 @@ import { React, useState } from "react";
 import T from "../core/T";
 import Server from '../server';
 
-function Login({ isOpen, onAuthenticated }) {
+function Login(props) {
+    const { systemUser, isOpen, onAuthenticated } = props
     const [showPassword, setShowPassword] = useState(false)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
@@ -23,16 +24,16 @@ function Login({ isOpen, onAuthenticated }) {
         <ModalContent>
             <ModalHeader>Welcome to Almost Scrum</ModalHeader>
             <ModalBody>
-                <FormControl id="ash-username">
+                <FormControl>
                     <FormLabel><T>username</T></FormLabel>
-                    <Input type="text" onChange={e => e && e.target
+                    <Input id="username" type="text" onChange={e => e && e.target
                         && setUsername(e.target.value)} />
                 </FormControl>
-                <FormControl id="username">
+                <FormControl>
                     <FormLabel><T>password</T></FormLabel>
                     <InputGroup size="md">
                         <Input
-                            id="ash-password"
+                            id="password"
                             pr="4.5rem"
                             type={showPassword ? "text" : "password"}
                             onChange={e => e && e.target && setPassword(e.target.value)}
@@ -47,7 +48,7 @@ function Login({ isOpen, onAuthenticated }) {
                 </FormControl>
                 <FormHelperText>{error ?
                     error :
-                    'Use admin:changeme the first time'
+                    `Use ${systemUser}:changeme the first time`
                 }</FormHelperText>
             </ModalBody>
 

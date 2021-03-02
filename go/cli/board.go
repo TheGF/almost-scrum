@@ -23,7 +23,7 @@ func listBoard(project *core.Project, args []string) {
 	}
 
 	config := getProjectConfig(project)
-	config.CurrentBoard = selected
+	config.Public.CurrentBoard = selected
 	err := core.WriteProjectConfig(project.Path, &config)
 	abortIf(err, "")
 

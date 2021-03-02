@@ -4,22 +4,21 @@ import Board from '../board/Board';
 import Library from '../library/Library';
 import Server from '../server';
 import UserContext from '../UserContext';
-import AskBoardName from './AskBoardName';
 import Header from './Header';
 import GitIntegration from '../git/GitIntegration';
 import NoAccess from './NoAccess';
+import AskBoardName from './AskBoardName';
 
 
 function Desktop(props) {
     const { project, onExit } = props;
+
     const [info, setInfo] = useState(null)
-    const [board, setBoard] = useState('backlog');
+    const [activeBoard, setActiveBoard] = useState(null)
     const [boards, setBoards] = useState([]);
-    const [boardKey, setBoardKey] = useState(0);
     const [showLibrary, setShowLibrary] = useState(false);
     const [showGitIntegration, setShowGitIntegration] = useState(false);
     const [noAccess, setNoAccess] = useState(null)
-
     const askBoardName = useDisclosure(false)
 
     function checkNoAccess(r) {
@@ -35,6 +34,19 @@ function Desktop(props) {
         onExit()
     }
 
+    function listBoards() {
+        Server.listBoards(project)
+            .then(setBoards)
+    }
+
+    function createBoard(name) {
+        Server.createBoard(project, name)
+            .then(askBoardName.onClose())
+            .then(listBoards)
+            .then(setActiveBoard(name))
+    }
+
+
     function init() {
         Server.addErrorHandler(10, checkNoAccess)
         Server.getProjectInfo(project)
@@ -46,39 +58,25 @@ function Desktop(props) {
     }
     useEffect(init, [])
 
-    function listBoards() {
-        Server.listBoards(project)
-            .then(setBoards)
-            .catch(checkNoAccess)
-    }
-
-    function createBoard(name) {
-        Server.createBoard(project, name)
-            .then(askBoardName.onClose())
-            .then(listBoards)
-            .then(setBoard(name))
-    }
-
     function onSelectLibrary() {
-        setBoard(null);
         setShowLibrary(true);
     }
 
     function onSelectBoard(board) {
-        setBoard(board);
+        setActiveBoard(board)
         setShowLibrary(false);
     }
 
-    const content = showLibrary ? <Library /> :
-        <Board key={boardKey} name={board} boards={boards} />
+    const content = showLibrary ? <Library /> : activeBoard ?
+        <Board name={activeBoard} boards={boards} /> : null
 
     const username = info && info.systemUser
     const userContext = { project, info, username }
     const body = info ? <UserContext.Provider value={userContext}>
+        <AskBoardName {...askBoardName} boards={boards} onCreate={createBoard} />
         <GitIntegration isOpen={showGitIntegration}
             onClose={_ => setShowGitIntegration(false)} />
 
-        <AskBoardName {...askBoardName} boards={boards} onCreate={createBoard} />
         <Flex
             direction="column"
             align="center"
@@ -86,10 +84,9 @@ function Desktop(props) {
             m="0 auto">
 
             <VStack w="100%">
-                <Header boards={boards}
-                    setShowGitIntegration={setShowGitIntegration}
+                <Header boards={boards} setShowGitIntegration={setShowGitIntegration}
                     onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
-                    onNewBoard={_ => askBoardName.onOpen()}
+                    onListBoards={listBoards} askBoardName={askBoardName}
                     onExit={onExit} />
                 {content}
             </VStack>

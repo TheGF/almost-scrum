@@ -36,8 +36,10 @@ function MarkdownEditor(props) {
         selectedTab={selectedTab}
         onTabChange={setSelectedTab}
         generateMarkdownPreview={(markdown) =>
-            Promise.resolve(<MarkdownView value={markdown}
-                onChange={onChange} />)
+            Promise.resolve(<div onClick={_=>setSelectedTab("write")}>
+                <MarkdownView value={markdown}
+                onChange={onChange} />
+                </div>)
         }
         paste={{
             saveImage: saveImage

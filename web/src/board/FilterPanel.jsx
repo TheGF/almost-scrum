@@ -17,11 +17,12 @@ import Server from '../server';
 import UserContext from '../UserContext';
 import Filter from "./Filter";
 import Portal from '../portal/Portal';
+import NewTask from "./NewTask";
 
 function FilterPanel(props) {
     const { project, info } = useContext(UserContext);
     const { propertyModel } = info || {}
-    const { compact, setCompact, setSearchKeys, onNewTask, users } = props;
+    const { compact, setCompact, setSearchKeys, onNewTask, users, board } = props;
     const [tags, setTags] = useState([])
     const [suggestions, setSuggestions] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
@@ -82,7 +83,8 @@ function FilterPanel(props) {
     </Popover>
 
     return <HStack spacing={3}>
-        <IconButton title="New Task" icon={<RiChatNewLine />} onClick={onNewTask} />
+        {/* <IconButton title="New Task" icon={<RiChatNewLine />} onClick={onNewTask} /> */}
+        <NewTask board={board} onNewTask={onNewTask}/>
         <ReactTags
             ref={reactTags}
             tags={tags}

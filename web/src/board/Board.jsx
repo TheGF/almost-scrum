@@ -27,8 +27,8 @@ function Board(props) {
     const [compact, setCompact] = useState(false)
     const spacerRef = useRef(null)
 
-    function onNewTask() {
-        Server.createTask(project, name, 'Click_and_Rename')
+    function onNewTask(type) {
+        Server.createTask(project, name, 'Click_and_Rename', type)
             .then(_ => loadTaskList())
     }
 
@@ -41,15 +41,12 @@ function Board(props) {
                 items = [...infos, ...items]
                 setInfos(items)
                 setHasMore(items.length == end)
-                console.log('Setting more = ', items.length == end)
             })
     }
 
     function checkSpace() {
         const top = getTop(spacerRef.current)
-        console.log(top, window.innerHeight, hasMore)
         if (top < window.innerHeight) {
-            console.log('loading more')
             loadMore()
         }
     }
@@ -78,7 +75,7 @@ function Board(props) {
         align="stretch"
         w="100%"
     >
-        <FilterPanel compact={compact} setCompact={setCompact} setSearchKeys={setSearchKeys}
+        <FilterPanel board={name} compact={compact} setCompact={setCompact} setSearchKeys={setSearchKeys}
             onNewTask={onNewTask} users={users}/>
         <InfiniteScroll
             dataLength={infos.length}

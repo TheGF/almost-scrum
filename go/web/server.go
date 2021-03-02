@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/getlantern/systray"
+	"github.com/skratchdot/open-golang/open"
 	"log"
 	"mime"
 	"net/http"
@@ -54,6 +55,7 @@ var knownClients = make([]string, 0)
 type hello struct {
 	Version string `json:"version"`
 	Portal  bool   `json:"portal"`
+	SystemUser string `json:"systemUser"`
 }
 
 func setHello(r *gin.Engine, portal bool, autoExit bool) {
@@ -76,6 +78,7 @@ func setHello(r *gin.Engine, portal bool, autoExit bool) {
 		c.JSON(http.StatusOK, hello{
 			Version: core.AshVersion,
 			Portal:  portal,
+			SystemUser: core.GetSystemUser(),
 		})
 	})
 }
@@ -163,7 +166,7 @@ func StartWeb(projectPath string, port string, logLevel string, autoExit bool, a
 	}
 	r := gin.Default()
 
-	if err := openProject("~", projectPath); err != nil {
+	if _, err := openProject("~", projectPath); err != nil {
 		color.Red("cannot open a project in %s: %v", projectPath, err)
 		os.Exit(1)
 	}
@@ -180,7 +183,7 @@ func StartWeb(projectPath string, port string, logLevel string, autoExit bool, a
 	indexRoute(v1)
 	gitRoute(v1)
 
-	core.OpenUrl(fmt.Sprintf("http://127.0.0.1:%s", port))
+	open.Start(fmt.Sprintf("http://127.0.0.1:%s", port))
 	runServer(r, fmt.Sprintf(":%s", port))
 }
 
@@ -216,6 +219,6 @@ func StartServer(port string, logLevel string, autoExit bool, args []string) {
 	indexRoute(v1)
 	gitRoute(v1)
 
-	core.OpenUrl(fmt.Sprintf("http://127.0.0.1:%s", port))
+	open.Start(fmt.Sprintf("http://127.0.0.1:%s", port))
 	runServer(r, fmt.Sprintf(":%s", port))
 }

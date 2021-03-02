@@ -21,8 +21,8 @@ var projectMapping = make(ProjectMapping)
 var projectUsers = make(ProjectUsers)
 
 type NoAccess struct {
-	Message string `json:"message"`
-	Users []string `json:"users"`
+	Message string   `json:"message"`
+	Users   []string `json:"users"`
 }
 
 // getProject resolves the URL parameters
@@ -41,7 +41,7 @@ func getProject(c *gin.Context) *core.Project {
 	if _, found := core.FindStringInSlice(users, user); !found {
 		noAccess := NoAccess{
 			Message: "No access to project",
-			Users: users,
+			Users:   users,
 		}
 		logrus.Warnf("User %s has no access to project %s. Valid users [%s]", user, name,
 			strings.Join(users, " "))
@@ -52,18 +52,19 @@ func getProject(c *gin.Context) *core.Project {
 	return project
 }
 
-func openProject(name string, path string) error {
+func openProject(name string, path string) (*core.Project, error) {
 	project, err := core.FindProject(path)
 	if core.IsErr(err, "cannot open project %s from %s", name, path) {
-		return err
+		return nil, err
 	}
 
 	_ = core.ReIndex(project)
-	projectMapping[name] = project
 	users := core.GetUserList(project)
+
+	projectMapping[name] = project
 	projectUsers[name] = users
 	logrus.Infof("Open project %s for users [%s]", name, strings.Join(users, " "))
-	return nil
+	return project, nil
 }
 
 func searchForProject(repoPath string, name string, items ...string) bool {
@@ -72,7 +73,7 @@ func searchForProject(repoPath string, name string, items ...string) bool {
 	if _, err := os.Stat(p); err != nil {
 		return false
 	}
-	if err := openProject(name, p); err != nil {
+	if _, err := openProject(name, p); err != nil {
 		logrus.Warnf("Cannot open project %s in path %s: %v", name, p, err)
 		return false
 	}
@@ -104,18 +105,16 @@ func loadRepoProjects(repoPath string) error {
 	return nil
 }
 
-func loadGlobalProjects() {
-	config := core.LoadConfig()
+func loadNamedProjects() {
+	config := core.ReadConfig()
 	for name := range config.Projects {
 		path := config.Projects[name]
-		_, err := core.OpenProject(path)
-		if err == nil {
+		if _, err := openProject(name, path); err == nil {
 			logrus.Infof("Added project %s (%s) to repo", name, path)
 		} else {
 			logrus.Warnf("Project %s has invalid path %s", name, path)
 		}
 	}
-
 }
 
 //serverRoute add routes used in a server setup
@@ -129,7 +128,7 @@ func serverRoute(group *gin.RouterGroup, repoPath string) {
 		color.Red("Cannot start server because of invalid repo folder %s: %v", repoPath, err)
 		os.Exit(1)
 	}
-	loadGlobalProjects()
+	loadNamedProjects()
 }
 
 func listProjectsAPI(c *gin.Context) {
@@ -146,7 +145,6 @@ type Authorization struct {
 	Pam   bool
 }
 
-
 func listProjectTemplatesAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, core.ListProjectTemplates())
 }
@@ -159,18 +157,14 @@ type createOptions struct {
 	GitUrl       string   `json:"gitUrl"`
 }
 
-func createProjectInFolder(c *gin.Context, name string, path string, templates []string, res string)  {
-	var err error
-	var project *core.Project
-
-	if len(templates) == 0 {
-		project, err = core.InitProject(path)
-	} else {
-		project, err = core.InitProjectFromTemplate(path, templates)
-	}
+func createProjectInFolder(c *gin.Context, name string, path string, templates []string, res string) {
+	project, err := core.InitProject(path, templates)
 	if err != nil {
+		logrus.Errorf("Cannot create project %s in folder %s with templates %v: %v",
+			name, path, templates, err)
 		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
+	} else {
+		logrus.Debugf("Create project %s in folder %s with templates: %v", name, path, templates)
 	}
 
 	user := getWebUser(c)
@@ -178,14 +172,17 @@ func createProjectInFolder(c *gin.Context, name string, path string, templates [
 		c.String(http.StatusInternalServerError, fmt.Sprintf("Cannot set user '%s' in project '%s'", user, name))
 		return
 	}
+	logrus.Debugf("User %s added to project %s", user, name)
 	projectMapping[name] = project
 	projectUsers[name] = []string{user}
+	core.NameProject(project, name)
 
 	logrus.Infof("Project %s created by user '%s'", name, user)
 	c.String(http.StatusCreated, res)
 }
 
-var cloneUrl = regexp.MustCompile(`http.*\/([^\/]*?)(.git)?$`)
+var cloneUrl = regexp.MustCompile(`http.*/([^/]*?)(.git)?$`)
+
 func createProjectFromGit(c *gin.Context, createOptions createOptions) {
 	match := cloneUrl.FindStringSubmatch(createOptions.GitUrl)
 	if len(match) < 2 {
@@ -200,33 +197,32 @@ func createProjectFromGit(c *gin.Context, createOptions createOptions) {
 		c.String(http.StatusInternalServerError, responseBody)
 	}
 
-	path := filepath.Join(repository, name, core.ProjectFolder)
-	if err := openProject(name, path); err == nil {
-		c.String(http.StatusCreated, name)
-	} else if createOptions.Inject {
-		createProjectInFolder(c, name, path, createOptions.Templates, responseBody)
-	} else {
-		c.String(http.StatusBadRequest, "Folder %s does not contain a valid project",
-			createOptions.ImportFolder)
-	}
+	createOptions.ImportFolder = filepath.Join(repository, name, core.ProjectFolder)
+	importFolderFromPath(c, createOptions)
 }
 
 func importFolderFromPath(c *gin.Context, createOptions createOptions) {
 	path := createOptions.ImportFolder
-	if _, err := os.Stat(path); err != nil {
-		c.String(http.StatusBadRequest, "Folder %s does not exists", createOptions.ImportFolder)
-		return
+	if createOptions.Inject == false {
+		if _, err := os.Stat(path); err != nil {
+			c.String(http.StatusBadRequest, "Folder %s does not exists", createOptions.ImportFolder)
+			return
+		}
 	}
 
 	name := filepath.Base(createOptions.ImportFolder)
-	if err := openProject(name, createOptions.ImportFolder); err == nil {
+	if project, err := openProject(name, createOptions.ImportFolder); err == nil {
+		logrus.Debugf("Found and imported project in folder %s", createOptions.ImportFolder)
+		core.NameProject(project, name)
 		c.String(http.StatusCreated, name)
-	} else if createOptions.Inject {
+	} else if createOptions.Inject && os.IsNotExist(err) {
+		logrus.Debugf("No project in folder %s. Try to create one", createOptions.ImportFolder)
 		createProjectInFolder(c, name, path, createOptions.Templates, name)
 	} else {
 		c.String(http.StatusBadRequest, "Folder %s does not contain a valid project",
 			createOptions.ImportFolder)
 	}
+
 }
 
 func createProjectFromScratch(c *gin.Context, createOptions createOptions) {
@@ -261,16 +257,18 @@ func createProjectAPI(c *gin.Context) {
 //projectRoute add projects related api routes
 func projectRoute(group *gin.RouterGroup) {
 	group.GET("/projects/:project/info", getProjectInfoAPI)
+	group.PUT("/projects/:project/info", putProjectInfoAPI)
 	group.GET("/projects/:project/boards", listBoardsAPI)
-	group.PUT("/projects/:project/boards/:board", createBoardAPI)
+	group.PUT("/projects/:project/boards/:board", putBoardAPI)
+	group.DELETE("/projects/:project/boards/:board", deleteBoardAPI)
 }
 
 type ProjectInfo struct {
-	SystemUser    string             `json:"systemUser"`
-	LoginUser     string             `json:"loginUser"`
-	CurrentBoard  string             `json:"currentBoard"`
-	PropertyModel []core.PropertyDef `json:"propertyModel"`
-	GitProject    bool               `json:"gitProject"`
+	SystemUser string                   `json:"systemUser"`
+	LoginUser  string                   `json:"loginUser"`
+	Config     core.ProjectConfigPublic `json:"config"`
+	Models     []core.Model             `json:"models"`
+	GitProject bool                     `json:"gitProject"`
 }
 
 func getProjectInfoAPI(c *gin.Context) {
@@ -284,44 +282,32 @@ func getProjectInfoAPI(c *gin.Context) {
 	gitProject := err == nil
 
 	info := ProjectInfo{
-		SystemUser:    core.GetSystemUser(),
-		LoginUser:     getWebUser(c),
-		CurrentBoard:  project.Config.CurrentBoard,
-		PropertyModel: project.Config.PropertyModel,
-		GitProject:    gitProject,
+		SystemUser: core.GetSystemUser(),
+		LoginUser:  getWebUser(c),
+		Config:     project.Config.Public,
+		Models:     project.Models,
+		GitProject: gitProject,
 	}
 	c.JSON(http.StatusOK, info)
 }
 
-func listBoardsAPI(c *gin.Context) {
+func putProjectInfoAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
+	var info ProjectInfo
 
-	boards, err := core.ListBoards(project)
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot list boards: %v", err)
-		return
-	}
-	logrus.Debugf("listBoardsAPI - List boards in project: %v", boards)
-
-	c.JSON(http.StatusOK, boards)
-}
-
-func createBoardAPI(c *gin.Context) {
-	var project *core.Project
-	if project = getProject(c); project == nil {
+	if err := c.BindJSON(&info); core.IsErr(err, "Invalid JSON") {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	board := c.Param("board")
-	if err := core.CreateBoard(project, board); err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot create board: %v", err)
+	project.Config.Public = info.Config
+	if err := core.WriteProjectConfig(project.Path, &project.Config); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	logrus.Debugf("createBoardAPI - Board %s created in project: %v", board, project)
-	c.JSON(http.StatusCreated, board)
+
+	c.JSON(http.StatusOK, info)
 }

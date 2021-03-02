@@ -36,7 +36,7 @@ function setPendingTasks() {
 const errorHandlers = []
 
 function errorHandler(r) {
-    for (const [_,handler] of errorHandlers) {
+    for (const [_, handler] of errorHandlers) {
         r = handler(r)
         if (!r) return
     }
@@ -159,6 +159,12 @@ class Server {
             .catch(errorHandler)
     }
 
+    static setProjectInfo(project, info) {
+        return axios.put(`/api/v1/projects/${project}/info`, info, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler)
+    }
+
     static listUsers(project) {
         return axios.get(`/api/v1/projects/${project}/users`, getConfig())
             .then(r => r.data)
@@ -196,6 +202,20 @@ class Server {
             .catch(errorHandler);
     }
 
+    static renameBoard(project, oldName, newName) {
+        return axios.put(`/api/v1/projects/${project}/boards/${newName}?rename=${oldName}`,
+            null, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static deleteBoard(project, board) {
+        return axios.delete(`/api/v1/projects/${project}/boards/${board}`, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+
     static listTasks(project, board, filter, start, end) {
         let url = `/api/v1/projects/${project}/boards/${board}?`
         let params = []
@@ -217,9 +237,9 @@ class Server {
     }
 
 
-    static createTask(project, board, title) {
+    static createTask(project, board, title, type) {
         title = encodeURIComponent(title)
-        return axios.post(`/api/v1/projects/${project}/boards/${board}?title=${title}`, null, getConfig())
+        return axios.post(`/api/v1/projects/${project}/boards/${board}?title=${title}&type=${type}`, null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -304,51 +324,62 @@ class Server {
         })
     }
 
-    static deleteFromLibrary(project, path, recursive) {
+    static deleteFromLibrary(project, path, recursive=false, archive=false) {
         path = encodeURIComponent(path)
-        let url = `/api/v1/projects/${project}/library${path}`
+        const target = archive ? 'archive' : 'library'
+        let url = `/api/v1/projects/${project}/${target}${path}`
         if (recursive) { url += '?recursive' }
         return axios.delete(url, getConfig(url))
             .then(r => r.data)
             .catch(errorHandler);
     }
 
-    static downloadFromlibrary(project, path) {
+    static downloadFromlibrary(project, path, archive=false) {
         path = encodeURIComponent(path)
-        return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
+        const target = archive ? 'archive' : 'library'
+        return axios.get(`/api/v1/projects/${project}/${target}${path}`, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
 
-    static localOpenFromLibrary(project, path) {
+    static localOpenFromLibrary(project, path, archive=false) {
         path = encodeURIComponent(path)
-        return axios.get(`/api/v1/projects/${project}/library${path}?local`, getConfig())
+        const target = archive ? 'archive' : 'library'
+        return axios.get(`/api/v1/projects/${project}/${target}${path}?local`, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
 
 
-    static openFromlibrary(project, path) {
+    static openFromlibrary(project, path, archive=false) {
         path = encodeURIComponent(path)
-
+        const target = archive ? 'archive' : 'library'
         const link = document.createElement("a");
-        link.href = `/api/v1/projects/${project}/library${path}?token=${localStorage.token}`;
+        link.href = `/api/v1/projects/${project}/${target}${path}?token=${localStorage.token}`;
         link.target = '_';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
 
-    static listLibrary(project, path) {
+    static listLibrary(project, path, archive=false) {
         path = encodeURIComponent(path)
-        return axios.get(`/api/v1/projects/${project}/library${path}`, getConfig())
+        const target = archive ? 'archive' : 'library'
+        return axios.get(`/api/v1/projects/${project}/${target}${path}`, getConfig())
             .then(r => r.data.filter(f => !f.name.startsWith('.')))
             .catch(errorHandler);
     }
 
-    static createFolderInLibrary(project, path) {
+    static getVersions(project, path) {
         path = encodeURIComponent(path)
-        return axios.put(`/api/v1/projects/${project}/library${path}`, null, getConfig())
+        return axios.get(`/api/v1/projects/${project}/library${path}?versions`, getConfig())
+            .then(r => r.data.filter(f => !f.name.startsWith('.')))
+            .catch(errorHandler);
+    }
+
+    static createFolderInLibrary(project, path, archive=false) {
+        path = encodeURIComponent(path)
+        return axios.put(`/api/v1/projects/${project}/${target}${path}`, null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }

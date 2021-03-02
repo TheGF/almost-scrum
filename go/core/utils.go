@@ -131,24 +131,24 @@ func UnzipFile(data []byte, destination string) error {
 	return nil
 }
 
-func OpenUrl(url string) error {
-	var cmd string
-	var args []string
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-
-	logrus.Debugf("Open url %s", url)
-	return exec.Command(cmd, args...).Start()
-}
+//func OpenUrl(url string) error {
+//	var cmd string
+//	var args []string
+//
+//	switch runtime.GOOS {
+//	case "windows":
+//		cmd = "cmd"
+//		args = []string{"/c", "start"}
+//	case "darwin":
+//		cmd = "open"
+//	default: // "linux", "freebsd", "openbsd", "netbsd"
+//		cmd = "xdg-open"
+//	}
+//	args = append(args, url)
+//
+//	logrus.Debugf("Open url %s", url)
+//	return exec.Command(cmd, args...).Start()
+//}
 
 
 func RunProgram(command string, arg ...string) error {

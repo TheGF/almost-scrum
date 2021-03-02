@@ -62,7 +62,7 @@ func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
 				logrus.Debugf("Add file '%s' to Git status", name)
 			case 	ProjectLibraryFolder:
-				if project.Config.IncludeLibInGit {
+				if project.Config.Public.IncludeLibInGit {
 					gitStatus.AshFiles = append(gitStatus.AshFiles, name)
 					logrus.Debugf("Add file '%s' to Git status", name)
 				}

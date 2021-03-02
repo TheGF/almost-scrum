@@ -2,16 +2,19 @@ package web
 
 import (
 	"almost-scrum/core"
+	"almost-scrum/library"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/skratchdot/open-golang/open"
 	"net/http"
 	"path/filepath"
 	"strings"
 )
 
 func libraryRoute(group *gin.RouterGroup) {
-	group.GET("/projects/:project/library/*path", listLibraryAPI)
+	group.GET("/projects/:project/library/*path", getLibraryAPI)
+	group.GET("/projects/:project/archive/*path", getArchiveAPI)
 	group.PUT("/projects/:project/library/*path", createFolderAPI)
 	group.POST("/projects/:project/library", uploadFileAPI)
 	group.POST("/projects/:project/library/*path", uploadFileAPI)
@@ -31,7 +34,7 @@ func localOpen(c *gin.Context, path string) {
 
 		for _, valid := range core.MimeForLocalAccess {
 			if mime.Is(valid) {
-				if err := core.OpenUrl(path); err != nil {
+				if err := open.Start(path); err != nil {
 					c.String(http.StatusInternalServerError, "Cannot run locally: %v", err)
 				} else {
 					c.String(http.StatusNoContent, "Local Open")
@@ -44,34 +47,71 @@ func localOpen(c *gin.Context, path string) {
 	}
 }
 
-func listLibraryAPI(c *gin.Context) {
+func getLibraryAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
 	path := c.Param("path")
-	list, path, err := core.ListLibrary(project, path)
+	_, versions := c.GetQuery("versions")
+	_, local := c.GetQuery("local")
+
+	if versions {
+		items, err := library.GetPreviousVersions(project, path)
+		if err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		c.JSON(http.StatusOK, items)
+		return
+	}
+
+	isDir, err := library.IsDir(project, path)
 	if err != nil {
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot read path %s in library", path, err)
 		return
 	}
 
-	if list == nil {
-		logrus.Debugf("Library API - download path %s", path)
-		_, local := c.GetQuery("local")
-
-		if local {
-			localOpen(c, path)
+	if isDir {
+		if items, err := library.List(project, path); err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		} else {
-			c.File(path)
+			c.JSON(http.StatusOK, items)
 		}
+		return
+	}
+
+	absPath, err := library.AbsPath(project, path)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+	} else if local {
+		localOpen(c, absPath)
 	} else {
-		logrus.Debugf("Library API - list path %s: %v", path, list)
-		c.JSON(http.StatusOK, list)
+		c.File(absPath)
 	}
 }
+
+func getArchiveAPI(c *gin.Context) {
+	var project *core.Project
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	path := c.Param("path")
+	_, local := c.GetQuery("local")
+
+	absPath, err := library.ArchivePath(project, path)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+	} else if local {
+		localOpen(c, absPath)
+	} else {
+		c.File(absPath)
+	}
+}
+
 
 func createFolderAPI(c *gin.Context) {
 	var project *core.Project
@@ -80,7 +120,7 @@ func createFolderAPI(c *gin.Context) {
 	}
 
 	path := c.Param("path")
-	if err := core.CreateFolderInLibrary(project, path); err != nil {
+	if err := library.CreateFolder(project, path, getWebUser(c)); err != nil {
 		logrus.Warnf("Cannot create folder %s: %v", path, err)
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "cannot create folder %s: %v", path, err)
@@ -100,31 +140,25 @@ func uploadFileAPI(c *gin.Context) {
 	move := c.DefaultQuery("move", "")
 
 	if move == "" {
-		path, err := core.GetPathInLibrary(project, path)
+		file, _ := c.FormFile("file")
+		reader, err := file.Open()
 		if err != nil {
-			logrus.Warnf("Cannot resolve path %s: %v", path, err)
 			_ = c.Error(err)
-			c.String(http.StatusNotFound, "Path not found")
+			c.String(http.StatusInternalServerError, "Cannot open upload stream: %v", err)
 			return
 		}
+		defer reader.Close()
 
-
-		file, _ := c.FormFile("file")
-		if err = c.SaveUploadedFile(file, filepath.Join(path, file.Filename)); err != nil {
+		dest := filepath.Join(path, file.Filename)
+		if _, err = library.SetFileInLibrary(project, dest, reader, getWebUser(c)); err != nil {
 			_ = c.Error(err)
 			c.String(http.StatusInternalServerError, "Cannot upload to %s", path)
 			return
 		}
 		logrus.Debugf("File %s uploaded in %s", file.Filename, path)
-		listLibraryAPI(c)
+		getLibraryAPI(c)
 	} else {
-		if _, err := core.GetPathInLibrary(project, move); err != nil {
-			logrus.Warnf("Cannot resolve path %s: %v", path, err)
-			_ = c.Error(err)
-			c.String(http.StatusNotFound, "Original path %s does not exist", move)
-			return
-		}
-		if err := core.MoveFileInLibrary(project, move, path); err != nil {
+		if err := library.MoveFile(project, move, path); err != nil {
 			_ = c.Error(err)
 			c.String(http.StatusInternalServerError, "Cannot move %s to %s", move, path)
 			return
@@ -147,13 +181,13 @@ func putFileAPI(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Cannot save file to %s", path)
 		return
 	}
-	if err := core.SetFileInLibrary(project, path, reader); err != nil {
+	if path, err := library.SetFileInLibrary(project, path, reader, getWebUser(c)); err != nil {
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot save file to %s", path)
 		return
 	}
 	logrus.Debugf("File %s saved in %s", path)
-	c.String(http.StatusOK, "")
+	c.String(http.StatusOK, path)
 }
 
 func deleteFileAPI(c *gin.Context) {
@@ -164,7 +198,7 @@ func deleteFileAPI(c *gin.Context) {
 
 	path := c.Param("path")
 	_, recursive := c.GetQuery("recursive")
-	if err := core.DeleteFileFromLibrary(project, path, recursive); err != nil {
+	if err := library.DeleteFile(project, path, recursive); err != nil {
 		logrus.Warnf("Cannot delete path %s: %v", path, err)
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot delete file")
@@ -185,7 +219,7 @@ func getLibraryItemsAPI(c *gin.Context) {
 		return
 	}
 
-	items, err := core.GetLibraryItems(project, files)
+	items, err := library.GetItems(project, files)
 	if err != nil {
 		logrus.Warnf("Cannot get stat info for %v: %v", files, err)
 		_ = c.Error(err)

@@ -111,7 +111,7 @@ func ProcessArgs() {
 	var verbose bool
 	var autoExit bool
 
-	config = core.LoadConfig()
+	config = core.ReadConfig()
 
 	flag.Usage = usage
 	flag.StringVar(&projectPath, "p", ".",

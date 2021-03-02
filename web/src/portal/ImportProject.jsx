@@ -24,7 +24,7 @@ function ImportProject(props) {
     function importProject() {
         setImportInProgress(true)
         Server.importProject(folder, injectProject, selectedTemplates)
-            .then(_ => onCreate(folder))
+            .then(name => onCreate(name))
             .then(_ => setImportInProgress(false))
     }
 

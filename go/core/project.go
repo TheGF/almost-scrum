@@ -6,7 +6,6 @@ import (
 	"crypto/aes"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -15,12 +14,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type ProjectConfigPublic struct {
+	CurrentBoard    string              `json:"currentStore" yaml:"currentStore"`
+	BoardTypes      map[string][]string `json:"boardTypes" yaml:"boardTypes"`
+	IncludeLibInGit bool                `json:"includeLibInGit" yaml:"includeLibInGit"`
+	UseGitNative    bool                `json:"useGitNative" yaml:"useGitNative"`
+}
+
 type ProjectConfig struct {
-	CurrentBoard    string        `yaml:"currentStore"`
-	PropertyModel   []PropertyDef `yaml:"propertyModel"`
-	IncludeLibInGit bool          `yaml:"includeLibInGit"`
-	CipherKey       string        `yaml:"cipherKey"`
-	UseGitNative    bool          `yaml:"useGitNative"`
+	CipherKey string              `yaml:"cipherKey"`
+	UUID      string              `yaml:"uuid"`
+	Public    ProjectConfigPublic `yaml:"public"`
 }
 
 type PropertyKind string
@@ -33,22 +37,14 @@ const (
 	KindTag    PropertyKind = "Tag"
 )
 
-type PropertyDef struct {
-	Name     string   `json:"name" yaml:"name"`
-	Kind     string   `json:"kind" yaml:"kind"`
-	Values   []string `json:"values" yaml:"values"`
-	Prefix   string   `json:"prefix" yaml:"prefix"`
-	Default  string   `json:"default" yaml:"default"`
-	IsFilter bool     `json:"isFilter" yaml:"isFilter"`
-}
-
 // Project is the basic information about a scrum project.
 type Project struct {
-	Path           string
-	Config         ProjectConfig
-	EncryptionSeed string
-	Index          *Index
-	TasksCount     int
+	Path   string
+	Config ProjectConfig
+	Models []Model
+	//	EncryptionSeed string
+	Index      *Index
+	TasksCount int
 }
 
 // LoadTheProjectConfig
@@ -77,9 +73,8 @@ func FindProject(path string) (*Project, error) {
 	if p != "" {
 		return OpenProject(p)
 	}
-	return nil, ErrNoFound
+	return nil, os.ErrNotExist
 }
-
 
 // OpenProject checks if the given path contains a project and creates an instance of Project.
 func OpenProject(path string) (*Project, error) {
@@ -88,10 +83,16 @@ func OpenProject(path string) (*Project, error) {
 		return nil, ErrNoFound
 	}
 
+	models, err := ReadModels(path)
+	if err != nil {
+		return nil, err
+	}
+
 	project := &Project{
-		Path:   path,
-		Config: projectConfig,
+		Path:       path,
+		Config:     projectConfig,
 		TasksCount: 0,
+		Models:     models,
 	}
 
 	infos, err := ListTasks(project, "", "")
@@ -105,7 +106,7 @@ func OpenProject(path string) (*Project, error) {
 }
 
 func GetGitClient(project *Project) GitClient {
-	if project.Config.UseGitNative {
+	if project.Config.Public.UseGitNative {
 		return GitNative{}
 	} else {
 		return GoGit{}
@@ -113,7 +114,7 @@ func GetGitClient(project *Project) GitClient {
 }
 
 func GetGitClientFromGlobalConfig() GitClient {
-	config := LoadConfig()
+	config := ReadConfig()
 	if config.UseGitNative {
 		return GitNative{}
 	} else {
@@ -133,82 +134,82 @@ func ListProjectTemplates() []string {
 	return templates
 }
 
-func InitProjectFromTemplate(path string, templates []string) (*Project, error) {
-	for _, template := range templates {
-		template = fmt.Sprintf("%s%s.zip", ProjectTemplatesPath, template)
-		templateData, err := assets.Asset(template)
-		if err != nil {
-			return nil, err
-		}
-		UnzipFile(templateData, path)
-	}
-
-	projectConfig, err := ReadProjectConfig(path)
-	if err != nil {
-		logrus.Warnf("InitProjectFromTemplate - cannot create project: %v", err)
-		return nil, ErrNoFound
-	}
-
-	projectConfig.CipherKey = GenerateRandomString(64)
-
-	if err := WriteProjectConfig(path, &projectConfig); err != nil {
-		logrus.Errorf("InitProject - Cannot create config file in %s", path)
-		return nil, err
-	}
-
-	return &Project{
-		Path:   path,
-		Config: projectConfig,
-	}, nil
-}
-
-// InitProject initializes a new project in the specified directory
-func InitProject(path string) (*Project, error) {
-	path, err := filepath.Abs(path)
-	if err != nil {
-		return nil, err
-	}
-
-	if _, err := ReadProjectConfig(path); err == nil {
-		logrus.Warnf("InitProject - Cannot initialize project. Project %s already exists", path)
-		return &Project{Path: path}, ErrExists
-	}
-
-	// Create required folders
+func createRequiredFolders(path string) error {
 	for _, folder := range ProjectFolders {
 		folder = filepath.Join(path, folder)
 		if err := os.MkdirAll(folder, 0755); err != nil {
 			logrus.Errorf("InitProject - Cannot create folder %s", folder)
-			return nil, err
+			return err
 		}
 	}
+	return nil
+}
 
-	config := LoadConfig()
+func initConfig(path string) error {
+	config := ReadConfig()
 
-	// Create the project configuration
-	projectConfig := ProjectConfig{
-		CurrentBoard: "backlog",
-		PropertyModel: []PropertyDef{
-			{"Owner", "User", nil, "", "", true},
-			{"Status", "Tag", []string{"#Draft", "#Started", "#Done"},
-				"", "#Draft", true},
-			{"Points", "Enum", []string{"1", "2", "3", "5", "7", "9", "12", "15", "21"},
-				"", "3", false},
-		},
-		CipherKey:    GenerateRandomString(64),
-		IncludeLibInGit: true,
-		UseGitNative: config.UseGitNative,
+	projectConfig, err := ReadProjectConfig(path)
+	if os.IsExist(err) {
+		projectConfig = ProjectConfig{
+			Public: ProjectConfigPublic{
+				CurrentBoard:    "",
+				BoardTypes:      make(map[string][]string),
+				IncludeLibInGit: true,
+				UseGitNative:    config.UseGitNative,
+			},
+		}
+	} else if err != nil {
+		return err
 	}
+
+	projectConfig.CipherKey = GenerateRandomString(64)
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {
 		logrus.Errorf("InitProject - Cannot create config file in %s", path)
+		return err
+	}
+	return nil
+}
+
+func unzipTemplates(path string, templates []string) error {
+	for _, template := range templates {
+		template = fmt.Sprintf("%s%s.zip", ProjectTemplatesPath, template)
+		templateData, err := assets.Asset(template)
+		if err != nil {
+			logrus.Errorf("Cannot open template %s: %v", template, err)
+			return err
+		}
+		if err := UnzipFile(templateData, path); err != nil {
+			logrus.Errorf("Cannot unzip template %s: %v", template, err)
+			return err
+		}
+	}
+	return nil
+}
+
+func InitProject(path string, templates []string) (*Project, error) {
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+	if err := createRequiredFolders(path); err != nil {
 		return nil, err
 	}
 
-	return &Project{
-		Path:   path,
-		Config: projectConfig,
-		TasksCount: 0,
-	}, nil
+	if _, err := os.Stat(filepath.Join(path, ProjectConfigFile)); !os.IsNotExist(err) {
+		logrus.Warnf("InitProject - Cannot initialize project. Project %s already exists", path)
+		return &Project{Path: path}, ErrExists
+	}
+
+	if err := unzipTemplates(path, templates); err != nil {
+		return nil, err
+	}
+
+	if err := initConfig(path); err != nil {
+		return nil, err
+	}
+
+	logrus.Infof("Successfully created project in path %s with templates %v", path, templates)
+	return OpenProject(path)
 }
 
 //NewTaskName browses all stories in all boards and returns the next possible id.
@@ -252,33 +253,21 @@ func ShredProject(project *Project) error {
 	}
 
 	// Remove a reference to the project from the global configuration
-	globalConfig := LoadConfig()
+	globalConfig := ReadConfig()
 	delete(globalConfig.Projects, filepath.Base(project.Path))
-	SaveConfig(globalConfig)
+	WriteConfig(globalConfig)
 
 	return nil
 }
 
-// ListBoards returns the boards in the project
-func ListBoards(project *Project) ([]string, error) {
-	p := filepath.Join(project.Path, "boards")
-	infos, err := ioutil.ReadDir(p)
-	if err != nil {
-		logrus.Warnf("Cannot list store folder: %v", err)
-		return nil, err
-	}
+func NameProject(project *Project, name string) {
+	config := ReadConfig()
 
-	stores := make([]string, 0, len(infos))
-	for _, info := range infos {
-		stores = append(stores, info.Name())
+	path, found := config.Projects[name]
+	if !found || path != project.Path {
+		config.Projects[name] = project.Path
+		WriteConfig(config)
 	}
-	return stores, nil
-}
-
-// CreateBoard creates a new store inside a project
-func CreateBoard(project *Project, name string) error {
-	p := filepath.Join(project.Path, "boards", name)
-	return os.MkdirAll(p, 0777)
 }
 
 func EncryptStringForProject(project *Project, value string) (string, error) {

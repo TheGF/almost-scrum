@@ -16,8 +16,9 @@ import Access from './Access';
 import ChangePassword from './ChangePassword';
 
 
-function Portal() {
+function Portal(props) {
 
+    const { systemUser } = props
     const [token, setToken] = useState(localStorage.token);
     const [activeProject, setActiveProject] = useState(null);
     const [projects, setProjects] = useState([]);
@@ -138,8 +139,10 @@ function Portal() {
         </Center>
 
     }
+
+    document.title = activeProject ? `Almost Scrum: ${activeProject}` : 'Almost Scrum';
     return <>
-        <Login isOpen={!token} onAuthenticated={authenticated} />
+        <Login isOpen={!token} systemUser={systemUser} onAuthenticated={authenticated} />
         {getContent()}
     </>
 

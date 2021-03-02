@@ -90,7 +90,7 @@ func getWebUserAPI(c *gin.Context) {
 func listLocalUsersAPI(c *gin.Context) {
 	var users []string
 
-	config := core.LoadConfig()
+	config := core.ReadConfig()
 
 	for user := range config.Passwords {
 		users = append(users, user)
@@ -113,7 +113,7 @@ func registerLocalUserAPI(c *gin.Context) {
 		return
 	}
 
-	config := core.LoadConfig()
+	config := core.ReadConfig()
 	if _, found := config.Passwords[credentials.Username]; found && credentials.Username != webUser &&
 		credentials.Password != "" && credentials.Password != "changeme" {
 		c.String(http.StatusForbidden, "User '%s' cannot change another user ('%s') password",

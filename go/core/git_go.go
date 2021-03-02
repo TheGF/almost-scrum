@@ -71,7 +71,7 @@ func (client GoGit) GetStatus(project *Project) (GitStatus, error) {
 		}
 
 		if parts[0] == ProjectFolder {
-			if parts[1] == ProjectBoardsFolder || (project.Config.IncludeLibInGit && parts[1] != ProjectLibraryFolder) {
+			if parts[1] == ProjectBoardsFolder || (project.Config.Public.IncludeLibInGit && parts[1] != ProjectLibraryFolder) {
 				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
 			}
 		} else {

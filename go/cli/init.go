@@ -10,7 +10,7 @@ import (
 
 func chooseTemplates() []string {
 	var selected []string
-	templates := []string {"Empty"}
+	templates := []string {"Done"}
 	templates = append(templates, core.ListProjectTemplates()...)
 
 	for true {
@@ -20,7 +20,11 @@ func chooseTemplates() []string {
 		}
 
 		_, s, _ := prompt.Run()
-		selected = append(selected, s)
+		if s == "Done" {
+			return selected
+		} else {
+			selected = append(selected, s)
+		}
 	}
 	return selected
 }
@@ -42,19 +46,9 @@ func processInit(projectPath string, _ []string) {
 	}
 
 	templates := chooseTemplates()
-	var project *core.Project
-	if len(templates) == 0 {
-		project, err = core.InitProject(projectPath)
-	} else {
-		project, err = core.InitProjectFromTemplate(projectPath, templates)
-	}
-	abortIf(err, "")
+	project, err := core.InitProject(projectPath, templates)
 
-	//config, err := core.ReadProjectConfig(projectPath)
-	//abortIf(err, "")
-	//
-	//err = core.WriteProjectConfig(projectPath, &config)
-	//abortIf(err, "")
+	abortIf(err, "")
 
 	err = core.SetUserInfo(project, core.GetSystemUser(), &core.UserInfo{})
 	abortIf(err, "")

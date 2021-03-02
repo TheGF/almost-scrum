@@ -11,7 +11,7 @@ import (
 func ReadJSON(path string, out interface{}) (err error) {
 	d, err := ioutil.ReadFile(path)
 	if err != nil {
-		logrus.Errorf("ReadJSON - Invalid file %s: %v", path, err)
+		logrus.Warnf("ReadJSON - Invalid file %s: %v", path, err)
 		return
 	}
 

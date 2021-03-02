@@ -37,14 +37,14 @@ func getWebUser(c *gin.Context) string {
 }
 
 func getJWTMiddleware() *jwt.GinJWTMiddleware {
-	config := core.LoadConfig()
+	config := core.ReadConfig()
 	key, _ := hex.DecodeString(config.Secret)
 
 	c := jwt.GinJWTMiddleware{
 		Realm:       "Almost Realm",
 		Key:         key,
-		Timeout:     time.Hour,
-		MaxRefresh:  time.Hour,
+		Timeout:     12 * time.Hour,
+		MaxRefresh:  2400 * time.Hour,
 		IdentityKey: identityKey,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*User); ok {

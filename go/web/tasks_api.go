@@ -59,6 +59,16 @@ func listTaskAPI(c *gin.Context) {
 		board = ""
 	}
 
+	_, isProperties := c.GetQuery("properties")
+	if isProperties {
+		boardProperties, err := core.GetBoardProperties(project, board)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		} else {
+			c.JSON(http.StatusOK, boardProperties)
+		}
+	}
+
 	filter := c.DefaultQuery("filter", "")
 	var keys []string
 	if filter != "" {
@@ -110,11 +120,16 @@ func postTaskAPI(c *gin.Context) {
 
 	board := c.Param("board")
 	title := c.DefaultQuery("title", "")
+	type_ := c.DefaultQuery("type", "")
 	move := c.DefaultQuery("move", "")
 
 	if move == "" {
 		webUser := getWebUser(c)
-		_, name, err := core.CreateTask(project, board, title, webUser)
+		_, name, err := core.CreateTask(project, board, title, type_, webUser)
+		if err == core.ErrInvalidType {
+			c.String(http.StatusBadRequest, fmt.Sprintf("Invalid type '%s", type_))
+			return
+		}
 		if core.IsErr(err, "cannot create task %s", title) {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return

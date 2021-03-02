@@ -332,7 +332,6 @@ function Task(props) {
                 <TabList>
                     <Tab key="view"><T>view</T></Tab>
                     <Tab key="edit"><T>edit</T></Tab>
-                    <Tab key="properties"><T>properties</T></Tab>
                     <Tab key="progress"><T>progress</T></Tab>
                     <Tab key="files"><T>files</T></Tab>
                     <Spacer key="spacer" />
