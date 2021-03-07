@@ -1,6 +1,7 @@
 package library
 
 import (
+	"almost-scrum/attributes"
 	"almost-scrum/core"
 	"io"
 	"io/ioutil"
@@ -28,7 +29,7 @@ func getItem(path string, fileInfo os.FileInfo) Item {
 	name := fileInfo.Name()
 	mime, _ := mimetype.DetectFile(filepath.Join(path, name))
 
-	extendedAttr, err := getExtendedAttr(path, name)
+	extendedAttr, err := attributes.GetExtendedAttr(path, name)
 	if err != nil {
 		logrus.Warnf("Cannot get extended attr for %s: %v", path, err)
 		return Item{}
@@ -90,7 +91,7 @@ func MoveFile(project *core.Project, oldPath string, path string) error {
 		return err
 	}
 	dir, name := filepath.Split(oldPath)
-	xAttr, err := getExtendedAttr(dir, name); if err != nil {
+	xAttr, err := attributes.GetExtendedAttr(dir, name); if err != nil {
 		return err
 	}
 
@@ -98,8 +99,8 @@ func MoveFile(project *core.Project, oldPath string, path string) error {
 		return err
 	}
 	dir_, name_ := filepath.Split(path)
-	setExtendedAttr(dir_, name_, xAttr)
-	setExtendedAttr(dir, name, nil)
+	attributes.SetExtendedAttr(dir_, name_, xAttr)
+	attributes.SetExtendedAttr(dir, name, nil)
 	return nil
 }
 
@@ -109,7 +110,7 @@ func CreateFolder(project *core.Project, path string, owner string) error {
 		return err
 	}
 	dir, name := filepath.Split(path)
-	return setOwner(dir, name, owner)
+	return attributes.SetOwner(dir, name, owner)
 }
 
 func DeleteFile(project *core.Project, path string, recursive bool) error {
@@ -120,7 +121,7 @@ func DeleteFile(project *core.Project, path string, recursive bool) error {
 		return os.Remove(path)
 	}
 	dir, name := filepath.Split(path)
-	setExtendedAttr(dir, name, nil)
+	attributes.SetExtendedAttr(dir, name, nil)
 	return nil
 }
 
@@ -155,7 +156,7 @@ func SetFileInLibrary(project *core.Project, path string, reader io.ReadCloser, 
 	logrus.Debugf("successfully set file %s in library", path)
 
 	dir, name := filepath.Split(path)
-	if err := setOwner(dir, name, owner); err != nil {
+	if err := attributes.SetOwner(dir, name, owner); err != nil {
 		logrus.Warnf("Cannot set owner for file %s: %v", path, owner)
 	}
 	logrus.Debugf("set owner of file %s tp %s", path, owner)

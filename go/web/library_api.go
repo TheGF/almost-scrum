@@ -130,7 +130,7 @@ func createFolderAPI(c *gin.Context) {
 }
 
 func uploadFileAPI(c *gin.Context) {
-	logrus.Debug("Upload file request")
+	logrus.Debug("Push file request")
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return

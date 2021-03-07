@@ -90,10 +90,6 @@ type GitSettings struct {
 	Password     string `json:"password"`
 }
 
-func HasGitNative() bool {
-	out, err := UseCommand("git", "--version")
-	return err == nil && strings.HasPrefix(out, "git")
-}
 
 func GetGitCredentials(project *Project, user string) (username string, password string, err error) {
 	userInfo, err := GetUserInfo(project, user)

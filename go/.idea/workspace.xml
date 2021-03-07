@@ -5,69 +5,36 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/core/board.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/models.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/library/attributes.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/library/attributes_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/library/library.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/library/unix.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/library/versions.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/library/windows.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/board_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../build.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/project_config.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/federation/config.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/federation/export.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/federation/fed_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/federation/ftp.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/federation/hub.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/federation/import.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/federation/merge.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/assets/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/assets/bindata.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli/board.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/board.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli/commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/commands.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli/git.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/git.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli/init.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/init.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli/task_new.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/task_new.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/utils.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/auth.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/config.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/const.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/const.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/git.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/git.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/git_go.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/git_go.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/git_native.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/git_native.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/index.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/json.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/library.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/library_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/library_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/project.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/task.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/task.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/task_io.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/task_io.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/utils.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/auth_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/auth_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/attributes.go" beforeDir="false" afterPath="$PROJECT_DIR$/attributes/attributes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/attributes_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/attributes/attributes_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/library.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/library.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/unix.go" beforeDir="false" afterPath="$PROJECT_DIR$/attributes/unix.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/versions.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/versions.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/attributes/windows.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/library_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/library_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/project_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/project_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/tasks_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/tasks_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/users_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/users_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/assets/templates/issue-tracker.zip" beforeDir="false" afterPath="$PROJECT_DIR$/../web/assets/templates/issue-tracker.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/assets/templates/library-integration-prj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/assets/templates/library-issue-tracker" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/assets/templates/scrum-one-week.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/assets/templates/scrum-sprints.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/board/Board.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Board.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/board/FilterPanel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/FilterPanel.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/board/Properties.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Properties.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/board/Task.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Task.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/core/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/core/utils.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Desktop.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Desktop.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/src/desktop/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Header.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/library/Library.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/Library.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/library/PageEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/PageEditor.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/portal/ImportProject.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/portal/ImportProject.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/src/portal/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/portal/Login.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/portal/Portal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/portal/Portal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,7 +73,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/library" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/federation" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
@@ -116,27 +83,41 @@
       <recent name="$PROJECT_DIR$/core" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/federation" />
       <recent name="$PROJECT_DIR$/library" />
       <recent name="$PROJECT_DIR$/web" />
       <recent name="$PROJECT_DIR$/core" />
       <recent name="$PROJECT_DIR$/cli" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/attributes" />
+      <recent name="$PROJECT_DIR$/core" />
+      <recent name="$PROJECT_DIR$/git" />
       <recent name="$PROJECT_DIR$/library" />
       <recent name="$PROJECT_DIR$/resources" />
-      <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.TestGetSetExtendedAttr in almost-scrum/library">
-    <configuration name="TestClone in almost-scrum/core" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Go Test.TestImport in almost-scrum/federation">
+    <configuration name="TestEnc in almost-scrum/federation" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
-      <working_directory value="$PROJECT_DIR$/core" />
+      <working_directory value="$PROJECT_DIR$/federation" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
-      <package value="almost-scrum/core" />
+      <package value="almost-scrum/federation" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestClone\E$" />
+      <pattern value="^\QTestEnc\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestExport in almost-scrum/federation" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="go" />
+      <working_directory value="$PROJECT_DIR$/federation" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="almost-scrum/federation" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <pattern value="^\QTestExport\E$" />
       <method v="2" />
     </configuration>
     <configuration name="TestGetPreviousVersions in almost-scrum/core" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -161,42 +142,31 @@
       <pattern value="^\QTestGetSetExtendedAttr\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestMarkdown in almost-scrum/core" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestImport in almost-scrum/federation" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
-      <working_directory value="$PROJECT_DIR$/core" />
+      <working_directory value="$PROJECT_DIR$/federation" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
-      <package value="almost-scrum/core" />
+      <package value="almost-scrum/federation" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestMarkdown\E$" />
-      <method v="2" />
-    </configuration>
-    <configuration name="TestReindex in almost-scrum/core" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="go" />
-      <working_directory value="$PROJECT_DIR$/core" />
-      <framework value="gotest" />
-      <kind value="PACKAGE" />
-      <package value="almost-scrum/core" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestReindex\E$" />
+      <pattern value="^\QTestImport\E$" />
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Go Test.TestMarkdown in almost-scrum/core" />
-      <item itemvalue="Go Test.TestClone in almost-scrum/core" />
-      <item itemvalue="Go Test.TestReindex in almost-scrum/core" />
       <item itemvalue="Go Test.TestGetPreviousVersions in almost-scrum/core" />
       <item itemvalue="Go Test.TestGetSetExtendedAttr in almost-scrum/library" />
+      <item itemvalue="Go Test.TestExport in almost-scrum/federation" />
+      <item itemvalue="Go Test.TestEnc in almost-scrum/federation" />
+      <item itemvalue="Go Test.TestImport in almost-scrum/federation" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestImport in almost-scrum/federation" />
+        <item itemvalue="Go Test.TestExport in almost-scrum/federation" />
+        <item itemvalue="Go Test.TestEnc in almost-scrum/federation" />
         <item itemvalue="Go Test.TestGetSetExtendedAttr in almost-scrum/library" />
         <item itemvalue="Go Test.TestGetPreviousVersions in almost-scrum/core" />
-        <item itemvalue="Go Test.TestReindex in almost-scrum/core" />
-        <item itemvalue="Go Test.TestClone in almost-scrum/core" />
-        <item itemvalue="Go Test.TestMarkdown in almost-scrum/core" />
       </list>
     </recent_temporary>
   </component>
@@ -269,7 +239,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git.go</url>
-          <line>57</line>
+          <line>56</line>
           <option name="timeStamp" value="75" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -294,7 +264,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git_test.go</url>
-          <line>47</line>
+          <line>46</line>
           <option name="timeStamp" value="87" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -304,47 +274,47 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git_test.go</url>
-          <line>29</line>
+          <line>28</line>
           <option name="timeStamp" value="93" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git_native.go</url>
-          <line>123</line>
+          <line>122</line>
           <option name="timeStamp" value="96" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git_native.go</url>
-          <line>83</line>
+          <line>82</line>
           <option name="timeStamp" value="99" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/project.go</url>
-          <line>277</line>
+          <line>271</line>
           <option name="timeStamp" value="101" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/project.go</url>
-          <line>299</line>
+          <line>293</line>
           <option name="timeStamp" value="106" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git_test.go</url>
-          <line>63</line>
+          <line>62</line>
           <option name="timeStamp" value="107" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git_test.go</url>
-          <line>67</line>
+          <line>66</line>
           <option name="timeStamp" value="108" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git_test.go</url>
-          <line>86</line>
+          <line>85</line>
           <option name="timeStamp" value="110" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git.go</url>
-          <line>192</line>
+          <line>191</line>
           <option name="timeStamp" value="111" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -359,7 +329,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/git_test.go</url>
-          <line>19</line>
+          <line>18</line>
           <option name="timeStamp" value="117" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -378,14 +348,39 @@
           <option name="timeStamp" value="120" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/library/attributes_test.go</url>
+          <url>file://$PROJECT_DIR$/attributes/attributes_test.go</url>
           <line>16</line>
           <option name="timeStamp" value="122" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/library/attributes.go</url>
-          <line>52</line>
-          <option name="timeStamp" value="134" />
+          <url>file://$PROJECT_DIR$/federation/fed_test.go</url>
+          <line>23</line>
+          <option name="timeStamp" value="141" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/federation/import.go</url>
+          <line>83</line>
+          <option name="timeStamp" value="183" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/federation/export.go</url>
+          <line>164</line>
+          <option name="timeStamp" value="184" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/federation/merge.go</url>
+          <line>101</line>
+          <option name="timeStamp" value="185" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/federation/merge.go</url>
+          <line>61</line>
+          <option name="timeStamp" value="186" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/federation/import.go</url>
+          <line>78</line>
+          <option name="timeStamp" value="187" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

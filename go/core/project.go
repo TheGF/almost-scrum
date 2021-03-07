@@ -6,6 +6,8 @@ import (
 	"crypto/aes"
 	"encoding/hex"
 	"fmt"
+	uuid2 "github.com/google/uuid"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -14,28 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type ProjectConfigPublic struct {
-	CurrentBoard    string              `json:"currentStore" yaml:"currentStore"`
-	BoardTypes      map[string][]string `json:"boardTypes" yaml:"boardTypes"`
-	IncludeLibInGit bool                `json:"includeLibInGit" yaml:"includeLibInGit"`
-	UseGitNative    bool                `json:"useGitNative" yaml:"useGitNative"`
-}
 
-type ProjectConfig struct {
-	CipherKey string              `yaml:"cipherKey"`
-	UUID      string              `yaml:"uuid"`
-	Public    ProjectConfigPublic `yaml:"public"`
-}
-
-type PropertyKind string
-
-const (
-	KindString PropertyKind = "String"
-	KindEnum   PropertyKind = "Enum"
-	KindBool   PropertyKind = "Bool"
-	KindUser   PropertyKind = "User"
-	KindTag    PropertyKind = "Tag"
-)
 
 // Project is the basic information about a scrum project.
 type Project struct {
@@ -107,7 +88,7 @@ func OpenProject(path string) (*Project, error) {
 
 func GetGitClient(project *Project) GitClient {
 	if project.Config.Public.UseGitNative {
-		return GitNative{}
+		return Native{}
 	} else {
 		return GoGit{}
 	}
@@ -116,7 +97,7 @@ func GetGitClient(project *Project) GitClient {
 func GetGitClientFromGlobalConfig() GitClient {
 	config := ReadConfig()
 	if config.UseGitNative {
-		return GitNative{}
+		return Native{}
 	} else {
 		return GoGit{}
 	}
@@ -149,7 +130,7 @@ func initConfig(path string) error {
 	config := ReadConfig()
 
 	projectConfig, err := ReadProjectConfig(path)
-	if os.IsExist(err) {
+	if os.IsNotExist(err) {
 		projectConfig = ProjectConfig{
 			Public: ProjectConfigPublic{
 				CurrentBoard:    "",
@@ -163,6 +144,7 @@ func initConfig(path string) error {
 	}
 
 	projectConfig.CipherKey = GenerateRandomString(64)
+	projectConfig.UUID = uuid2.New().String()
 	if err := WriteProjectConfig(path, &projectConfig); err != nil {
 		logrus.Errorf("InitProject - Cannot create config file in %s", path)
 		return err
@@ -170,14 +152,26 @@ func initConfig(path string) error {
 	return nil
 }
 
-func unzipTemplates(path string, templates []string) error {
+func UnzipProjectTemplates(path string, templates []string) error {
 	for _, template := range templates {
-		template = fmt.Sprintf("%s%s.zip", ProjectTemplatesPath, template)
-		templateData, err := assets.Asset(template)
+		var err error
+		var templateData []byte
+		if strings.HasPrefix(template, "file:/") {
+			file, err := os.Open(template[6:])
+			if err != nil {
+				return err
+			}
+			templateData, err = ioutil.ReadAll(file)
+			file.Close()
+		} else {
+			template = fmt.Sprintf("%s%s.zip", ProjectTemplatesPath, template)
+			templateData, err = assets.Asset(template)
+		}
 		if err != nil {
 			logrus.Errorf("Cannot open template %s: %v", template, err)
 			return err
 		}
+
 		if err := UnzipFile(templateData, path); err != nil {
 			logrus.Errorf("Cannot unzip template %s: %v", template, err)
 			return err
@@ -200,7 +194,7 @@ func InitProject(path string, templates []string) (*Project, error) {
 		return &Project{Path: path}, ErrExists
 	}
 
-	if err := unzipTemplates(path, templates); err != nil {
+	if err := UnzipProjectTemplates(path, templates); err != nil {
 		return nil, err
 	}
 

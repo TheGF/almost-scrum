@@ -37,3 +37,11 @@ func WriteJSON(path string, in interface{}) (err error) {
 	}
 	return
 }
+
+func ConvertWithJSON(in interface{}, out interface{}) error {
+	if j, err := json.Marshal(in); err != nil {
+		return err
+	} else {
+		return json.Unmarshal(j, out)
+	}
+}

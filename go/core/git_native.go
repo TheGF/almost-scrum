@@ -12,11 +12,11 @@ import (
 	"time"
 )
 
-type GitNative struct{}
+type Native struct{}
 
 var statusRe = regexp.MustCompile(`\s*([?\w])[?\w]?\s+(.*)`)
 
-func (client GitNative) Clone(url string, path string) (string, error) {
+func (client Native) Clone(url string, path string) (string, error) {
 	start := time.Now()
 	out, err := UseCommand("git", "", "-C", path, "clone", url)
 	if err != nil {
@@ -28,7 +28,7 @@ func (client GitNative) Clone(url string, path string) (string, error) {
 	return out, nil
 }
 
-func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
+func (client Native) GetStatus(project *Project) (GitStatus, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
@@ -61,7 +61,7 @@ func (client GitNative) GetStatus(project *Project) (GitStatus, error) {
 			case ProjectBoardsFolder, ProjectConfigFile, ProjectUsersFolder:
 				gitStatus.AshFiles = append(gitStatus.AshFiles, name)
 				logrus.Debugf("Add file '%s' to Git status", name)
-			case 	ProjectLibraryFolder:
+			case ProjectLibraryFolder:
 				if project.Config.Public.IncludeLibInGit {
 					gitStatus.AshFiles = append(gitStatus.AshFiles, name)
 					logrus.Debugf("Add file '%s' to Git status", name)
@@ -134,7 +134,7 @@ func getRemoteWithCredentials(gitFolder string, action gitAction, credentials st
 	}
 }
 
-func (client GitNative) Pull(project *Project, user string) (string, error) {
+func (client Native) Pull(project *Project, user string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
@@ -150,7 +150,7 @@ func (client GitNative) Pull(project *Project, user string) (string, error) {
 	return output, nil
 }
 
-func (client GitNative) Push(project *Project, user string) (string, error) {
+func (client Native) Push(project *Project, user string) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 
@@ -166,7 +166,7 @@ func (client GitNative) Push(project *Project, user string) (string, error) {
 	return out, nil
 }
 
-func (client GitNative) Commit(project *Project, commitInfo CommitInfo) (string, error) {
+func (client Native) Commit(project *Project, commitInfo CommitInfo) (string, error) {
 	start := time.Now()
 	gitFolder := filepath.Dir(project.Path)
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "prefix-")

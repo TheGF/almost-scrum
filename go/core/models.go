@@ -7,11 +7,21 @@ import (
 	"sort"
 )
 
+type PropertyKind string
+
+const (
+	KindString PropertyKind = "String"
+	KindEnum   PropertyKind = "Enum"
+	KindBool   PropertyKind = "Bool"
+	KindUser   PropertyKind = "User"
+	KindTag    PropertyKind = "Tag"
+)
+
 type PropertyDef struct {
-	Name    string   `json:"name" yaml:"name"`
-	Kind    string   `json:"kind" yaml:"kind"`
-	Values  []string `json:"values" yaml:"values"`
-	Default string   `json:"default" yaml:"default"`
+	Name    string       `json:"name" yaml:"name"`
+	Kind    PropertyKind `json:"kind" yaml:"kind"`
+	Values  []string     `json:"values" yaml:"values"`
+	Default string       `json:"default" yaml:"default"`
 }
 
 type Model struct {
@@ -42,8 +52,8 @@ func ReadModels(path string) ([]Model, error) {
 					model.Template = template
 				} else {
 					modelsMap[name] = Model{
-						Name: name,
-						Template: template,
+						Name:       name,
+						Template:   template,
 						Properties: make([]PropertyDef, 0),
 					}
 				}

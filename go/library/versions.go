@@ -1,12 +1,13 @@
 package library
 
 import (
+	"almost-scrum/attributes"
 	"almost-scrum/core"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"github.com/hashicorp/go-version"
+	"github.com/sirupsen/logrus"
 
-    "io/ioutil"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -42,7 +43,7 @@ func archiveFile(project *core.Project, path string, fileInfo os.FileInfo) error
 	name := fileInfo.Name()
 	parent := filepath.Join(project.Path, core.ProjectLibraryFolder, path)
 	source := filepath.Join(parent, name)
-	sourceXAttr, err := getExtendedAttr(parent, name)
+	sourceXAttr, err := attributes.GetExtendedAttr(parent, name)
 	if err != nil {
 		return err
 	}
@@ -55,8 +56,8 @@ func archiveFile(project *core.Project, path string, fileInfo os.FileInfo) error
 		return err
 	}
 
-	_ = setExtendedAttr(parent_, name, sourceXAttr)
-	_ = setExtendedAttr(parent, name, nil)
+	_ = attributes.SetExtendedAttr(parent_, name, sourceXAttr)
+	_ = attributes.SetExtendedAttr(parent, name, nil)
 	logrus.Debugf("Archived file %s/%s to %s", parent, name, parent_)
 	return err
 }

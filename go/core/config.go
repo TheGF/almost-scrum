@@ -3,8 +3,10 @@ package core
 import (
 	"crypto/rand"
 	"encoding/hex"
+	uuid2 "github.com/google/uuid"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -22,6 +24,7 @@ type LdapConfig struct {
 //Config is the global configuration stored in the user's home directory.
 type Config struct {
 	Editor       string
+	UUID         string
 	User         string
 	Passwords    map[string]string
 	Projects     map[string]string
@@ -31,14 +34,6 @@ type Config struct {
 	LdapConfig   *LdapConfig
 }
 
-var defaultConfig = Config{
-	Editor:       "",
-	User:         "",
-	Passwords:    map[string]string{},
-	Projects:     map[string]string{},
-	Secret:       getSecret(),
-	UseGitNative: HasGitNative(),
-}
 
 func getSecret() string {
 	key := [48]byte{}
@@ -48,6 +43,12 @@ func getSecret() string {
 	}
 	return hex.EncodeToString(key[:])
 }
+
+func HasGitNative() bool {
+	out, err := UseCommand("git", "--version")
+	return err == nil && strings.HasPrefix(out, "git")
+}
+
 
 func getConfigPath() string {
 	home, _ := os.UserHomeDir()
@@ -65,8 +66,19 @@ func ReadConfig() *Config {
 	if err != nil {
 		logrus.Warnf("Cannot read global configuration %s: %v", configPath, err)
 
-		WriteConfig(&defaultConfig)
-		SetPassword(GetSystemUser(), "changeme")
+		WriteConfig(&Config{
+			Editor:       "",
+			User:         "",
+			UUID:         uuid2.New().String(),
+			Passwords:    map[string]string{},
+			Projects:     map[string]string{},
+			Secret:       getSecret(),
+			UseGitNative: HasGitNative(),
+		})
+		err := SetPassword(GetSystemUser(), "changeme")
+		if err != nil {
+			logrus.Fatalf("cannot set initial password for user %s in global config", GetSystemUser())
+		}
 		return ReadConfig()
 	} else {
 		logrus.Debugf("Successfully loaded config from %s: %v", configPath, config)
@@ -84,4 +96,3 @@ func WriteConfig(config *Config) {
 	}
 	logrus.Debugf("Config saved to %s", configPath)
 }
-

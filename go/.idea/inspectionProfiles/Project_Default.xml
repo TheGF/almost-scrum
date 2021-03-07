@@ -23,6 +23,7 @@
         <method importPath="math/rand" receiver="*Rand" name="Read" />
         <method importPath="mime/multipart" receiver="File" name="Close" />
         <method importPath="os" receiver="*File" name="Close" />
+        <method importPath="github.com/jlaffaye/ftp" receiver="*Response" name="Close" />
       </methods>
     </inspection_tool>
   </profile>

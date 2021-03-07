@@ -1,9 +1,9 @@
 import {
-    Button, Menu, MenuButton, MenuDivider, MenuItem,
+    Button, IconButton, Menu, MenuButton, MenuDivider, MenuItem,
     MenuList, Stack, useColorMode
 } from "@chakra-ui/react";
 import { React, useContext, useState } from "react";
-import { BiChevronDown } from "react-icons/all";
+import { AiOutlineCloudSync, BiChevronDown, BiTransfer, GiMeshBall, GiMeshNetwork, GiSpiderWeb } from "react-icons/all";
 import T from "../core/T";
 import Help from '../help/Help';
 import UserContext from '../UserContext';
@@ -63,6 +63,7 @@ function Header(props) {
         <Boards key={boardKey}
             active={activeBoard} setActiveBoard={setActiveBoard}
             {...props} />
+        <IconButton icon={<BiTransfer/>}/>
     </Stack>
 }
 
