@@ -1,7 +1,7 @@
 import {
     Breadcrumb, BreadcrumbItem, BreadcrumbLink, Button, ButtonGroup,
     Editable, EditableInput, EditablePreview, HStack,
-    IconButton, Link, Table, Tbody, Td, Th, Thead, Tr
+    IconButton, Link, Switch, Table, Tbody, Td, Th, Thead, Tr
 } from '@chakra-ui/react';
 import { React, useContext, useState } from 'react';
 import { BiEdit } from 'react-icons/bi';
@@ -79,14 +79,7 @@ function Files(props) {
     }
 
     function increaseVersion(file) {
-        const [prefix, version, ext] = getNextVersion(file, true)
-        const newName = version ?
-            `${prefix}${version}${ext}` :
-            `${prefix}-0.1${ext}`
-
-        const p = `${path}/${newName}`
-        const o = `${path}/${file.name}`
-        Server.moveFileInLibrary(project, o, p)
+        Server.upgradeVersion(project, `${path}/${file.name}`, false)
             .then(listFolder)
     }
 
@@ -96,8 +89,14 @@ function Files(props) {
             null
     }
 
+    function switchVisibility(file) {
+        const public_ = !file.public_
+        Server.setVisibility(project, `${path}/${file.name}`, public_)
+            .then(listFolder)
+    }
+
     const rows = files && files.map(file => {
-        const match = file.name.match(/(.*?)((\d+\.)+\d+)?(\.\w*)?$/)
+        const match = file.name.match(/(.*?)(~(\d+\.)+\d+)?(\.\w*)?$/)
         if (match.length < 5) {
             return ''
         }
@@ -106,10 +105,10 @@ function Files(props) {
         const version = match[2] || ''
         const ext = match[4] || ''
 
-        const versionUI = file.dir && !file.name.endsWith('.pg') ? null : version ?
+        const versionUI = file.dir && !file.name.endsWith('.pg') ? null : version.length ?
             <HStack>
                 <Link key="versions" onClick={_ => setShowVersions(file)}>
-                    {version}
+                    {version.substr(1)}
                 </Link>
                 <Link key="upgrade" onClick={_ => increaseVersion(file)}>
                     <GrUpgrade />
@@ -117,6 +116,7 @@ function Files(props) {
             </HStack> :
             <Link onClick={_ => increaseVersion(file)}>Enable</Link>
 
+        const cannotDelete = file.dir && file.size
         return <Tr key={file.name}>
             <Td>
                 <Editable defaultValue={name} isPreviewFocusable={false}
@@ -143,12 +143,16 @@ function Files(props) {
             <Td>{Utils.getFriendlyDate(file.modTime)}</Td>
             <Td>{file.owner}</Td>
             <Td>{versionUI}</Td>
+            <Td><Switch isChecked={file.public_} onChange={_ => switchVisibility(file)} /></Td>
             <Td><span title={file.size}>{Utils.getFriendlySize(file.size)}</span></Td>
             <Td>
                 <ButtonGroup size="sm" spacing={2}>
                     {getAttachButton(file)}
                     {getOpenButton(file)}
-                    <Button onClick={_ => deleteFile(file)}>Delete</Button>
+                    <Button onClick={_ => deleteFile(file)} isDisabled={cannotDelete}
+                        title={cannotDelete ? 'delete content first' : 'delete the file or empty folder'}>
+                        Delete
+                    </Button>
                 </ButtonGroup>
             </Td>
         </Tr>
@@ -162,6 +166,7 @@ function Files(props) {
                 <Th>Modified</Th>
                 <Th>Owner</Th>
                 <Th>Version</Th>
+                <Th>Public</Th>
                 <Th>Size</Th>
                 <Th>Actions</Th>
             </Tr>

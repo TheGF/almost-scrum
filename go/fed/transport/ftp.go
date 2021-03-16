@@ -1,0 +1,202 @@
+package transport
+
+import (
+	"fmt"
+	"github.com/jlaffaye/ftp"
+	"github.com/sirupsen/logrus"
+	"io"
+	"net/url"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"time"
+)
+
+type FTPConfig struct {
+	Name     string `yaml:"name"`
+	URL      string `yaml:"url"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Timeout  int    `yaml:"timeout"`
+}
+
+type FTPExchange struct {
+	config *FTPConfig
+	remote string
+	local  string
+	conn   *ftp.ServerConn
+}
+
+func GetFTPExchanges(configs ...FTPConfig) []Exchange {
+	var exchanges []Exchange
+	for i := range configs {
+		exchanges = append(exchanges, &FTPExchange{
+			config: &configs[i],
+			remote: "",
+			local:  "",
+			conn:   nil,
+		})
+	}
+	return exchanges
+}
+
+func (exchange *FTPExchange) ID() string {
+	return fmt.Sprintf("ftp-%s", exchange.config.Name)
+}
+
+func (exchange *FTPExchange) Connect(remoteRoot, localRoot string) (UpdatesCh, error) {
+	if exchange.conn != nil {
+		exchange.Disconnect()
+	}
+
+	url_, err := url.Parse(exchange.config.URL)
+	if err != nil {
+		logrus.Warnf("FTP url %s is invalid: %v", exchange.config.URL, err)
+	}
+
+	var timeout time.Duration
+	if exchange.config.Timeout == 0 {
+		timeout = time.Duration(exchange.config.Timeout) * time.Second
+	} else {
+		timeout = 30 * time.Second
+	}
+
+	conn, err := ftp.Dial(url_.Host, ftp.DialWithTimeout(timeout))
+	if err != nil {
+		logrus.Warnf("cannot Connect to FTP transport %s: %v", exchange.config.URL, err)
+		return nil, err
+	}
+	err = conn.Login(exchange.config.Username, exchange.config.Password)
+	if err != nil {
+		logrus.Warnf("cannot authenticate to FTP transport %s: %v", exchange.config.URL, err)
+		return nil, err
+	}
+
+	p := fmt.Sprintf("%s/%s", url_.Path, remoteRoot)
+	_ = conn.MakeDir(p)
+	err = conn.ChangeDir(p)
+	if err != nil {
+		logrus.Warnf("cannot change to local %s on FTP host %s: %v", remoteRoot, url_.Host, err)
+		return nil, err
+	}
+
+	exchange.local = localRoot
+	exchange.remote = remoteRoot
+	exchange.conn = conn
+	return nil, nil
+}
+
+func (exchange *FTPExchange) Disconnect() {
+	if exchange.conn != nil {
+		_ = exchange.conn.Quit()
+		exchange.conn = nil
+	}
+}
+
+func (exchange *FTPExchange) list(folder string, since time.Time) ([]string, error) {
+	entries, err := exchange.conn.List(folder)
+	if err != nil {
+		logrus.Warnf("cannot list FTP transport %s: %v",
+			exchange.config.URL, err)
+	}
+
+	var names []string
+	for _, entry := range entries {
+
+		switch entry.Type {
+		case ftp.EntryTypeFile:
+			if entry.Size > 0 && entry.Time.After(since) {
+				names = append(names, path.Join(folder,entry.Name))
+			}
+		case ftp.EntryTypeFolder:
+			names_, err := exchange.list(path.Join(folder, entry.Name), since)
+			if err != nil {
+				return nil, err
+			}
+			names = append(names, names_...)
+		}
+	}
+
+	return names, nil
+}
+
+func (exchange *FTPExchange) List(since time.Time) ([]string, error) {
+	if exchange.conn == nil {
+		logrus.Warn("trying to list without FTP connection. Call Connect first")
+		return nil, os.ErrClosed
+	}
+
+	names, err := exchange.list("", since)
+	if err == nil {
+		logrus.Debugf("list from %s: %#v", exchange, names)
+	}
+	return names, err
+}
+
+func (exchange *FTPExchange) Push(loc string) error {
+	if exchange.conn == nil {
+		logrus.Warn("trying to list without FTP connection. Call Connect first")
+		return os.ErrClosed
+	}
+
+	c := exchange.conn
+	file := filepath.Join(exchange.local, strings.ReplaceAll(loc, "/", string(os.PathSeparator)))
+	r, err := os.Open(file)
+	if err != nil {
+		logrus.Warnf("cannot open loc %s in %s: %v", loc, exchange, err)
+		return err
+	}
+	defer r.Close()
+
+	//	l := filepath.Base(loc)
+
+	curr, _ := c.CurrentDir()
+	parts := strings.Split(loc, "/")
+	for i := 0; i < len(parts)-1; i++ {
+		_ = c.MakeDir(parts[i])
+		_ = c.ChangeDir(parts[i])
+	}
+
+	err = exchange.conn.Stor(parts[len(parts)-1], r)
+	_ = c.ChangeDir(curr)
+	if err != nil {
+		logrus.Warnf("cannot upload loc %s to %s: %v", loc, exchange, err)
+		return err
+	}
+
+	logrus.Infof("loc %s uploaded to %s", loc, exchange)
+	return nil
+}
+
+func (exchange *FTPExchange) Pull(file string) error {
+	if exchange.conn == nil {
+		logrus.Warn("trying to list without FTP connection. Call Connect first")
+		return os.ErrClosed
+	}
+
+	r, err := exchange.conn.Retr(file)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	path := filepath.Join(exchange.local, file)
+	_ = os.MkdirAll(filepath.Dir(path), 0755)
+	w, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	_, err = io.Copy(w, r)
+	if err != nil {
+		return err
+	}
+	logrus.Infof("file %s downloaded from %s to %s", file, exchange, path)
+	return nil
+}
+
+func (exchange *FTPExchange) String() string {
+	return fmt.Sprintf("ftp %s - %s, connected=%t", exchange.config.Name, exchange.config.URL, exchange.conn != nil)
+}

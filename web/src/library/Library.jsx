@@ -39,14 +39,14 @@ function Library(props) {
     }
 
     function getNextVersion(file) {
-        const match = file.name.match(/(.*?)((\d+\.)+\d+)?(\.\w*)?$/)
+        const match = file.name.match(/(.*?)(~(\d+\.)+\d+)?(\.\w*)?$/)
         if (match.length < 5) return null
 
         const prefix = match[2] ? match[1] : `${match[1]}-`
         const ext = match[4] || ''
 
         const versions = files.map(file => {
-            const match = file.name.match(/(.*?)((\d+\.)+\d+)?(\.\w*)?$/)
+            const match = file.name.match(/(.*?)(~(\d+\.)+\d+)?(\.\w*)?$/)
             if (match.length < 5) return null
             if (match[1] != prefix) return null
             return match[2]
@@ -54,7 +54,7 @@ function Library(props) {
         let version = null
         if (versions.length) {
             const last = versions[versions.length - 1]
-            const match = last.match(/((\d+\.)+)(\d+)/)
+            const match = last.match(/(~(\d+\.)+)(\d+)/)
             if (match.length == 4) {
                 const last_digit = parseInt(match[3], 10)
                 version = `${match[1]}${last_digit + 1}`

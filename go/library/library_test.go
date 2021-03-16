@@ -30,3 +30,18 @@ func TestGetPreviousVersions(t *testing.T) {
 	assert.NotNil(t, items)
 
 }
+
+func TestNextVersion(t *testing.T) {
+	res, err := getNextVersion("~0.2", false)
+	assert.Nil(t, err)
+	assert.Equal(t, res, "~0.3")
+
+	res, err = getNextVersion("", false)
+	assert.Nil(t, err)
+	assert.Equal(t, res, "~0.1")
+
+	res, err = getNextVersion("~0.2", true)
+	assert.Nil(t, err)
+	assert.Equal(t, res, "~0.2.1")
+
+}

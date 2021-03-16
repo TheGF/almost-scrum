@@ -24,7 +24,8 @@ type LdapConfig struct {
 //Config is the global configuration stored in the user's home directory.
 type Config struct {
 	Editor       string
-	UUID         string
+	Host         string
+	Hostname     string
 	User         string
 	Passwords    map[string]string
 	Projects     map[string]string
@@ -33,7 +34,6 @@ type Config struct {
 	UseGitNative bool
 	LdapConfig   *LdapConfig
 }
-
 
 func getSecret() string {
 	key := [48]byte{}
@@ -48,7 +48,6 @@ func HasGitNative() bool {
 	out, err := UseCommand("git", "--version")
 	return err == nil && strings.HasPrefix(out, "git")
 }
-
 
 func getConfigPath() string {
 	home, _ := os.UserHomeDir()
@@ -69,7 +68,8 @@ func ReadConfig() *Config {
 		WriteConfig(&Config{
 			Editor:       "",
 			User:         "",
-			UUID:         uuid2.New().String(),
+			Host:         uuid2.New().String(),
+			Hostname:     "aloha",
 			Passwords:    map[string]string{},
 			Projects:     map[string]string{},
 			Secret:       getSecret(),
@@ -94,5 +94,5 @@ func WriteConfig(config *Config) {
 		logrus.Panicf("Cannot save global configuration in %s: %v", configPath, err)
 		panic(err)
 	}
-	logrus.Debugf("Config saved to %s", configPath)
+	logrus.Debugf("config saved to %s", configPath)
 }

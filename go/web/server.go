@@ -182,6 +182,7 @@ func StartWeb(projectPath string, port string, logLevel string, autoExit bool, a
 	userRoute(v1)
 	indexRoute(v1)
 	gitRoute(v1)
+	fedRoute(v1)
 
 	open.Start(fmt.Sprintf("http://127.0.0.1:%s", port))
 	runServer(r, fmt.Sprintf(":%s", port))
@@ -218,6 +219,7 @@ func StartServer(port string, logLevel string, autoExit bool, args []string) {
 	userRoute(v1)
 	indexRoute(v1)
 	gitRoute(v1)
+	fedRoute(v1)
 
 	open.Start(fmt.Sprintf("http://127.0.0.1:%s", port))
 	runServer(r, fmt.Sprintf(":%s", port))

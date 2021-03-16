@@ -1,8 +1,8 @@
 package library
 
 import (
-	"almost-scrum/attributes"
 	"almost-scrum/core"
+	"almost-scrum/fs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -21,24 +21,35 @@ type Item struct {
 	ModTime time.Time `json:"modTime"`
 	Mime    string    `json:"mime"`
 	Dir     bool      `json:"dir"`
+	Empty   bool      `json:"empty"`
+	Public  bool      `json:"public_"`
 	Owner   string    `json:"owner"`
 	Parent  string    `json:"parent"`
 }
 
 func getItem(path string, fileInfo os.FileInfo) Item {
-	name := fileInfo.Name()
-	mime, _ := mimetype.DetectFile(filepath.Join(path, name))
+	path = filepath.Join(path, fileInfo.Name())
+	mime, _ := mimetype.DetectFile(path)
 
-	extendedAttr, err := attributes.GetExtendedAttr(path, name)
+	var size int64
+	if fileInfo.IsDir() {
+		files, _ := ioutil.ReadDir(path)
+		size = int64(len(files))
+	} else {
+		size = fileInfo.Size()
+	}
+
+	extendedAttr, err := fs.GetExtendedAttr(path)
 	if err != nil {
 		logrus.Warnf("Cannot get extended attr for %s: %v", path, err)
 		return Item{}
 	}
 	return Item{
 		Name:    fileInfo.Name(),
-		Size:    fileInfo.Size(),
+		Size:    size,
 		ModTime: fileInfo.ModTime(),
 		Mime:    mime.String(),
+		Public:  extendedAttr.Public,
 		Owner:   extendedAttr.Owner,
 		Dir:     fileInfo.IsDir(),
 	}
@@ -61,17 +72,19 @@ func List(project *core.Project, path string) ([]Item, error) {
 		logrus.Warnf("List - Cannot get info about file %s: %v", path, err)
 		return nil, err
 	}
-	fileInfos, err := ioutil.ReadDir(absPath)
+	files, err := ioutil.ReadDir(absPath)
 	if err != nil {
-		logrus.Warnf("List - Cannot fileInfos content of folder %s: %v", path, err)
+		logrus.Warnf("List - Cannot files content of folder %s: %v", path, err)
 	}
 
 	versions := make(map[string]versionInfo)
-	for _, fileInfo := range fileInfos {
-		filterVersioned(project, path, fileInfo, versions)
+	for _, file := range files {
+		if file.Name() != fs.AttrsFileName {
+			filterVersioned(project, path, file, versions)
+		}
 	}
 
-	items := make([]Item, 0, len(fileInfos))
+	items := make([]Item, 0, len(files))
 	for _, versionInfo := range versions {
 		items = append(items, getItem(absPath, versionInfo.fileInfo))
 	}
@@ -90,17 +103,17 @@ func MoveFile(project *core.Project, oldPath string, path string) error {
 	if oldPath, err = AbsPath(project, oldPath); err != nil {
 		return err
 	}
-	dir, name := filepath.Split(oldPath)
-	xAttr, err := attributes.GetExtendedAttr(dir, name); if err != nil {
+	xAttr, err := fs.GetExtendedAttr(oldPath)
+	if err != nil {
 		return err
 	}
 
-	err = os.Rename(oldPath, path); if err != nil {
+	err = os.Rename(oldPath, path)
+	if err != nil {
 		return err
 	}
-	dir_, name_ := filepath.Split(path)
-	attributes.SetExtendedAttr(dir_, name_, xAttr)
-	attributes.SetExtendedAttr(dir, name, nil)
+	_ = fs.SetExtendedAttr(oldPath, xAttr)
+	_ = fs.SetExtendedAttr(path, nil)
 	return nil
 }
 
@@ -109,19 +122,24 @@ func CreateFolder(project *core.Project, path string, owner string) error {
 	if err := os.MkdirAll(path, 0755); err != nil {
 		return err
 	}
-	dir, name := filepath.Split(path)
-	return attributes.SetOwner(dir, name, owner)
+	return fs.SetExtendedAttr(path, &fs.ExtendedAttr{
+		Owner: owner,
+	})
 }
 
-func DeleteFile(project *core.Project, path string, recursive bool) error {
+func DeleteFile(project *core.Project, path string) error {
 	path = filepath.Join(project.Path, core.ProjectLibraryFolder, path)
-	if recursive {
-		return os.RemoveAll(path)
-	} else {
-		return os.Remove(path)
+	//if recursive {
+	//	_ = fs.SetExtendedAttr(path, nil)
+	//	return os.RemoveAll(path)
+	//} else {
+	err := os.Remove(path)
+	if err != nil {
+		return err
 	}
-	dir, name := filepath.Split(path)
-	attributes.SetExtendedAttr(dir, name, nil)
+	attr, _ := fs.GetExtendedAttr(path)
+	attr.Deleted = time.Now()
+	_ = fs.SetExtendedAttr(path, attr)
 	return nil
 }
 
@@ -136,8 +154,8 @@ func ArchivePath(project *core.Project, path string) (string, error) {
 	return filepath.Abs(p)
 }
 
-
-func SetFileInLibrary(project *core.Project, path string, reader io.ReadCloser, owner string) (string, error) {
+func SetFileInLibrary(project *core.Project, path string, reader io.ReadCloser,
+		owner string, public bool) (string, error) {
 	var err error
 	path = filepath.Join(project.Path, core.ProjectLibraryFolder, path)
 
@@ -155,13 +173,40 @@ func SetFileInLibrary(project *core.Project, path string, reader io.ReadCloser, 
 	}
 	logrus.Debugf("successfully set file %s in library", path)
 
-	dir, name := filepath.Split(path)
-	if err := attributes.SetOwner(dir, name, owner); err != nil {
+	if err := fs.SetExtendedAttr(path, &fs.ExtendedAttr{
+		Owner:   owner,
+		Origin:  nil,
+		Public:  public,
+		Deleted: time.Time{},
+	}); err != nil {
 		logrus.Warnf("Cannot set owner for file %s: %v", path, owner)
 	}
 	logrus.Debugf("set owner of file %s tp %s", path, owner)
 	return path, err
 }
+
+func SetVisibility(project *core.Project, path string, public bool) error {
+	fullPath := filepath.Join(project.Path, core.ProjectLibraryFolder, path)
+	files, err := ioutil.ReadDir(fullPath)
+	if err == nil {
+		for _, file := range files {
+			if err := SetVisibility(project, filepath.Join(path, file.Name()), public); err != nil {
+				return err
+			}
+		}
+	}
+	attr, _ := fs.GetExtendedAttr(fullPath)
+	if attr.Public != public {
+		attr.Public = public
+		if err = fs.SetExtendedAttr(fullPath, attr); err == nil {
+			tm := time.Now()
+			_ = os.Chtimes(fullPath, tm, tm)
+		}
+		logrus.Infof("set visibility of file %s tp %t", path, public)
+	}
+	return nil
+}
+
 
 // AbsPath returns the absolute path for a resource stored in the library.
 func GetItems(project *core.Project, paths []string) ([]Item, error) {

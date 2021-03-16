@@ -31,7 +31,10 @@ require (
 	github.com/msteinert/pam v0.0.0-20201130170657-e61372126161 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/npat-efault/crc16 v0.0.0-20161013170008-4128ccbe47c3
+	github.com/orcaman/concurrent-map v0.0.0-20210106121528-16402b402231 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
+	github.com/prprprus/scheduler v0.5.0
+	github.com/ricardopadilha/gowebdav v0.0.0-20191209050204-4b0933605566
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shurcooL/go v0.0.0-20200502201357-93f07166e636 // indirect

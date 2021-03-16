@@ -23,7 +23,7 @@ func TestFindFileUpwards(t *testing.T) {
 		assert.Equal(t, "/usr/bin", path)
 	}
 
-	path, _ := FindFileUpwards(".", "main.go")
+	path, _ := FindFileUpwards(".", "connect.go")
 	assert.Equal(t, "go", filepath.Base(path))
 
 	path, _ = FindFileUpwards(".", ".git")

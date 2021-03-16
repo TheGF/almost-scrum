@@ -109,6 +109,7 @@ func ProcessArgs() {
 	var port string
 	var username string
 	var verbose bool
+	var verbose2 bool
 	var autoExit bool
 
 	config = core.ReadConfig()
@@ -118,7 +119,7 @@ func ProcessArgs() {
 		"Path where the project is. Default is current folder")
 
 	flag.StringVar(&logLevel, "d", "error",
-		"Log level to display")
+		"Items level to display")
 
 	flag.StringVar(&username, "u", "",
 		"Impersonate a different user")
@@ -129,12 +130,18 @@ func ProcessArgs() {
 	flag.BoolVar(&verbose, "v", false,
 		"shows verbose log")
 
+	flag.BoolVar(&verbose2, "vv", false,
+		"shows very verbose log")
+
 	flag.BoolVar(&autoExit, "x", false,
 		"exit when the user closes the browser (only for web UI)")
 
 	flag.Parse()
 
 	if verbose {
+		logLevel = "INFO"
+	}
+	if verbose2 {
 		logLevel = "DEBUG"
 	}
 	setLogLevel(logLevel)

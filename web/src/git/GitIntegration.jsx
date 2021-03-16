@@ -19,6 +19,7 @@ import T from "../core/T";
 import GitPull from './GitPull';
 
 
+
 function GitIntegration({ isOpen, onClose }) {
     const [gitMessage, setGitMessage] = useState({ header: '', body: {} })
     const [stagedFiles, setStagedFiles] = useState([])

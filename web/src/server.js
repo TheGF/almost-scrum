@@ -387,7 +387,23 @@ class Server {
     static moveFileInLibrary(project, oldpath, path) {
         oldpath = encodeURIComponent(oldpath)
         path = encodeURIComponent(path)
-        return axios.post(`/api/v1/projects/${project}/library${path}?move=${oldpath}`,
+        return axios.post(`/api/v1/projects/${project}/library${path}?action=move&origin=${oldpath}`,
+            null, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static upgradeVersion(project, path) {
+        path = encodeURIComponent(path)
+        return axios.post(`/api/v1/projects/${project}/library${path}?action=upgrade`,
+            null, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static setVisibility(project, path, public_) {
+        path = encodeURIComponent(path)
+        return axios.post(`/api/v1/projects/${project}/library${path}?action=visibility&public=${public_}`,
             null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
@@ -406,6 +422,28 @@ class Server {
         let url = `/api/v1/projects/${project}/index/suggest/${prefix}`
         if (total) url += `&total=${total}`
         return axios.get(url, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static getFedLogs(project) {
+        let url = `/api/v1/projects/${project}/fed/logs`
+        return axios.get(url, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static postFedImport(project, logs) {
+        let url = `/api/v1/projects/${project}/fed/merge`
+        return axios.post(url, logs, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static postFedExport(project, since=null) {
+        let url = `/api/v1/projects/${project}/fed/export`
+        if (since) url += `?${since}`
+        return axios.post(url, null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }

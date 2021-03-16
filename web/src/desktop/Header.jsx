@@ -5,6 +5,7 @@ import {
 import { React, useContext, useState } from "react";
 import { AiOutlineCloudSync, BiChevronDown, BiTransfer, GiMeshBall, GiMeshNetwork, GiSpiderWeb } from "react-icons/all";
 import T from "../core/T";
+import Federation from "../federation/Federation";
 import Help from '../help/Help';
 import UserContext from '../UserContext';
 import Boards from './Boards';
@@ -18,6 +19,7 @@ function Header(props) {
     const [boardKey, setBoardKey] = useState(0);
     const [showSettings, setShowSettings] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
+    const [showFederation, setShowFederation] = useState(false);
 
     const { setShowGitIntegration, onExit, askBoardName } = props;
     const { colorMode, toggleColorMode } = useColorMode()
@@ -28,7 +30,7 @@ function Header(props) {
     }
 
     return <Stack spacing={4} direction="row" align="center">
-
+        <Federation isOpen={showFederation} onClose={_=>setShowFederation(false)}/>
         <Settings isOpen={showSettings} onClose={_ => setShowSettings(false)} />
         <Help isOpen={showHelp} onClose={_ => setShowHelp(false)} />
         <Menu>
@@ -63,7 +65,7 @@ function Header(props) {
         <Boards key={boardKey}
             active={activeBoard} setActiveBoard={setActiveBoard}
             {...props} />
-        <IconButton icon={<BiTransfer/>}/>
+        <Federation/>
     </Stack>
 }
 

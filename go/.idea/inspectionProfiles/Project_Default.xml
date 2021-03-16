@@ -9,6 +9,7 @@
         <function importPath="fmt" name="Println" />
         <function importPath="fmt" name="Print" />
         <function importPath="os" name="Remove" />
+        <function importPath="almost-scrum/fed" name="Watch" />
       </functions>
       <methods>
         <method importPath="hash" receiver="Hash" name="Write" />
@@ -24,6 +25,8 @@
         <method importPath="mime/multipart" receiver="File" name="Close" />
         <method importPath="os" receiver="*File" name="Close" />
         <method importPath="github.com/jlaffaye/ftp" receiver="*Response" name="Close" />
+        <method importPath="github.com/alexmullins/zip" receiver="*ReadCloser" name="Close" />
+        <method importPath="io" receiver="ReadCloser" name="Close" />
       </methods>
     </inspection_tool>
   </profile>

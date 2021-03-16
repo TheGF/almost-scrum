@@ -2,6 +2,7 @@ package web
 
 import (
 	"almost-scrum/core"
+	"almost-scrum/fed"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
@@ -39,14 +40,18 @@ func getProject(c *gin.Context) *core.Project {
 	user := getWebUser(c)
 	users := projectUsers[name]
 	if _, found := core.FindStringInSlice(users, user); !found {
-		noAccess := NoAccess{
-			Message: "No access to project",
-			Users:   users,
+		users = core.GetUserList(project)
+		projectUsers[name] = users
+		if _, found := core.FindStringInSlice(users, user); !found {
+			noAccess := NoAccess{
+				Message: "No access to project",
+				Users:   users,
+			}
+			logrus.Warnf("User %s has no access to project %s. Valid users [%s]", user, name,
+				strings.Join(users, " "))
+			c.JSON(http.StatusForbidden, noAccess)
+			return nil
 		}
-		logrus.Warnf("User %s has no access to project %s. Valid users [%s]", user, name,
-			strings.Join(users, " "))
-		c.JSON(http.StatusForbidden, noAccess)
-		return nil
 	}
 
 	return project
@@ -64,6 +69,11 @@ func openProject(name string, path string) (*core.Project, error) {
 	projectMapping[name] = project
 	projectUsers[name] = users
 	logrus.Infof("Open project %s for users [%s]", name, strings.Join(users, " "))
+
+	if err := fed.Start(project); err != nil {
+		return nil, err
+	}
+
 	return project, nil
 }
 

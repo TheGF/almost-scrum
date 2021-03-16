@@ -9,6 +9,7 @@ import (
 	"github.com/skratchdot/open-golang/open"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -112,7 +113,6 @@ func getArchiveAPI(c *gin.Context) {
 	}
 }
 
-
 func createFolderAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
@@ -137,9 +137,39 @@ func uploadFileAPI(c *gin.Context) {
 	}
 
 	path := c.Param("path")
-	move := c.DefaultQuery("move", "")
+	action := c.DefaultQuery("action", "upload")
+	public, _ := strconv.ParseBool(c.DefaultQuery("public", "false"))
+	origin := c.DefaultQuery("origin", "")
+	owner := getWebUser(c)
 
-	if move == "" {
+	switch action {
+	case "move":
+		if err := library.MoveFile(project, origin, path); err != nil {
+			_ = c.Error(err)
+			c.String(http.StatusInternalServerError, "Cannot move %s to %s", origin, path)
+			return
+		}
+		logrus.Infof("file %s moved to %s", origin, path)
+		c.String(http.StatusOK, "%s", path)
+	case "upgrade":
+		path_, err := library.IncreaseVersion(project, path, owner, public)
+		if err != nil {
+			_ = c.Error(err)
+			c.String(http.StatusInternalServerError, "Cannot upgrade version: %v", err)
+			return
+		}
+		logrus.Infof("file %s upgraded to %s, owner %s, public %t", path, path_, owner, public)
+		c.String(http.StatusOK, path_)
+	case "visibility":
+		err := library.SetVisibility(project, path, public)
+		if err != nil {
+			_ = c.Error(err)
+			c.String(http.StatusInternalServerError, "Cannot upgrade version: %v", err)
+			return
+		}
+		logrus.Infof("visibility of %s set to %t", path, public)
+		c.String(http.StatusOK, "")
+	case "upload":
 		file, _ := c.FormFile("file")
 		reader, err := file.Open()
 		if err != nil {
@@ -150,44 +180,19 @@ func uploadFileAPI(c *gin.Context) {
 		defer reader.Close()
 
 		dest := filepath.Join(path, file.Filename)
-		if _, err = library.SetFileInLibrary(project, dest, reader, getWebUser(c)); err != nil {
+		if _, err = library.SetFileInLibrary(project, dest, reader, owner, public); err != nil {
 			_ = c.Error(err)
 			c.String(http.StatusInternalServerError, "Cannot upload to %s", path)
 			return
 		}
-		logrus.Debugf("File %s uploaded in %s", file.Filename, path)
+		logrus.Infof("File %s uploaded in %s, owner %s, public %t",
+			file.Filename, path, owner, public)
 		getLibraryAPI(c)
-	} else {
-		if err := library.MoveFile(project, move, path); err != nil {
-			_ = c.Error(err)
-			c.String(http.StatusInternalServerError, "Cannot move %s to %s", move, path)
-			return
-		}
-		c.String(http.StatusOK, "%s", path)
-	}
-}
+	default:
+		c.String(http.StatusBadRequest, "invalid action %s", action)
 
-func putFileAPI(c *gin.Context) {
-	var project *core.Project
-	if project = getProject(c); project == nil {
-		return
 	}
 
-	path := c.Param("path")
-	reader, err := c.Request.GetBody()
-	if err != nil {
-		logrus.Warnf("Cannot read body in save of file path %s: %v", path, err)
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot save file to %s", path)
-		return
-	}
-	if path, err := library.SetFileInLibrary(project, path, reader, getWebUser(c)); err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot save file to %s", path)
-		return
-	}
-	logrus.Debugf("File %s saved in %s", path)
-	c.String(http.StatusOK, path)
 }
 
 func deleteFileAPI(c *gin.Context) {
@@ -197,8 +202,7 @@ func deleteFileAPI(c *gin.Context) {
 	}
 
 	path := c.Param("path")
-	_, recursive := c.GetQuery("recursive")
-	if err := library.DeleteFile(project, path, recursive); err != nil {
+	if err := library.DeleteFile(project, path); err != nil {
 		logrus.Warnf("Cannot delete path %s: %v", path, err)
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot delete file")

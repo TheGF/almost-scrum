@@ -21,8 +21,9 @@ const ProjectUsersFolder = "users"
 // ProjectUsersFolder the folder containing users
 const ProjectLibraryFolder = "library"
 
-// ProjectFedFolder the folder containing federation config and temporary files
+// ProjectFedFolder the folder containing fed config and temporary files
 const ProjectFedFolder = "fed"
+const ProjectFedFilesFolder = "fed/files"
 
 // ProjectUsersFolder the folder containing users
 const ProjectArchiveFolder = "archive"
@@ -48,7 +49,7 @@ var (
 	// ProjectFolders is the required folders in the project
 	ProjectFolders = []string{"boards/backlog", "boards/sandbox", "boards/icebox",
 		ProjectLibraryFolder, ProjectUsersFolder, ProjectLibraryInlineImagesFolder, ProjectModelsFolder,
-		ProjectFedFolder}
+		ProjectFedFolder, ProjectFedFilesFolder}
 
 	ProjectTemplatesPath = "assets/templates/"
 
