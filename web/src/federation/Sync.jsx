@@ -10,26 +10,26 @@ import UserContext from '../UserContext';
 
 function Sync(props) {
     const { project } = useContext(UserContext)
-    const [logs, setLogs] = useState(null)
+    const [diffs, setDiffs] = useState(null)
     const [exported, setExported] = useState(null)
     const [updated, setUpdated] = useState(false)
     const { onClose } = props
 
-    function getLogs() {
-        Server.getFedLogs(project)
-            .then(setLogs)
+    function getDiffs() {
+        Server.getFedDiffs(project, true)
+            .then(setDiffs)
     }
-    useEffect(getLogs, [])
+    useEffect(getDiffs, [])
 
     function importFiles() {
-        setLogs(null)
-        Server.postFedImport(project, logs)
+        setDiffs(null)
+        Server.postFedImport(project, diffs)
             .then(_ => setUpdated(true))
-            .then(getLogs)
+            .then(getDiffs)
     }
 
     function exportFiles() {
-        Server.postFedExport(project, logs)
+        Server.postFedExport(project, diffs)
             .then(setExported)
     }
 
@@ -51,11 +51,11 @@ function Sync(props) {
         </Tr>
     }
 
-    const rows = logs && logs.flatMap(log => Object.keys(log.items).sort()
+    const rows = diffs && diffs.flatMap(log => Object.keys(log.items).sort()
         .filter(name => log.items[name].match != 'outdated')
         .map(name => <Row key={name} name={name} item={log.items[name]} header={log.header} />))
 
-    return logs != null ? <VStack>
+    return diffs != null ? <VStack>
         {rows.length ? <Flex overflow="auto" w="100%">
             <Table overflow="auto" >
                 <Thead>

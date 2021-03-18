@@ -2,7 +2,6 @@ package web
 
 import (
 	"almost-scrum/core"
-	"almost-scrum/fed"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
@@ -69,10 +68,6 @@ func openProject(name string, path string) (*core.Project, error) {
 	projectMapping[name] = project
 	projectUsers[name] = users
 	logrus.Infof("Open project %s for users [%s]", name, strings.Join(users, " "))
-
-	if err := fed.Start(project); err != nil {
-		return nil, err
-	}
 
 	return project, nil
 }

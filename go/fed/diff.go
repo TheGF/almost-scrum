@@ -161,7 +161,7 @@ func CreateDiff(project *core.Project, file string) (*Diff, error) {
 	return &log, nil
 }
 
-func GetDiff(project *core.Project) ([]*Diff, error) {
+func GetDiffs(project *core.Project) ([]*Diff, error) {
 	var diffs []*Diff
 
 	state, err := GetSignal(project)

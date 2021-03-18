@@ -68,7 +68,7 @@ func getAuth(project *Project, user string) (transport.AuthMethod, error) {
 		return nil, nil
 	}
 
-	credentials, err = DecryptStringForProject(project, credentials)
+	credentials, err = DecryptString(project.Config.CipherKey, credentials)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func GetGitCredentials(project *Project, user string) (username string, password
 
 	credentials, ok := userInfo.Credentials["GitUserPass"]
 	if ok {
-		credentials, _ = DecryptStringForProject(project, credentials)
+		credentials, _ = DecryptString(project.Config.CipherKey, credentials)
 		idx := strings.Index(credentials, ":")
 		return credentials[0:idx], credentials[1+idx:], nil
 	} else {
@@ -115,7 +115,7 @@ func SetGitCredentials(project *Project, user string, gitUsername string, gitPas
 	}
 
 	credentials := fmt.Sprintf("%s:%s", gitUsername, gitPassword)
-	credentials, err = EncryptStringForProject(project, credentials)
+	credentials, err = EncryptString(project.Config.CipherKey, credentials)
 	if err != nil {
 		return err
 	}

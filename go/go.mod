@@ -21,11 +21,12 @@ require (
 	github.com/google/uuid v1.2.0
 	github.com/hashicorp/go-version v1.2.1
 	github.com/jlaffaye/ftp v0.0.0-20210302195756-c3c8c7ac6590
-	github.com/json-iterator/go v1.1.10 // indirect
+	github.com/json-iterator/go v1.1.10
 	github.com/jtblin/go-ldap-client v0.0.0-20170223121919-b73f66626b33
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/minio/minio-go/v7 v7.0.10
 	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/monirz/gotri v0.0.0-20200219181904-dacfb98c509f
 	github.com/msteinert/pam v0.0.0-20201130170657-e61372126161 // indirect
@@ -35,18 +36,20 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/prprprus/scheduler v0.5.0
 	github.com/ricardopadilha/gowebdav v0.0.0-20191209050204-4b0933605566
+	github.com/rlmcpherson/s3gof3r v0.5.0
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shurcooL/go v0.0.0-20200502201357-93f07166e636 // indirect
 	github.com/shurcooL/markdownfmt v0.0.0-20191117054414-21fe95c248e9
 	github.com/sirupsen/logrus v1.7.0
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/stretchr/testify v1.6.1
 	github.com/ugorji/go v1.2.0 // indirect
 	github.com/yuin/goldmark v1.3.0
 	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
-	golang.org/x/text v0.3.2
+	golang.org/x/text v0.3.3
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect

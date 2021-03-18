@@ -426,15 +426,49 @@ class Server {
             .catch(errorHandler);
     }
 
-    static getFedLogs(project) {
-        let url = `/api/v1/projects/${project}/fed/logs`
+    static getFedConfig(project) {
+        let url = `/api/v1/projects/${project}/fed/config`
+        return axios.get(url, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static postFedConfig(project, config) {
+        let url = `/api/v1/projects/${project}/fed/config`
+        return axios.post(url, config, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static postFedShare(project, exchanges, removeCredentials) {
+        const c = {
+            exchanges: exchanges,
+            removeCredentials: removeCredentials,
+        }
+        let url = `/api/v1/projects/${project}/fed/share`
+        return axios.post(url, c, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+
+    static getFedStatus(project) {
+        let url = `/api/v1/projects/${project}/fed/status`
+        return axios.get(url, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static getFedDiffs(project, sync) {
+        let url = `/api/v1/projects/${project}/fed/diffs`
+        if (sync) url += '?sync'
         return axios.get(url, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
 
     static postFedImport(project, logs) {
-        let url = `/api/v1/projects/${project}/fed/merge`
+        let url = `/api/v1/projects/${project}/fed/import`
         return axios.post(url, logs, getConfig())
             .then(r => r.data)
             .catch(errorHandler);

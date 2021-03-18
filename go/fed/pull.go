@@ -24,7 +24,7 @@ func pullFromExchange(signal *Signal, exchange transport.Exchange, since time.Ti
 		var imported []string
 		for _, loc := range locs {
 			if _, loaded := signal.locs.LoadOrStore(loc, true); !loaded {
-				if err := exchange.Pull(loc); err == nil {
+				if _, err := exchange.Pull(loc); err == nil {
 					logrus.Debugf("import %s from transport %s", loc, exchange)
 					imported = append(imported, loc)
 				} else {

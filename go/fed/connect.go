@@ -14,16 +14,20 @@ import (
 
 func getExchanges(config *Config) []transport.Exchange {
 	var exchanges []transport.Exchange
-	exchanges = append(exchanges, transport.GetFTPExchanges(config.Ftp...)...)
+	exchanges = append(exchanges, transport.GetS3Exchanges(config.S3...)...)
 	exchanges = append(exchanges, transport.GetWebDAVExchanges(config.WebDAV...)...)
+	exchanges = append(exchanges, transport.GetFTPExchanges(config.Ftp...)...)
 	return exchanges
 }
 
 func loadLocs(signal *Signal) error {
+	locs := sync.Map{}
+	count := 0
 	err := filepath.Walk(signal.local, func(p string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			loc, _ := filepath.Rel(signal.local, p)
-			signal.locs.LoadOrStore(loc, false)
+			locs.Store(loc, 0)
+			count++
 		}
 		return nil
 	})
@@ -31,6 +35,9 @@ func loadLocs(signal *Signal) error {
 		logrus.Errorf("cannot read fed staging folder %s: %v", signal.local, err)
 		return err
 	}
+
+	signal.locs = locs
+	logrus.Infof("loaded %d files in matching map", count)
 	return nil
 }
 
@@ -45,7 +52,7 @@ func GetSignal(project *core.Project) (*Signal, error) {
 	localRoot := filepath.Join(project.Path, core.ProjectFedFilesFolder)
 	_ = os.MkdirAll(localRoot, 0755)
 
-	config, err := ReadConfig(project)
+	config, err := ReadConfig(project, false)
 	if err != nil {
 		return nil, err
 	}
@@ -56,6 +63,7 @@ func GetSignal(project *core.Project) (*Signal, error) {
 		locs:      sync.Map{},
 		exchanges: map[transport.Exchange]bool{},
 		config:    config,
+		stat:      map[transport.Exchange]Stat{},
 	}
 
 	for _, exchange := range getExchanges(config) {
@@ -66,9 +74,7 @@ func GetSignal(project *core.Project) (*Signal, error) {
 		return nil, err
 	}
 
-	if connectivity := connect(signal); connectivity == 0 {
-		return nil, ErrNoConnections
-	}
+	connect(signal)
 
 	go func() {
 		signal.reconnect = time.NewTicker(signal.config.ReconnectTime)
@@ -116,7 +122,7 @@ func checkTime() error {
 	return ErrFedNoTimeServer
 }
 
-func getConnectedExchanges(signal* Signal) []transport.Exchange{
+func getConnectedExchanges(signal *Signal) []transport.Exchange {
 	var exchanges []transport.Exchange
 	for exchange, connected := range signal.exchanges {
 		if connected {
@@ -135,7 +141,7 @@ func asyncUpdates(signal *Signal, exchange transport.Exchange, ch transport.Upda
 		signal.inUse.Add(1)
 		for _, loc := range locs {
 			if _, loaded := signal.locs.LoadOrStore(loc, true); !loaded {
-				if err := exchange.Pull(loc); err != nil {
+				if _, err := exchange.Pull(loc); err != nil {
 					signal.locs.Delete(loc)
 				}
 			}
@@ -178,7 +184,7 @@ func connect(signal *Signal) int {
 		}
 	}
 
-	return len(signal.exchanges)-len(disconnected)+newConnected
+	return len(signal.exchanges) - len(disconnected) + newConnected
 }
 
 func Disconnect(project *core.Project) {

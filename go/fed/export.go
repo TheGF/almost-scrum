@@ -65,7 +65,7 @@ func addHeader(projectId string, writer *zip.Writer, user string, time time.Time
 func addFileToPackage(base string, secret string, writer *zip.Writer, file string) (int64, error) {
 	stat, err := os.Stat(file)
 	if err != nil {
-		logrus.Warnf("cannot stat file %s for federated export: %v", file, err)
+		logrus.Warnf("cannot Stat file %s for federated export: %v", file, err)
 		return 0, err
 	}
 
@@ -178,7 +178,7 @@ func buildPackage(project *core.Project, dest string, user string, files []strin
 func Export(project *core.Project, user string, since time.Time) ([]string, error) {
 	var files []string
 
-	config, err := ReadConfig(project)
+	config, err := ReadConfig(project, false)
 	if err != nil {
 		return nil, err
 	}

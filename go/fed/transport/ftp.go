@@ -14,11 +14,11 @@ import (
 )
 
 type FTPConfig struct {
-	Name     string `yaml:"name"`
-	URL      string `yaml:"url"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Timeout  int    `yaml:"timeout"`
+	Name     string `json:"name" yaml:"name"`
+	URL      string `json:"url" yaml:"url"`
+	Username string `json:"username" yaml:"username"`
+	Password string `json:"password" yaml:"password"`
+	Timeout  int    `json:"timeout" yaml:"timeout"`
 }
 
 type FTPExchange struct {
@@ -39,6 +39,12 @@ func GetFTPExchanges(configs ...FTPConfig) []Exchange {
 		})
 	}
 	return exchanges
+}
+
+func RemoveFTPSecret(configs ...FTPConfig) {
+	for i := range configs {
+		configs[i].Password = ""
+	}
 }
 
 func (exchange *FTPExchange) ID() string {
@@ -129,23 +135,24 @@ func (exchange *FTPExchange) List(since time.Time) ([]string, error) {
 
 	names, err := exchange.list("", since)
 	if err == nil {
-		logrus.Debugf("list from %s: %#v", exchange, names)
+		logrus.Infof("list from %s: %v", exchange, names)
 	}
 	return names, err
 }
 
-func (exchange *FTPExchange) Push(loc string) error {
+func (exchange *FTPExchange) Push(loc string) (int64, error) {
 	if exchange.conn == nil {
 		logrus.Warn("trying to list without FTP connection. Call Connect first")
-		return os.ErrClosed
+		return 0, os.ErrClosed
 	}
 
 	c := exchange.conn
 	file := filepath.Join(exchange.local, strings.ReplaceAll(loc, "/", string(os.PathSeparator)))
+	stat, _ := os.Stat(file)
 	r, err := os.Open(file)
 	if err != nil {
 		logrus.Warnf("cannot open loc %s in %s: %v", loc, exchange, err)
-		return err
+		return 0, err
 	}
 	defer r.Close()
 
@@ -162,41 +169,45 @@ func (exchange *FTPExchange) Push(loc string) error {
 	_ = c.ChangeDir(curr)
 	if err != nil {
 		logrus.Warnf("cannot upload loc %s to %s: %v", loc, exchange, err)
-		return err
+		return 0, err
 	}
 
 	logrus.Infof("loc %s uploaded to %s", loc, exchange)
-	return nil
+	return stat.Size(), nil
 }
 
-func (exchange *FTPExchange) Pull(file string) error {
+func (exchange *FTPExchange) Pull(file string)  (int64, error) {
 	if exchange.conn == nil {
 		logrus.Warn("trying to list without FTP connection. Call Connect first")
-		return os.ErrClosed
+		return 0, os.ErrClosed
 	}
 
 	r, err := exchange.conn.Retr(file)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer r.Close()
 
-	path := filepath.Join(exchange.local, file)
-	_ = os.MkdirAll(filepath.Dir(path), 0755)
-	w, err := os.Create(path)
+	dest := filepath.Join(exchange.local, file)
+	_ = os.MkdirAll(filepath.Dir(dest), 0755)
+	w, err := os.Create(dest)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer w.Close()
 
-	_, err = io.Copy(w, r)
+	sz, err := io.Copy(w, r)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	logrus.Infof("file %s downloaded from %s to %s", file, exchange, path)
-	return nil
+	logrus.Infof("file %s downloaded from %s to %s", file, exchange, dest)
+	return sz, nil
+}
+
+func (exchange *FTPExchange) Name() string {
+	return exchange.config.Name
 }
 
 func (exchange *FTPExchange) String() string {
-	return fmt.Sprintf("ftp %s - %s, connected=%t", exchange.config.Name, exchange.config.URL, exchange.conn != nil)
+	return fmt.Sprintf("ftp %s - %s", exchange.config.Name, exchange.config.URL)
 }

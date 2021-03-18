@@ -30,7 +30,6 @@ function Header(props) {
     }
 
     return <Stack spacing={4} direction="row" align="center">
-        <Federation isOpen={showFederation} onClose={_=>setShowFederation(false)}/>
         <Settings isOpen={showSettings} onClose={_ => setShowSettings(false)} />
         <Help isOpen={showHelp} onClose={_ => setShowHelp(false)} />
         <Menu>

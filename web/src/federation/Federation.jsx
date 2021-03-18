@@ -1,6 +1,6 @@
 import {
     Button, Icon, IconButton, Modal, ModalBody, ModalCloseButton, ModalContent,
-    ModalFooter, ModalHeader, ModalOverlay, Tab, TabList, TabPanel, TabPanels, Tabs, useDisclosure
+    ModalFooter, ModalHeader, ModalOverlay, Switch, Tab, TabList, TabPanel, TabPanels, Tabs, useDisclosure
 } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react"
 import { React, useEffect, useContext, useState } from "react";
@@ -9,27 +9,31 @@ import T from "../core/T";
 import Server from "../server";
 import Sync from "./Sync";
 import UserContext from '../UserContext';
+import { MdSignalCellular0Bar, MdSignalCellular1Bar, MdSignalCellular2Bar, MdSignalCellular3Bar, MdSignalCellular4Bar } from "react-icons/md";
+import Exchanges from "./Exchanges";
+import Share from "./Share";
 
 let monitorInterval = null
 
 function Federation(props) {
     const { project } = useContext(UserContext)
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const [logs, setLogs] = useState([])
+//    const [diffs, setDiffs] = useState([])
+    const [strenght, setStrength] = useState(0)
     const [updates, setUpdates] = useState(0)
     const toast = useToast()
 
 
-    function notifyChanges(logs) {
+    function notifyChanges(diffs) {
         const lastChange = new Date(localStorage.getItem('ash-fed-newest-fed-log'))
 
-        for (const log of logs) {
+        for (const log of diffs) {
             const creationTime = new Date(log.creationTime)
-            if ( creationTime < lastChange) {
+            if (creationTime < lastChange) {
                 continue
             }
-            
-            const stat = {outdated: 0, update:0, new: 0, conflict: 0}
+
+            const stat = { outdated: 0, update: 0, new: 0, conflict: 0 }
             for (const item of Object.values(log.items)) {
                 stat[item.match] += 1
             }
@@ -37,31 +41,71 @@ function Federation(props) {
             if (stat['new'] || stat['update'] || stat['conflict']) {
                 toast({
                     title: `Update from ${log.header.user}@${log.header.hostname}`,
-                    description: `${stat['new']} new files, ${stat['update']} updates and ${stat['conflict']} conflicts`+
-                                 '; click on federation button to update',
+                    description: `${stat['new']} new files, ${stat['update']} updates and ${stat['conflict']} conflicts` +
+                        '; click on federation button to update',
                     status: "success",
                     duration: 9000,
                     isClosable: true,
-                  })
+                })
             }
         }
     }
-    function getLogs() {
-        Server.getFedLogs(project)
-            .then(logs => {
-                setLogs(logs)
-                notifyChanges(logs)
-            })
+    function getDiffs() {
+        Server.getFedDiffs(project, true)
+            .then(notifyChanges)
+    }
+
+    function sync() {
+        Server.postFedSync(project)
     }
 
     function startMonitoring() {
-        if (monitorInterval) clearInterval(monitorInterval);
-        monitorInterval = setInterval(getLogs, 10*60000)
+        Server.getFedStatus(project)
+            .then(status => {
+                let strenght = 0
+                let exchanges = 0
+                for (const [_, connected] of Object.entries(status.exchanges)) {
+                    if (connected) strenght++
+                    exchanges++
+                }
+                setStrength(strenght)
+
+                if (exchanges) {
+                    if (strenght) {
+                        setTimeout(() => {}, 600 * 1000)
+                    } else {
+                        if (monitorInterval) clearInterval(monitorInterval);
+                        monitorInterval = setInterval(getDiffs, 10 * 60000)
+                    }
+                } else {
+                    toast({
+                        title: `No Exchanges`,
+                        description: 'No exchanges are configured and federation is not available',
+                        status: "warning",
+                        duration: 9000,
+                        isClosable: true,
+                    })
+                }
+            })
+
     }
     useEffect(startMonitoring, [])
 
+    let signalBar = 0 
+    switch (strenght) {
+        case 0: signalBar = <MdSignalCellular0Bar/>; break
+        case 1: signalBar = <MdSignalCellular1Bar/>; break
+        case 2: signalBar = <MdSignalCellular2Bar/>; break
+        case 3: signalBar = <MdSignalCellular3Bar/>; break
+        default: signalBar = <MdSignalCellular4Bar/>
+    }
+
     return <>
-        <Button  onClick={onOpen}><BiTransfer />{updates ? updates : null}</Button>
+        <Button onClick={onOpen}>
+            {signalBar}
+            <BiTransfer />
+            {updates ? updates : null}
+        </Button>
         <Modal isOpen={isOpen} onClose={onClose} size="full" top
             scrollBehavior="inside" >
             <ModalOverlay />
@@ -72,20 +116,19 @@ function Federation(props) {
                     <Tabs isLazy>
                         <TabList>
                             <Tab><T>sync</T></Tab>
-                            <Tab><T>hubs</T></Tab>
-                            <Tab><T>users</T></Tab>
+                            <Tab><T>exchanges</T></Tab>
                             <Tab><T>share</T></Tab>
                         </TabList>
 
                         <TabPanels>
                             <TabPanel>
-                                <Sync key={isOpen} onClose={onClose}/>
+                                <Sync key={isOpen} onClose={onClose} />
                             </TabPanel>
                             <TabPanel>
+                                <Exchanges onClose={onClose}/>
                             </TabPanel>
                             <TabPanel>
-                            </TabPanel>
-                            <TabPanel>
+                                <Share onClose={onClose}/>
                             </TabPanel>
                         </TabPanels>
                     </Tabs>

@@ -19,7 +19,7 @@ func pushToExchange(signal *Signal, exchange transport.Exchange, r chan error) {
 	signal.locs.Range(func(loc, _ interface{}) bool {
 		_, found := core.FindStringInSlice(files, loc.(string))
 		if !found {
-			err := exchange.Push(loc.(string))
+			_, err := exchange.Push(loc.(string))
 			r <- err
 			if err != nil {
 				logrus.Warnf("cannot push file %s to %s: %v", loc, exchange, err)

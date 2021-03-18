@@ -24,12 +24,20 @@ type Header struct {
 	User      string    `json:"user"`
 }
 
+type Stat struct {
+	Upload   int64 `json:"upload"`
+	Download int64 `json:"download"`
+	Push     int   `json:"push"`
+	Pull     int   `json:"pull"`
+}
+
 type Signal struct {
 	local      string
 	remote     string
 	config     *Config
 	locs       sync.Map
 	exchanges  map[transport.Exchange]bool
+	stat       map[transport.Exchange]Stat
 	lastExport time.Time
 	reconnect  *time.Ticker
 	inUse      sync.WaitGroup

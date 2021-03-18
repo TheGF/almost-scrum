@@ -13,10 +13,11 @@ type Exchange interface {
 	List(since time.Time) ([]string, error)
 
 	/** Pull the requested file (full local) from the transport to the storage folder */
-	Push(file string) error
+	Push(file string) (int64, error)
 
 	/** Pull the requested location from the transport to the storage folder*/
-	Pull(loc string) error
+	Pull(loc string) (int64, error)
 
+	Name() string
 	String() string
 }

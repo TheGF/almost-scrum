@@ -9,15 +9,9 @@ import (
 	"time"
 )
 
-//var config = WebDAVConfig{
-//	Name:     "nextcloud",
-//	URL:      "https://ppp.woelkli.com/remote.php/dav/files/almost_scrum@protonmail.com/",
-//	Username: "almost_scrum@protonmail.com",
-//	Password: "ScrumAlmost42",
-//	Timeout:  60,
-//}
 
-var config = WebDAVConfig{
+
+var webDAVConfig = WebDAVConfig{
 	Name:     "nextcloud",
 	URL:      "https://use01.thegood.cloud/remote.php/dav/files/almost_scrum@protonmail.com/",
 	Username: "almost_scrum@protonmail.com",
@@ -25,17 +19,9 @@ var config = WebDAVConfig{
 	Timeout:  60,
 }
 
-//var config = WebDAVConfig{
-//	Name:     "nextcloud",
-//	URL:      "https://shared03.opsone-cloud.ch/remote.php/dav/files/cestino83@protonmail.com",
-//	Username: "cestino83@protonmail.com",
-//	Password: "83cestino",
-//	Timeout:  60,
-//}
-
 func TestConnect(t *testing.T) {
 
-	exchange := GetWebDAVExchanges(config)[0]
+	exchange := GetWebDAVExchanges(webDAVConfig)[0]
 
 	_, err := exchange.Connect("test", "/tmp")
 	assert.Nil(t, err)
@@ -47,7 +33,7 @@ func TestConnect(t *testing.T) {
 
 func TestPush(t *testing.T) {
 
-	exchange := GetWebDAVExchanges(config)[0]
+	exchange := GetWebDAVExchanges(webDAVConfig)[0]
 
 	dir, _ := ioutil.TempDir(os.TempDir(), "ash-test")
 	_, err := exchange.Connect("test", dir)
@@ -63,7 +49,7 @@ func TestPush(t *testing.T) {
 }
 
 func TestPull(t *testing.T) {
-	exchange := GetWebDAVExchanges(config)[0]
+	exchange := GetWebDAVExchanges(webDAVConfig)[0]
 
 	dir, _ := ioutil.TempDir(os.TempDir(), "ash-test")
 	_, err := exchange.Connect("test", dir)

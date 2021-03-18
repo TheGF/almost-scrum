@@ -3,6 +3,8 @@ package fed
 import (
 	"almost-scrum/core"
 	"almost-scrum/fs"
+	"github.com/sirupsen/logrus"
+	"github.com/skip2/go-qrcode"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -48,7 +50,7 @@ func TestImport(t *testing.T) {
 
 	print("pull from ", n)
 
-	diffs, _ := GetDiff(project)
+	diffs, _ := GetDiffs(project)
 	_, _ = Import(project, diffs)
 
 	Disconnect(project)
@@ -75,4 +77,20 @@ func TestSync(t *testing.T) {
 	failed, err := Sync(project, time.Time{})
 	assert.Nil(t, err)
 	assert.Equal(t, failed, 0)
+
+	logrus.Printf("status: %#v", GetStatus(project))
+
+}
+
+func TestSharing(t *testing.T) {
+	project := getProject(t)
+
+	c,_ := ReadConfig(project, false)
+	key, token,_ := Share(project, c)
+
+	logrus.Print(key, token)
+
+	png, err  := qrcode.Encode(key, qrcode.Medium, 256)
+	assert.Nil(t, err)
+	ioutil.WriteFile("/tmp/qr.png", png, 0755)
 }

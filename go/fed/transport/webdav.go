@@ -13,11 +13,11 @@ import (
 )
 
 type WebDAVConfig struct {
-	Name     string `yaml:"name"`
-	URL      string `yaml:"url"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Timeout  int    `yaml:"timeout"`
+	Name     string `json:"name" yaml:"name"`
+	URL      string `json:"url" yaml:"url"`
+	Username string `json:"username" yaml:"username"`
+	Password string `json:"password" yaml:"password"`
+	Timeout  int    `json:"timeout" yaml:"timeout"`
 }
 
 type WebDAVExchange struct {
@@ -40,6 +40,13 @@ func GetWebDAVExchanges(configs ...WebDAVConfig) []Exchange {
 	}
 	return exchanges
 }
+
+func RemoveWebDAVSecret(configs ...WebDAVConfig) {
+	for i := range configs {
+		configs[i].Password = ""
+	}
+}
+
 
 func (exchange *WebDAVExchange) ID() string {
 	return fmt.Sprintf("webDAV-%s", exchange.config.Name)
@@ -113,15 +120,15 @@ func (exchange *WebDAVExchange) List(since time.Time) ([]string, error) {
 
 	names, err := exchange.list("", since)
 	if err == nil {
-		logrus.Debugf("list from %s: %#v", exchange, names)
+		logrus.Infof("list from %s: %v", exchange, names)
 	}
 	return names, err
 }
 
-func (exchange *WebDAVExchange) Push(loc string) error {
+func (exchange *WebDAVExchange) Push(loc string) (int64, error) {
 	if exchange.conn == nil {
 		logrus.Warn("trying to list without FTP connection. Call Connect first")
-		return os.ErrClosed
+		return 0, os.ErrClosed
 	}
 
 	c := exchange.conn
@@ -129,41 +136,41 @@ func (exchange *WebDAVExchange) Push(loc string) error {
 	r, err := os.Open(file)
 	if err != nil {
 		logrus.Warnf("cannot open loc %s in %s: %v", loc, exchange, err)
-		return err
+		return 0, err
 	}
 	defer r.Close()
 
-	full := fmt.Sprintf("%s/%s", exchange.remote, loc)
-	idx := strings.LastIndex(full, "/")
-	dir := full[0:idx]
-	info, err := c.Stat(dir)
+	dest := fmt.Sprintf("%s/%s", exchange.remote, loc)
+	idx := strings.LastIndex(dest, "/")
+	dir := dest[0:idx]
+	stat, err := c.Stat(dir)
 	if err != nil {
 		_ = c.MkdirAll(dir, 0644)
-	} else if !info.IsDir() {
-		return os.ErrInvalid
+	} else if !stat.IsDir() {
+		return 0, os.ErrInvalid
 	}
 
-	err = c.WriteStream(full, r, 0644)
+	err = c.WriteStream(dest, r, 0644)
 	if err != nil {
 		logrus.Warnf("cannot upload loc %s to %s: %v", loc, exchange, err)
-		return err
+		return 0, err
 	}
-
+	stat, _ = os.Stat(file)
 
 	logrus.Infof("loc %s uploaded to %s", loc, exchange)
-	return nil
+	return stat.Size(), nil
 }
 
-func (exchange *WebDAVExchange) Pull(loc string) error {
+func (exchange *WebDAVExchange) Pull(loc string) (int64, error) {
 	if exchange.conn == nil {
 		logrus.Warn("trying to list without WebDAV connection. Call Connect first")
-		return os.ErrClosed
+		return 0, os.ErrClosed
 	}
 
 	remote := fmt.Sprintf("%s/%s", exchange.remote, loc)
 	r, err := exchange.conn.ReadStream(remote)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer r.Close()
 
@@ -171,18 +178,31 @@ func (exchange *WebDAVExchange) Pull(loc string) error {
 	_ = os.MkdirAll(filepath.Dir(local), 0755)
 	w, err := os.Create(local)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer w.Close()
 
-	_, err = io.Copy(w, r)
+	sz, err := io.Copy(w, r)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	logrus.Infof("loc %s downloaded from %s to %s", loc, exchange, local)
-	return nil
+	return sz, nil
+}
+func (exchange *WebDAVExchange) Config(withPrivateKeys bool) interface{} {
+	c := *exchange.config
+	if !withPrivateKeys {
+		c.Password = ""
+	}
+	return c
 }
 
+
+func (exchange *WebDAVExchange) Name() string {
+	return exchange.config.Name
+}
+
+
 func (exchange *WebDAVExchange) String() string {
-	return fmt.Sprintf("webDAV %s - %s, connected=%t", exchange.config.Name, exchange.config.URL, exchange.conn != nil)
+	return fmt.Sprintf("webDAV %s - %s", exchange.config.Name, exchange.config.URL)
 }

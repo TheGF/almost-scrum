@@ -12,16 +12,17 @@ import (
 const configFile = "fed.yaml"
 
 type Config struct {
-	Secret        string                   `yaml:"secret"`
-	ReconnectTime time.Duration            `yaml:"reconnectTime"`
-	PollTime      time.Duration            `yaml:"pollTime"`
-	Span          int                      `yaml:"span"`
-	LastExport    time.Time                `yaml:"lastExport"`
-	Ftp           []transport.FTPConfig    `yaml:"ftp"`
-	WebDAV        []transport.WebDAVConfig `yaml:"webdav"`
+	Secret        string                   `json:"secret" yaml:"secret"`
+	ReconnectTime time.Duration            `json:"reconnectTime" yaml:"reconnectTime"`
+	PollTime      time.Duration            `json:"pollTime" yaml:"pollTime"`
+	Span          int                      `json:"span" yaml:"span"`
+	LastExport    time.Time                `json:"last_export" yaml:"lastExport"`
+	S3            []transport.S3Config     `json:"s3" yaml:"s3"`
+	WebDAV        []transport.WebDAVConfig `json:"webDAV" yaml:"webdav"`
+	Ftp           []transport.FTPConfig    `json:"ftp" yaml:"ftp"`
 }
 
-func ReadConfig(project *core.Project) (*Config, error) {
+func ReadConfig(project *core.Project, removeSecret bool) (*Config, error) {
 	var config Config
 	path := filepath.Join(project.Path, core.ProjectFedFolder, configFile)
 	if err := core.ReadYaml(path, &config); err == nil {
@@ -34,10 +35,9 @@ func ReadConfig(project *core.Project) (*Config, error) {
 			logrus.Warnf("invalid pool time %s in %s; default to 10m", config.PollTime, path)
 			config.PollTime = 10 * time.Minute
 		}
-		return &config, nil
 	} else if os.IsNotExist(err) {
 		config = Config{
-			Secret:        core.GenerateRandomString(64),
+			Secret:        core.GenerateRandomString(32),
 			ReconnectTime: 10 * time.Minute,
 			PollTime:      time.Minute,
 			Span:          10,
@@ -45,15 +45,27 @@ func ReadConfig(project *core.Project) (*Config, error) {
 		}
 
 		_ = os.MkdirAll(filepath.Dir(path), 0755)
-		err = WriteConfig(project, &config)
-		return &config, err
+		if err = WriteConfig(project, &config); err != nil {
+			return nil, err
+		}
 	} else {
 		logrus.Errorf("cannot read fed config %s: %v", path, err)
 		return nil, err
 	}
+
+	if !removeSecret {
+		return &config, nil
+	}
+
+	config.Secret = ""
+	transport.RemoveS3Secret(config.S3...)
+	transport.RemoveWebDAVSecret(config.WebDAV...)
+	transport.RemoveFTPSecret(config.Ftp...)
+	return &config, nil
 }
 
 func WriteConfig(project *core.Project, config *Config) error {
 	path := filepath.Join(project.Path, core.ProjectFedFolder, configFile)
 	return core.WriteYaml(path, config)
 }
+

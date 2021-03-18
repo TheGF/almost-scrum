@@ -35,8 +35,8 @@ func TestEncryption(t *testing.T) {
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	s := "Hello World"
-	e, _ := EncryptStringForProject(project, s)
-	d, _ := DecryptStringForProject(project, e)
+	e, _ := EncryptString(project, s)
+	d, _ := DecryptString(project, e)
 	assert.Equal(t, s, d)
 
 }
