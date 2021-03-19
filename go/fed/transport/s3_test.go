@@ -13,7 +13,7 @@ var s3Config = S3Config{
 	Name:      "nextcloud",
 	Endpoint:  "s3.eu-central-1.amazonaws.com",
 	AccessKey: "AKIA275FPHM3BLLN2NX5",
-	Secret:    "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",
+	Secret:    "",
 	Bucket:    "almost-scrum",
 	UseSSL:    false,
 	Location:  "eu-central-1",
