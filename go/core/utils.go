@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strings"
 )
@@ -185,4 +186,27 @@ func EscapeSpaceInPath(path string) string {
 		escapeExpr = `\ `
 	}
 	return strings.ReplaceAll(path, " ", escapeExpr)
+}
+
+func AppendOrUpdate(current, update interface{}, cmp func(i,j int) bool) interface{}{
+	cs := reflect.ValueOf(current)
+	ct := cs.Type()
+	us := reflect.ValueOf(update)
+
+	cl := cs.Len()
+	ul := us.Len()
+	for j := 0; j < ul; j++ {
+		found := false
+		for i := 0; i < cl; i++ {
+			if cmp(i, j) {
+				cs.Index(i).Set(us.Index(j))
+				found = true
+				break
+			}
+		}
+		if !found {
+			cs = reflect.Append(cs, us.Index(j))
+		}
+	}
+	return cs.Convert(ct).Interface()
 }

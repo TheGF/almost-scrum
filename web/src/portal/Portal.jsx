@@ -10,10 +10,11 @@ import { GrLogout, GrNewWindow } from "react-icons/gr";
 import Desktop from '../desktop/Desktop';
 import Help from '../help/Help';
 import Server from '../server';
-import AddProject from './AddProject';
-import Login from './Login';
 import Access from './Access';
+import AddProject from './AddProject';
 import ChangePassword from './ChangePassword';
+import ClaimInvite from './ClaimInvite';
+import Login from './Login';
 
 
 function Portal(props) {
@@ -89,6 +90,8 @@ function Portal(props) {
             </VStack>
         </Box>
     </Link>)
+    
+    projectsBoxes.push(<ClaimInvite key="claimInvite"/>)
 
     projectsBoxes.push(<Link key="#users"
         onClick={_ => setShowUsers(true)} >
@@ -100,6 +103,7 @@ function Portal(props) {
             </VStack>
         </Box>
     </Link>)
+
 
     function getContent() {
         if (!token) return null;

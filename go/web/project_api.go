@@ -112,12 +112,11 @@ func loadRepoProjects(repoPath string) error {
 
 func loadNamedProjects() {
 	config := core.ReadConfig()
-	for name := range config.Projects {
-		path := config.Projects[name]
-		if _, err := openProject(name, path); err == nil {
-			logrus.Infof("Added project %s (%s) to repo", name, path)
+	for _, ref := range config.Projects {
+		if _, err := openProject(ref.Name, ref.Folder); err == nil {
+			logrus.Infof("Added project %s (%s) to repo", ref.Name, ref.Folder)
 		} else {
-			logrus.Warnf("Project %s has invalid path %s", name, path)
+			logrus.Warnf("Project %s has invalid path %s", ref.Name, ref.Folder)
 		}
 	}
 }
@@ -180,7 +179,6 @@ func createProjectInFolder(c *gin.Context, name string, path string, templates [
 	logrus.Debugf("User %s added to project %s", user, name)
 	projectMapping[name] = project
 	projectUsers[name] = []string{user}
-	core.NameProject(project, name)
 
 	logrus.Infof("Project %s created by user '%s'", name, user)
 	c.String(http.StatusCreated, res)
@@ -216,9 +214,8 @@ func importFolderFromPath(c *gin.Context, createOptions createOptions) {
 	}
 
 	name := filepath.Base(createOptions.ImportFolder)
-	if project, err := openProject(name, createOptions.ImportFolder); err == nil {
+	if _, err := openProject(name, createOptions.ImportFolder); err == nil {
 		logrus.Debugf("Found and imported project in folder %s", createOptions.ImportFolder)
-		core.NameProject(project, name)
 		c.String(http.StatusCreated, name)
 	} else if createOptions.Inject && os.IsNotExist(err) {
 		logrus.Debugf("No project in folder %s. Try to create one", createOptions.ImportFolder)
@@ -227,7 +224,6 @@ func importFolderFromPath(c *gin.Context, createOptions createOptions) {
 		c.String(http.StatusBadRequest, "Folder %s does not contain a valid project",
 			createOptions.ImportFolder)
 	}
-
 }
 
 func createProjectFromScratch(c *gin.Context, createOptions createOptions) {

@@ -5,12 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/fed/invite.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/library/book.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/assets/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/assets/bindata.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cli/commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/commands.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/project_config.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/project_config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/utils.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/fed_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/fed_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/share.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/fed/transport/s3_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/s3_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/library.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/library.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/library_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/library_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/fed_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/fed_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/library_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/library_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/project_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/project_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_linux" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../web/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../web/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/core/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/core/utils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Exchanges.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Exchanges.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Share.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Share.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/exchanges/FTPExchange.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/exchanges/FTPExchange.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/help/portal.md" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/help/portal.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/library/Bar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/Bar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/library/Library.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/Library.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/library/PageEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/PageEditor.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/portal/Portal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/portal/Portal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,38 +110,38 @@
       <recent name="$PROJECT_DIR$/git" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.TestSharing in almost-scrum/fed">
-    <configuration name="TestS3Connect in almost-scrum/fed/transport" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Go Test.TestExport in almost-scrum/library">
+    <configuration name="TestClaimInvite in almost-scrum/fed" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
-      <working_directory value="$PROJECT_DIR$/fed/transport" />
+      <working_directory value="$PROJECT_DIR$/fed" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
-      <package value="almost-scrum/fed/transport" />
+      <package value="almost-scrum/fed" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestS3Connect\E$" />
+      <pattern value="^\QTestClaimInvite\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestS3Pull in almost-scrum/fed/transport" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestExport in almost-scrum/library" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
-      <working_directory value="$PROJECT_DIR$/fed/transport" />
+      <working_directory value="$PROJECT_DIR$/library" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
-      <package value="almost-scrum/fed/transport" />
+      <package value="almost-scrum/library" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestS3Pull\E$" />
+      <pattern value="^\QTestExport\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestS3Push in almost-scrum/fed/transport" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestMergeConfig in almost-scrum/fed" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
-      <working_directory value="$PROJECT_DIR$/fed/transport" />
+      <working_directory value="$PROJECT_DIR$/fed" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
-      <package value="almost-scrum/fed/transport" />
+      <package value="almost-scrum/fed" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestS3Push\E$" />
+      <pattern value="^\QTestMergeConfig\E$" />
       <method v="2" />
     </configuration>
     <configuration name="TestSharing in almost-scrum/fed" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -139,18 +168,18 @@
     </configuration>
     <list>
       <item itemvalue="Go Test.TestSync in almost-scrum/fed" />
-      <item itemvalue="Go Test.TestS3Connect in almost-scrum/fed/transport" />
-      <item itemvalue="Go Test.TestS3Push in almost-scrum/fed/transport" />
-      <item itemvalue="Go Test.TestS3Pull in almost-scrum/fed/transport" />
       <item itemvalue="Go Test.TestSharing in almost-scrum/fed" />
+      <item itemvalue="Go Test.TestClaimInvite in almost-scrum/fed" />
+      <item itemvalue="Go Test.TestMergeConfig in almost-scrum/fed" />
+      <item itemvalue="Go Test.TestExport in almost-scrum/library" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestExport in almost-scrum/library" />
+        <item itemvalue="Go Test.TestMergeConfig in almost-scrum/fed" />
+        <item itemvalue="Go Test.TestClaimInvite in almost-scrum/fed" />
         <item itemvalue="Go Test.TestSharing in almost-scrum/fed" />
         <item itemvalue="Go Test.TestSync in almost-scrum/fed" />
-        <item itemvalue="Go Test.TestS3Pull in almost-scrum/fed/transport" />
-        <item itemvalue="Go Test.TestS3Push in almost-scrum/fed/transport" />
-        <item itemvalue="Go Test.TestS3Connect in almost-scrum/fed/transport" />
       </list>
     </recent_temporary>
   </component>
@@ -200,11 +229,6 @@
           <url>file://$PROJECT_DIR$/cli/utils.go</url>
           <line>22</line>
           <option name="timeStamp" value="43" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/web/server.go</url>
-          <line>188</line>
-          <option name="timeStamp" value="44" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/cli/top.go</url>
@@ -328,7 +352,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
-          <line>25</line>
+          <line>26</line>
           <option name="timeStamp" value="141" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -348,12 +372,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
-          <line>40</line>
+          <line>41</line>
           <option name="timeStamp" value="220" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
-          <line>52</line>
+          <line>53</line>
           <option name="timeStamp" value="228" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -378,7 +402,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
-          <line>32</line>
+          <line>33</line>
           <option name="timeStamp" value="241" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -388,7 +412,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
-          <line>77</line>
+          <line>78</line>
           <option name="timeStamp" value="245" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -398,25 +422,58 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/transport/s3_test.go</url>
-          <line>31</line>
+          <line>23</line>
           <option name="timeStamp" value="248" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/transport/s3_test.go</url>
-          <line>43</line>
+          <line>35</line>
           <option name="timeStamp" value="249" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/transport/s3_test.go</url>
-          <line>59</line>
+          <line>51</line>
           <option name="timeStamp" value="250" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
-          <line>88</line>
+          <line>89</line>
           <option name="timeStamp" value="252" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/cli/commands.go</url>
+          <line>33</line>
+          <option name="timeStamp" value="254" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
+          <line>113</line>
+          <option name="timeStamp" value="255" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/invite.go</url>
+          <line>123</line>
+          <option name="timeStamp" value="256" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/library/library_test.go</url>
+          <line>49</line>
+          <option name="timeStamp" value="258" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$USER_HOME$/go/pkg/mod/github.com/russross/blackfriday/v2@v2.1.0/markdown.go</url>
+          <line>195</line>
+          <option name="timeStamp" value="263" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="GoTestRunConfiguration">
+        <watch expression="cs.Len()" />
+        <watch expression="fedConfig.S3[i] == c.S3[j]" />
+        <watch expression="fedConfig.S3[i]" />
+        <watch expression="data[i:]" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

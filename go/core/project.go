@@ -79,6 +79,8 @@ func OpenProject(path string) (*Project, error) {
 	}
 	project.TasksCount = len(infos)
 
+	AddProjectRefToConfig(project)
+
 	logrus.Debugf("FindProject - Project found in %s", path)
 	return project, nil
 }
@@ -123,10 +125,10 @@ func createRequiredFolders(path string) error {
 	return nil
 }
 
-func initConfig(path string) error {
+func initConfig(folder string) error {
 	config := ReadConfig()
 
-	projectConfig, err := ReadProjectConfig(path)
+	projectConfig, err := ReadProjectConfig(folder)
 	if os.IsNotExist(err) {
 		projectConfig = ProjectConfig{
 			Public: ProjectConfigPublic{
@@ -142,10 +144,26 @@ func initConfig(path string) error {
 
 	projectConfig.CipherKey = GenerateRandomString(64)
 	projectConfig.UUID = uuid2.New().String()
-	if err := WriteProjectConfig(path, &projectConfig); err != nil {
-		logrus.Errorf("InitProject - Cannot create config file in %s", path)
+
+	parent, name := filepath.Split(folder)
+	if name == ProjectFolder {
+		projectConfig.Public.Name = parent
+	} else {
+		projectConfig.Public.Name = name
+	}
+
+	if err := WriteProjectConfig(folder, &projectConfig); err != nil {
+		logrus.Errorf("InitProject - Cannot create config file in %s", folder)
 		return err
 	}
+
+	config.Projects = append(config.Projects, ProjectRef{
+		UUID:   projectConfig.UUID,
+		Name:   projectConfig.Public.Name,
+		Folder: folder,
+	})
+
+	logrus.Infof("created project %s (id %s)", projectConfig.Public.Name, projectConfig.UUID)
 	return nil
 }
 
@@ -244,22 +262,20 @@ func ShredProject(project *Project) error {
 	}
 
 	// Remove a reference to the project from the global configuration
-	globalConfig := ReadConfig()
-	delete(globalConfig.Projects, filepath.Base(project.Path))
-	WriteConfig(globalConfig)
+	DeleteProjFromConfig(project.Config.UUID)
 
 	return nil
 }
 
-func NameProject(project *Project, name string) {
-	config := ReadConfig()
-
-	path, found := config.Projects[name]
-	if !found || path != project.Path {
-		config.Projects[name] = project.Path
-		WriteConfig(config)
-	}
-}
-
-
+//func NameProject(project *Project, name string) {
+//	config := ReadConfig()
+//
+//	path, found := config.Projects[name]
+//	if !found || path != project.Path {
+//		config.Projects[name] = project.Path
+//		WriteConfig(config)
+//	}
+//}
+//
+//
 

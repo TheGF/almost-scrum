@@ -52,7 +52,7 @@ function FTPExchange(props) {
                 </Tr>
                 <Tr>
                     <Td><label><T>timeout</T></label></Td>
-                    <Td><Input type="password" value={exchange.timeout} onChange={e => updateField(e, 'timeout')} /></Td>
+                    <Td><Input type="number" value={exchange.timeout} onChange={e => updateField(e, 'timeout')} /></Td>
                 </Tr>
             </Table>
 

@@ -2,6 +2,7 @@ package fed
 
 import (
 	"almost-scrum/core"
+	"almost-scrum/fed/transport"
 	"almost-scrum/fs"
 	"github.com/sirupsen/logrus"
 	"github.com/skip2/go-qrcode"
@@ -82,15 +83,51 @@ func TestSync(t *testing.T) {
 
 }
 
-func TestSharing(t *testing.T) {
+func TestInvite(t *testing.T) {
 	project := getProject(t)
 
 	c,_ := ReadConfig(project, false)
-	key, token,_ := Share(project, c)
+	invite,_ := CreateInvite(project, c)
 
-	logrus.Print(key, token)
+	logrus.Print(invite.Key, invite.Token)
 
-	png, err  := qrcode.Encode(key, qrcode.Medium, 256)
+	png, err  := qrcode.Encode(invite.Key, qrcode.Medium, 256)
 	assert.Nil(t, err)
 	ioutil.WriteFile("/tmp/qr.png", png, 0755)
+}
+
+
+func TestClaimInvite(t *testing.T) {
+	token := `1d1980595b6d4d19b41a5224b748665a0bf7fc7db511dcc2577bd1cf01ba66aa39c295ad6cb223bfd61be9c6c0de8d92d167
+              9acda08a4bdc18a3a0ae4189d0cfe283ba89255d7d53a6ffe5848ea59e4d8a38917989202757ce3dc52d22d0f38b93020443
+              4b2ecce698dcd6fcc88cb868fd4977e013139fe29b8621de71dcdcc6e6b102188ced8e8ea3fa073498941175183723562651
+              eecbe3278be18c00dc2aae59cef20c488d447c25d2868112a83fe1d10197c02876c307bc7666d705c117ca7818ca1bdc8d05
+              d93904e5a28146567dab1d7e4569ccac94594633b725400b19c409a4a1842629101470840600950d38d3a7f6953fb510eb33
+              06397eeedf3b2a6945b4a143410f9b81962978a4ad0a8e7259500b9e25855b3a0c3ccc60f10b`
+	key := "NfHK5a84jjJkwzDk"
+
+	invite := Invite{
+		Key: key,
+		Token: token,
+	}
+
+	ClaimInvite(invite, "/tmp")
+}
+
+func TestMergeConfig(t *testing.T) {
+	project := getProject(t)
+
+	mergeFedConfig(project, &Config{
+		Secret:        "",
+		ReconnectTime: 0,
+		PollTime:      0,
+		Span:          0,
+		LastExport:    time.Time{},
+		S3:            [] transport.S3Config{
+			{Name: "Amazon S3", Endpoint: "xx", Bucket: "xx"},
+			{Name: "B3", Endpoint: "xx", Bucket: "xx"},
+		},
+		WebDAV:        nil,
+		Ftp:           nil,
+	})
 }

@@ -64,7 +64,7 @@ function Library(props) {
     }
 
     function addPageAttribute(f) {
-        f.page = f.dir && f.name.endsWith('.pg')
+        f.page = f.name.endsWith('.pg')
         f.dir = f.dir && !f.page
         return f
     }
@@ -94,7 +94,7 @@ function Library(props) {
         {breadcrumbs}
     </Breadcrumb>
 
-    return <VStack w="100%" align="left" >
+    return <VStack id="test-pdf" w="100%" align="left" >
         <PageEditor page={page} setPage={setPage} />
         <Bar path={path} changePath={changePath} getNextVersion={getNextVersion}
             favorites={favorites} files={files} listFolder={listFolder} />

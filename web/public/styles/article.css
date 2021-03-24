@@ -1,0 +1,19 @@
+div.cover {
+    margin-top: 10%;
+}
+
+div.title {
+    font: 30pt Arial bold;
+    text-align: center;
+}
+
+div.sectionTitle {
+    font: 28px Arial bolder;
+    text-align: center;
+}
+
+section {
+    page-break-before: always;
+    string-set: header content();
+    page-break-after: left;
+}

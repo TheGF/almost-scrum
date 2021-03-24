@@ -21,6 +21,12 @@ type LdapConfig struct {
 	UserFilter   string
 }
 
+type ProjectRef struct {
+	Name   string `json:"name"`
+	UUID   string `json:"uuid"`
+	Folder string `json:"folder"`
+}
+
 //Config is the global configuration stored in the user's home directory.
 type Config struct {
 	Editor       string
@@ -28,7 +34,7 @@ type Config struct {
 	Hostname     string
 	User         string
 	Passwords    map[string]string
-	Projects     map[string]string
+	Projects     []ProjectRef
 	Secret       string
 	OwnerLock    bool
 	UseGitNative bool
@@ -71,7 +77,7 @@ func ReadConfig() *Config {
 			Host:         uuid2.New().String(),
 			Hostname:     "aloha",
 			Passwords:    map[string]string{},
-			Projects:     map[string]string{},
+			Projects:     []ProjectRef{},
 			Secret:       getSecret(),
 			UseGitNative: HasGitNative(),
 		})
@@ -95,4 +101,54 @@ func WriteConfig(config *Config) {
 		panic(err)
 	}
 	logrus.Debugf("config saved to %s", configPath)
+}
+
+func FindProjInConfigByName(config *Config, name string) *ProjectRef {
+	for _, ref := range config.Projects {
+		if ref.Name == name {
+			return &ref
+		}
+	}
+	return nil
+}
+
+func AddProjectRefToConfig(project *Project) bool {
+	config := ReadConfig()
+	for _, ref := range config.Projects {
+		if ref.UUID == project.Config.UUID {
+			return false
+		}
+	}
+	config.Projects = append(config.Projects, ProjectRef{
+		Name:   project.Config.Public.Name,
+		UUID:   project.Config.UUID,
+		Folder: project.Path,
+	})
+	WriteConfig(config)
+	return true
+}
+
+func FindProjInConfigByUUID(uuid string) *ProjectRef {
+	config := ReadConfig()
+	for _, ref := range config.Projects {
+		if ref.UUID == uuid {
+			return &ref
+		}
+	}
+	return nil
+}
+
+func DeleteProjFromConfig(uuid string) {
+	config := ReadConfig()
+	idx := -1
+	for i, r := range config.Projects {
+		if r.UUID == uuid {
+			idx = i
+			break
+		}
+	}
+	if idx != -1 {
+		config.Projects = append(config.Projects[0:idx], config.Projects[idx+1:]...)
+		WriteConfig(config)
+	}
 }

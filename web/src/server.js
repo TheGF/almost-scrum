@@ -173,7 +173,7 @@ class Server {
 
     static setUser(project, user, userInfo) {
         return axios.put(`/api/v1/projects/${project}/users/${user}`,
-            userInfo, getConfig())
+                userInfo, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -204,7 +204,7 @@ class Server {
 
     static renameBoard(project, oldName, newName) {
         return axios.put(`/api/v1/projects/${project}/boards/${newName}?rename=${oldName}`,
-            null, getConfig())
+                null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -245,7 +245,7 @@ class Server {
     }
 
     static setTaskLater(project, board, name, content) {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             const k = `setTask:${project}/${board}/${name}`
             pendingSet[k] = [Date.now() + setDelay, [resolve, reject], Server.setTask, project, board, name, content]
             if (pendingInterval == null) {
@@ -268,7 +268,7 @@ class Server {
             url += `&title=${encodeURIComponent(title)}`;
         }
         return axios.post(url,
-            null, getConfig())
+                null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -306,25 +306,26 @@ class Server {
             config.headers['Content-Type'] = 'multipart/form-data';
         }
 
-
         return axios.post(`/api/v1/projects/${project}/library${path}?token=${token}`,
-            formData, { config })
+                formData, { config })
             .then(r => r.data.filter(f => !f.name.startsWith('.')))
             .catch(errorHandler);
     }
 
     static uploadFileToLibraryLater(project, path, file, name) {
-        return new Promise(function (resolve, reject) {
-            const k = `uploadFile:${project}/${path}/${name}`
+        return new Promise(function(resolve, reject) {
+            const k = name ? `uploadFile:${project}/${path}/${name}` :
+                `uploadFile:${project}/${path}`
             pendingSet[k] = [Date.now() + setDelay, [resolve, reject], Server.uploadFileToLibrary, project,
-                path, file, name]
+                path, file, name
+            ]
             if (pendingInterval == null) {
                 pendingInterval = setInterval(setPendingTasks, setDelay)
             }
         })
     }
 
-    static deleteFromLibrary(project, path, recursive=false, archive=false) {
+    static deleteFromLibrary(project, path, recursive = false, archive = false) {
         path = encodeURIComponent(path)
         const target = archive ? 'archive' : 'library'
         let url = `/api/v1/projects/${project}/${target}${path}`
@@ -334,7 +335,7 @@ class Server {
             .catch(errorHandler);
     }
 
-    static downloadFromlibrary(project, path, archive=false) {
+    static downloadFromlibrary(project, path, archive = false) {
         path = encodeURIComponent(path)
         const target = archive ? 'archive' : 'library'
         return axios.get(`/api/v1/projects/${project}/${target}${path}`, getConfig())
@@ -342,7 +343,7 @@ class Server {
             .catch(errorHandler);
     }
 
-    static localOpenFromLibrary(project, path, archive=false) {
+    static localOpenFromLibrary(project, path, archive = false) {
         path = encodeURIComponent(path)
         const target = archive ? 'archive' : 'library'
         return axios.get(`/api/v1/projects/${project}/${target}${path}?local`, getConfig())
@@ -351,7 +352,7 @@ class Server {
     }
 
 
-    static openFromlibrary(project, path, archive=false) {
+    static openFromlibrary(project, path, archive = false) {
         path = encodeURIComponent(path)
         const target = archive ? 'archive' : 'library'
         const link = document.createElement("a");
@@ -362,7 +363,23 @@ class Server {
         document.body.removeChild(link);
     }
 
-    static listLibrary(project, path, archive=false) {
+    static postNewBook(project, path) {
+        const link = document.createElement("a");
+        link.href = `/api/v1/projects/${project}/library-book${path}?token=${localStorage.token}`;
+        link.target = '_';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    static postNewBook2(project, path, settings) {
+        return axios.post(`/api/v1/projects/${project}/library-book${path}`, settings, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+
+    static listLibrary(project, path, archive = false) {
         path = encodeURIComponent(path)
         const target = archive ? 'archive' : 'library'
         return axios.get(`/api/v1/projects/${project}/${target}${path}`, getConfig())
@@ -377,7 +394,7 @@ class Server {
             .catch(errorHandler);
     }
 
-    static createFolderInLibrary(project, path, archive=false) {
+    static createFolderInLibrary(project, path, archive = false) {
         path = encodeURIComponent(path)
         return axios.put(`/api/v1/projects/${project}/${target}${path}`, null, getConfig())
             .then(r => r.data)
@@ -388,7 +405,7 @@ class Server {
         oldpath = encodeURIComponent(oldpath)
         path = encodeURIComponent(path)
         return axios.post(`/api/v1/projects/${project}/library${path}?action=move&origin=${oldpath}`,
-            null, getConfig())
+                null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -396,7 +413,7 @@ class Server {
     static upgradeVersion(project, path) {
         path = encodeURIComponent(path)
         return axios.post(`/api/v1/projects/${project}/library${path}?action=upgrade`,
-            null, getConfig())
+                null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -404,14 +421,14 @@ class Server {
     static setVisibility(project, path, public_) {
         path = encodeURIComponent(path)
         return axios.post(`/api/v1/projects/${project}/library${path}?action=visibility&public=${public_}`,
-            null, getConfig())
+                null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
 
     static getLibraryStat(project, files) {
         return axios.post(`/api/v1/projects/${project}/library-stat`,
-            files, getConfig())
+                files, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -451,6 +468,13 @@ class Server {
             .catch(errorHandler);
     }
 
+    static postFedClaim(invite) {
+        let url = `/api/v1/claim`
+        return axios.post(url, invite, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
 
     static getFedStatus(project) {
         let url = `/api/v1/projects/${project}/fed/status`
@@ -474,7 +498,7 @@ class Server {
             .catch(errorHandler);
     }
 
-    static postFedExport(project, since=null) {
+    static postFedExport(project, since = null) {
         let url = `/api/v1/projects/${project}/fed/export`
         if (since) url += `?${since}`
         return axios.post(url, null, getConfig())

@@ -159,34 +159,6 @@ func runServer(router *gin.Engine, addr string) {
 	logrus.Println("Shutting down server...")
 }
 
-//StartWeb starts the embedded web UI. Only for local usage
-func StartWeb(projectPath string, port string, logLevel string, autoExit bool, args []string) {
-	if strings.ToUpper(logLevel) != "DEBUG" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-	r := gin.Default()
-
-	if _, err := openProject("~", projectPath); err != nil {
-		color.Red("cannot open a project in %s: %v", projectPath, err)
-		os.Exit(1)
-	}
-
-	loadStaticContent(r)
-	setHello(r, false, autoExit)
-	setBye(r)
-	v1 := r.Group("/api/v1")
-
-	projectRoute(v1)
-	tasksRoute(v1)
-	libraryRoute(v1)
-	userRoute(v1)
-	indexRoute(v1)
-	gitRoute(v1)
-	fedRoute(v1)
-
-	open.Start(fmt.Sprintf("http://127.0.0.1:%s", port))
-	runServer(r, fmt.Sprintf(":%s", port))
-}
 
 //StartServer starts the embedded server portal.
 func StartServer(port string, logLevel string, autoExit bool, args []string) {

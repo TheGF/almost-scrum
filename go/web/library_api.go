@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -21,6 +22,7 @@ func libraryRoute(group *gin.RouterGroup) {
 	group.POST("/projects/:project/library/*path", uploadFileAPI)
 	group.DELETE("/projects/:project/library/*path", deleteFileAPI)
 	group.POST("/projects/:project/library-stat", getLibraryItemsAPI)
+	group.POST("/projects/:project/library-book/*path", postLibraryBookAPI)
 }
 
 func localOpen(c *gin.Context, path string) {
@@ -69,6 +71,10 @@ func getLibraryAPI(c *gin.Context) {
 	}
 
 	isDir, err := library.IsDir(project, path)
+	if os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, "")
+		return
+	}
 	if err != nil {
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot read path %s in library", path, err)
@@ -76,10 +82,13 @@ func getLibraryAPI(c *gin.Context) {
 	}
 
 	if isDir {
-		if items, err := library.List(project, path); err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-		} else {
+		items, err := library.List(project, path)
+		if err == nil {
 			c.JSON(http.StatusOK, items)
+		} else if os.IsNotExist(err) {
+			c.JSON(http.StatusNotFound, "")
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -231,4 +240,28 @@ func getLibraryItemsAPI(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, items)
+}
+
+func postLibraryBookAPI(c *gin.Context) {
+	var project *core.Project
+	var settings library.BookSettings
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	path := c.Param("path")
+	if err := c.BindJSON(&settings); core.IsErr(err, "Invalid JSON") {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	book, err := library.CreateBook(project, path, settings)
+	if err != nil {
+		logrus.Warnf("Cannot create book for path %s: %v", path, err)
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "Cannot delete file")
+		return
+	}
+	c.Writer.Header().Set("Content-Type", gin.MIMEHTML)
+	c.String(http.StatusOK, book)
 }

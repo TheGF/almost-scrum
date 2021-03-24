@@ -1,19 +1,22 @@
 import {
-    Accordion, Button, ButtonGroup, Input, Spacer, Table, Td, Tr, VStack
+    Accordion, Button, ButtonGroup, Input, Spacer, Table, Td, Tr, useToast, VStack
 } from '@chakra-ui/react';
 import { React, useContext, useEffect, useState } from "react";
 import T from '../core/T';
 import Server from '../server';
 import UserContext from '../UserContext';
-import S3Exchange from './exchanges/S3Exchange';
 import FTPExchange from './exchanges/FTPExchange';
+import S3Exchange from './exchanges/S3Exchange';
 import WebDAVExchange from './exchanges/WebDAVExchange';
 
 
 function Exchanges(props) {
-    const { project, onClose } = useContext(UserContext)
+    const { project } = useContext(UserContext)
+    const { onClose } = props
     const [config, setConfig] = useState(null)
     const [status, setStatus] = useState(null)
+    const toast = useToast()
+
 
     function getConfig() {
         Server.getFedConfig(project)
@@ -25,6 +28,13 @@ function Exchanges(props) {
 
     function saveConfig() {
         Server.postFedConfig(project, config)
+        .then(_=> toast({
+            title: `Config Saved`,
+            description: 'The federation configuration has been saved',
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+        }))
     }
 
     function updateExchange(l, idx, value) {

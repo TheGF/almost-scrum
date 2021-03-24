@@ -3,10 +3,12 @@ module almost-scrum
 go 1.14
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/alexmullins/zip v0.0.0-20180717182244-4affb64b04d0
 	github.com/appleboy/gin-jwt/v2 v2.6.4
 	github.com/bbalet/stopwords v1.0.0
 	github.com/beevik/ntp v0.3.0
+	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1
 	github.com/cratonica/trayhost v0.0.0-20150112162955-98495206fd96
 	github.com/ecies/go v1.0.1
 	github.com/fatih/color v1.10.0
@@ -18,9 +20,11 @@ require (
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
+	github.com/gomarkdown/markdown v0.0.0-20210208175418-bda154fe17d8
 	github.com/google/uuid v1.2.0
 	github.com/hashicorp/go-version v1.2.1
 	github.com/jlaffaye/ftp v0.0.0-20210302195756-c3c8c7ac6590
+	github.com/joaojeronimo/go-crc16 v0.0.0-20140729130949-59bd0194935e
 	github.com/json-iterator/go v1.1.10
 	github.com/jtblin/go-ldap-client v0.0.0-20170223121919-b73f66626b33
 	github.com/lunixbochs/vtclean v1.0.0 // indirect

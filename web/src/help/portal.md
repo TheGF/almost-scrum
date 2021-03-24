@@ -14,3 +14,5 @@ The top in the portal shows:
 The center of the portal shows in blue squares all the projects available in the local repository. By clicking on a square, the user opens the related project.
 
 The last two squares __Add Project__ and __Access__ allow to add a new project  and manage the authentication.
+
+## Add Project

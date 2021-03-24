@@ -1,8 +1,15 @@
 import React from 'react';
 import {
-    FaFile, FaFileArchive, FaFileAudio, FaFileExcel, FaFileImage,
+    FaFile,
+    FaFileArchive,
+    FaFileAudio,
+    FaFileExcel,
+    FaFileImage,
     FaFilePdf,
-    FaFilePowerpoint, FaFileVideo, FaFileWord, FaFolder
+    FaFilePowerpoint,
+    FaFileVideo,
+    FaFileWord,
+    FaFolder
 } from 'react-icons/fa';
 
 const oneDay = 24 * 3600 * 1000;
@@ -56,18 +63,18 @@ class Utils {
     }
 
     static getFriendlySize(size) {
-        if (size > 1024*1024*1024) {
-            return `${Math.floor(size/1024*1024*1024)}G`
+        if (size > 1024 * 1024 * 1024) {
+            return `${Math.round(size/1024/1024/1024)}G`
         }
-        if (size > 1024*1024) {
-            return `${Math.floor(size/1024*1024)}M`
+        if (size > 1024 * 1024) {
+            return `${Math.round(size/1024/1024)}M`
         }
         if (size > 1024) {
-            return `${Math.floor(size/1024)}K`
+            return `${Math.round(size/1024)}K`
         }
         return size
     }
-    
+
     static lazyCall(key, action, callback = null) {
         pendingCalls[key] = {
             action: action,
@@ -86,10 +93,10 @@ class Utils {
 
 
     static fileIcon(dir, mime) {
-        if (dir) return <FaFolder />;
-        if (!mime) return <FaFile />;
+        if (dir) return <FaFolder / > ;
+        if (!mime) return <FaFile / > ;
         const Icon = mime2icons.filter(m => m && mime.includes(m[0]))[0][1]
-        return <Icon />;
+        return <Icon / > ;
     }
 
     static isLocalhost() {

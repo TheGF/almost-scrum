@@ -3,6 +3,7 @@ package core
 import "strings"
 
 type ProjectConfigPublic struct {
+	Name            string              `json:"name" yaml:"name"`
 	CurrentBoard    string              `json:"currentStore" yaml:"currentStore"`
 	BoardTypes      map[string][]string `json:"boardTypes" yaml:"boardTypes"`
 	IncludeLibInGit bool                `json:"includeLibInGit" yaml:"includeLibInGit"`
@@ -10,13 +11,13 @@ type ProjectConfigPublic struct {
 }
 
 type ProjectConfig struct {
-	CipherKey string                 `yaml:"cipherKey"`
-	UUID      string                 `yaml:"uuid"`
-	Public    ProjectConfigPublic    `yaml:"public"`
-	Settings  map[string]interface{} `yaml:parts`
+	CipherKey string                 `json:"cipherKey" yaml:"cipherKey"`
+	UUID      string                 `json:"uuid" yaml:"uuid"`
+	Public    ProjectConfigPublic    `json:"public" yaml:"public"`
+	Settings  map[string]interface{} `json:"settings" yaml:"settings""`
 }
 
-func FilterConfigParts(config *ProjectConfig, prefix string) map[string]interface{}{
+func FilterConfigParts(config *ProjectConfig, prefix string) map[string]interface{} {
 	var filtered map[string]interface{}
 	for key, value := range config.Settings {
 		if strings.HasPrefix(key, prefix) {

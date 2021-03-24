@@ -4,6 +4,7 @@ import {
 } from '@chakra-ui/react';
 import { React, useContext, useState } from 'react';
 import { AiOutlineReload } from 'react-icons/ai';
+import { GiBlackBook } from 'react-icons/gi';
 import { GoHome } from 'react-icons/go';
 import { MdCreateNewFolder } from 'react-icons/md';
 import { VscNewFile } from 'react-icons/vsc';
@@ -11,6 +12,8 @@ import T from '../core/T';
 import Server from '../server';
 import UserContext from '../UserContext';
 import ConfirmUpload from './ConfirmUpload';
+import Book from './Book';
+//import html2pdf from 'html2pdf.js';
 
 function Bar(props) {
     const { project } = useContext(UserContext);
@@ -28,14 +31,74 @@ function Bar(props) {
 
     function newPage() {
         const cnt = files.filter(f => f.name.startsWith('page-')).length
-        const folder = `${path}/page-${cnt}.pg`
-        Server.createFolderInLibrary(project, folder)
+        const name = `page-${cnt}.pg`
+        const file = new Blob(['Change me'], { type: 'text/markdown' })
+        Server.uploadFileToLibrary(project, path, file, name)
             .then(listFolder)
-            .then(_ => {
-                const file = new Blob(['Change me'], { type: 'text/markdown' })
-                Server.uploadFileToLibrary(project, folder, file, 'index.md')
+
+    }
+
+    function newBook() {
+        // doc.fromHTML(document.getElementById("test-pdf"), // page element which you want to print as PDF
+        //     15,
+        //     15,
+        //     {
+        //         'width': 170  //set width
+        //     },
+        //     function (a) {
+        //         doc.save("HTML2PDF.pdf"); // save file name as HTML2PDF.pdf
+        //     })
+
+        Server.postNewBook2(project, path)
+            .then(html => {
+                const opt = {
+                    margin: [10, 10, 10, 10],
+                    filename: `document.pdf`,
+                    image: {
+                        type: 'jpeg',
+                        quality: 0.98
+                    },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: false
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'letter',
+                        orientation: 'portrait'
+                    }
+                };
+                html2pdf().from(html).set(opt).save();
+
+                // const pdf = new jsPDF('p', 'pt', 'letter');;  //create jsPDF object
+                // const margin = [40, 80, 40, 80]
+
+                // const body = html.match(/<body[^>]*>([\w|\W]*)<\/body>/im)[0];
+
+                // pdf.html(html, // HTML string or DOM elem ref.
+                //     {
+                //         margin: margin,
+                //         callback: _ => pdf.save('Test.pdf')
+                //     }
+                // );
+
+                //body = document.getElementById('document');
+                // const body = html.match(/<body[^>]*>([\w|\W]*)<\/body>/im)[0];
+
+                // const anchor = document.createElement("div");
+                // anchor.innerHTML = body
+
+                // var opt = {
+                //     margin:       [10, 0, 10, 0],
+                //     filename:     `document.pdf`,
+                //     image:        { type: 'jpeg', quality: 0.98 },
+                //     html2canvas:  { scale: 2, useCORS: false },
+                //     jsPDF:        { unit: 'mm', format: 'A4', orientation: 'portrait' }
+                // };
+                // html2pdf().from(anchor).set(opt).save();
             })
     }
+
 
     function uploadFileToLibrary(file, name) {
         if (file) {
@@ -83,7 +146,7 @@ function Bar(props) {
             return [...acc, p]
         }, [])
         breadcrumbs = breadcrumbs.map((p, index) => <BreadcrumbItem>
-            <BreadcrumbLink href="#" onClick={_ => changePath(p)}>
+            <BreadcrumbLink key={index} href="#" onClick={_ => changePath(p)}>
                 {folders[1 + index]}
             </BreadcrumbLink>
         </BreadcrumbItem>)
@@ -118,12 +181,13 @@ function Bar(props) {
         <Button onClick={_ => hiddenInput.click()} isLoading={uploading} >
             <T>Upload</T>
         </Button>
-        <Button onClick={newFolder} title="Create New Folder">
+        <Button onClick={newBook} title="Create New Folder">
             <MdCreateNewFolder />
         </Button>
         <Button onClick={newPage} title="Create New Page">
             <VscNewFile />
         </Button>
+        <Book path={path} listFolder={listFolder}/>
         <IconButton onClick={listFolder} title="Reload">
             <AiOutlineReload onClick={listFolder} />
         </IconButton>

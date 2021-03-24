@@ -14,10 +14,12 @@ func fedRoute(group *gin.RouterGroup) {
 	group.GET("/projects/:project/fed/config", getConfigAPI)
 	group.GET("/projects/:project/fed/status", getStatusAPI)
 	group.GET("/projects/:project/fed/diffs", getDiffsAPI)
+	group.POST("/projects/:project/fed/config", setConfigAPI)
 	group.POST("/projects/:project/fed/import", postImportAPI)
 	group.POST("/projects/:project/fed/export", postExportAPI)
 	group.POST("/projects/:project/fed/sync", postSyncAPI)
-	group.POST("/projects/:project/fed/share", postShareAPI)
+	group.POST("/projects/:project/fed/share", postCreateInviteAPI)
+	group.POST("/claim", postClaimInviteAPI)
 }
 
 func getConfigAPI(c *gin.Context) {
@@ -32,9 +34,30 @@ func getConfigAPI(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Cannot read federation config: %v", err)
 		return
 	}
-	logrus.Debugf("Fed config in project: %v", config)
 	c.JSON(http.StatusOK, config)
 }
+
+func setConfigAPI(c *gin.Context) {
+	var project *core.Project
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	var config fed.Config
+	if err := c.BindJSON(&config); core.IsErr(err, "Invalid JSON") {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	err := fed.WriteConfig(project, &config)
+	if err != nil {
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "Cannot read federation config: %v", err)
+		return
+	}
+	c.JSON(http.StatusOK, "")
+}
+
 
 func getStatusAPI(c *gin.Context) {
 	var project *core.Project
@@ -150,12 +173,8 @@ type ShareRequest struct {
 	Exchanges         []string `json:"exchanges"`
 	RemoveCredentials bool     `json:"removeCredentials"`
 }
-type ShareResponse struct {
-	Key   string `json:"key"`
-	Token string `json:"token"`
-}
 
-func postShareAPI(c *gin.Context) {
+func postCreateInviteAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
@@ -167,13 +186,25 @@ func postShareAPI(c *gin.Context) {
 		return
 	}
 
-	key, token, err := fed.ShareWith(project, shareRequest.Exchanges, shareRequest.RemoveCredentials)
+	invite, err := fed.CreateInviteForExchanges(project, shareRequest.Exchanges, shareRequest.RemoveCredentials)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	c.JSON(http.StatusOK, ShareResponse{
-		Key:   key,
-		Token: token,
-	})
+	c.JSON(http.StatusOK, invite)
+}
+
+func postClaimInviteAPI(c *gin.Context) {
+	var invite fed.Invite
+	if err := c.BindJSON(&invite); core.IsErr(err, "Invalid JSON") {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	err := fed.ClaimInvite(invite, repository)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, "")
 }

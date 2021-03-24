@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
@@ -34,7 +35,13 @@ func getItem(path string, fileInfo os.FileInfo) Item {
 	var size int64
 	if fileInfo.IsDir() {
 		files, _ := ioutil.ReadDir(path)
-		size = int64(len(files))
+		cnt := 0
+		for _, file := range files {
+			if !strings.HasPrefix(".", file.Name()) {
+				cnt++
+			}
+		}
+		size = int64(cnt)
 	} else {
 		size = fileInfo.Size()
 	}

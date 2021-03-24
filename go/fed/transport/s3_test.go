@@ -10,22 +10,14 @@ import (
 )
 
 var s3Config = S3Config{
-	Name:      "nextcloud",
+	Name:      "Amazon S3",
 	Endpoint:  "s3.eu-central-1.amazonaws.com",
-	AccessKey: "AKIA275FPHM3BLLN2NX5",
+	AccessKey: "",
 	Secret:    "",
 	Bucket:    "almost-scrum",
 	UseSSL:    false,
 	Location:  "eu-central-1",
 }
-
-//var webDAVConfig = WebDAVConfig{
-//	Name:     "nextcloud",
-//	URL:      "https://shared03.opsone-cloud.ch/remote.php/dav/files/cestino83@protonmail.com",
-//	Username: "cestino83@protonmail.com",
-//	Password: "83cestino",
-//	Timeout:  60,
-//}
 
 func TestS3Connect(t *testing.T) {
 
@@ -50,10 +42,10 @@ func TestS3Push(t *testing.T) {
 	err = ioutil.WriteFile(filepath.Join(dir, "test1"), []byte("test content"), 0755)
 	assert.Nil(t, err)
 
-	err = exchange.Push("test1")
+	_, err = exchange.Push("test1")
 	assert.Nil(t, err)
 
-	os.RemoveAll(dir)
+	_ = os.RemoveAll(dir)
 }
 
 func TestS3Pull(t *testing.T) {
@@ -63,11 +55,11 @@ func TestS3Pull(t *testing.T) {
 	_, err := exchange.Connect("test", dir)
 	assert.Nil(t, err)
 
-	err = exchange.Pull("test1")
+	_, err = exchange.Pull("test1")
 	assert.Nil(t, err)
 
 	_, err = os.Stat(filepath.Join(dir, "test1"))
 	assert.Nil(t, err)
 
-	os.RemoveAll(dir)
+	_ = os.RemoveAll(dir)
 }

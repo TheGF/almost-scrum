@@ -45,3 +45,10 @@ func TestNextVersion(t *testing.T) {
 	assert.Equal(t, res, "~0.2.1")
 
 }
+
+func TestExport(t *testing.T) {
+	html, _ := ExportMarkdownToHTML("../../web/src/help/portal.md", "/tmp/export.html",
+		"../../web/public")
+
+	print(html)
+}

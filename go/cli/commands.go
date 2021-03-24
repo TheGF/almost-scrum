@@ -28,9 +28,11 @@ func usage() {
 		"\tboard             List the boards and set the default\n" +
 		"\tboard new <name>  Create a board with the provided name\n" +
 		"\tusers add <id>    Add a user to current project\n" +
-		"\tusers del <id>     Remove a user to current project\n" +
+		"\tusers del <id>    Remove a user to current project\n" +
+		"\tfed sync		     Sync the project with the Federation\n" +
+		"\tfed claim		 Claim an invite to the Federation\n" +
+		"\tfed share <file>  Make a file public to the Federation\n" +
 		"\tweb               Start the Web UI\n\n" +
-		"\tserver <repo>     Start the Web UI as portal for projects in repo folder\n\n" +
 		"\treindex [full]    Rebuild the search index \n\n" +
 		"Options\n"+
 		"\t-p <project-path> path where the current project is\n"+
@@ -52,7 +54,7 @@ var shortcuts = map[byte]string{
 	'u': "users",
 	'a': "a",
 	'r': "reindex",
-	's': "server",
+	'w': "web",
 }
 
 
@@ -185,8 +187,6 @@ func ProcessArgs() {
 	case "reindex":
 		processReIndex(projectPath, commands[1:])
 	case "web":
-		web.StartWeb(projectPath, port, logLevel, autoExit, commands[1:])
-	case "server":
 		web.StartServer(port, logLevel, autoExit, commands[1:])
 
 	default:
