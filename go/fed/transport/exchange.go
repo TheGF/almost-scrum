@@ -18,6 +18,9 @@ type Exchange interface {
 	/** Pull the requested location from the transport to the storage folder*/
 	Pull(loc string) (int64, error)
 
+	/** Delete all files matching pattern and older than specified time */
+	Delete(pattern string, before time.Time) error
+
 	Name() string
 	String() string
 }

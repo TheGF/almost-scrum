@@ -125,7 +125,25 @@ func onReady() {
 	}
 	systray.SetTitle("Almost Scrum")
 	systray.SetTooltip("Pretty awesome")
-	_ = systray.AddMenuItem("Quit", "Quit the whole app")
+	openMenu := systray.AddMenuItem("New Window", "Open a new browser page")
+	systray.AddSeparator()
+	quitMenu := systray.AddMenuItem("Quit", "Quit the whole app")
+
+
+	go func() {
+		for {
+			select {
+				case <- quitMenu.ClickedCh: {
+					systray.Quit()
+					onExit()
+				}
+				case <- openMenu.ClickedCh: {
+					open.Start(ashUrl)
+				}
+			}
+		}
+
+	}()
 
 	// Sets the icon of a menu item. Only available on Mac and Windows.
 //	mQuit.SetIcon(icon.Data)
@@ -159,6 +177,7 @@ func runServer(router *gin.Engine, addr string) {
 	logrus.Println("Shutting down server...")
 }
 
+var ashUrl = ""
 
 //StartServer starts the embedded server portal.
 func StartServer(port string, logLevel string, autoExit bool, args []string) {
@@ -193,6 +212,7 @@ func StartServer(port string, logLevel string, autoExit bool, args []string) {
 	gitRoute(v1)
 	fedRoute(v1)
 
-	open.Start(fmt.Sprintf("http://127.0.0.1:%s", port))
+	ashUrl = fmt.Sprintf("http://127.0.0.1:%s", port)
+	open.Start(ashUrl)
 	runServer(r, fmt.Sprintf(":%s", port))
 }

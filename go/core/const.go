@@ -2,7 +2,6 @@ package core
 
 import "errors"
 
-
 // GitFolder is the default folder where git info is stored
 const AshVersion = "0.5.0"
 
@@ -28,10 +27,8 @@ const ProjectFedFilesFolder = "fed/files"
 // ProjectUsersFolder the folder containing users
 const ProjectArchiveFolder = "archive"
 
-
 // ProjectUsersFolder the folder containing users
 const ProjectModelsFolder = "models"
-
 
 // ProjectUsersFolder the folder containing users
 const ProjectLibraryInlineImagesFolder = "library/.inline-images"
@@ -47,8 +44,9 @@ const TypeProperty = "Type"
 
 var (
 	// ProjectFolders is the required folders in the project
-	ProjectFolders = []string{"boards/backlog", "boards/sandbox", "boards/icebox",
-		ProjectLibraryFolder, ProjectUsersFolder, ProjectLibraryInlineImagesFolder, ProjectModelsFolder,
+	ProjectFolders = []string{ProjectBoardsFolder,
+		ProjectLibraryFolder, ProjectUsersFolder,
+		ProjectLibraryInlineImagesFolder, ProjectModelsFolder,
 		ProjectFedFolder, ProjectFedFilesFolder}
 
 	ProjectTemplatesPath = "assets/templates/"

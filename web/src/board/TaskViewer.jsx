@@ -18,7 +18,9 @@ function TaskViewer(props) {
     <HStack>
       <Box w="90%" h={height}>
         <div className="mde-preview">
-          <div className="mde-preview-content task-viewer" style={{ height: height, overflow: 'auto' }}>
+          <div className="mde-preview-content task-viewer" style={{
+            height: height-41, overflow: 'auto'
+          }}>
             <MarkdownView highlights={searchKeys}
               readOnly={readOnly}
               value={task.description}

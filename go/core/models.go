@@ -77,6 +77,7 @@ func ReadModels(path string) ([]Model, error) {
 				}
 			}
 		}
+
 	}
 	models := make([]Model, 0, len(modelsMap))
 	for _, model := range modelsMap {

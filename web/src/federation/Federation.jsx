@@ -62,20 +62,29 @@ function Federation(props) {
     function startMonitoring() {
         Server.getFedStatus(project)
             .then(status => {
-                let strenght = 0
-                let exchanges = 0
-                for (const [_, connected] of Object.entries(status.exchanges)) {
-                    if (connected) strenght++
-                    exchanges++
+                let connectedExchanges = []
+                let exchangesNum = 0
+                for (const [name, connected] of Object.entries(status.exchanges)) {
+                    if (connected) connectedExchanges.push(name)
+                    exchangesNum++
                 }
-                setStrength(strenght)
+                setStrength(connectedExchanges.length)
 
-                if (exchanges) {
-                    if (strenght) {
-                        setTimeout(() => {}, 600 * 1000)
-                    } else {
+                if (exchangesNum) {
+                    if (connectedExchanges.length) {
+                        Server.postFedExport(project)
+                        getDiffs()
+                        monitorInterval = setInterval(getDiffs, 2 * 60000)
+                        toast({
+                            title: `Connected`,
+                            description: 'Successfully connected to '+connectedExchanges,
+                            status: "warning",
+                            duration: 9000,
+                            isClosable: true,
+                        })
+                        } else {
                         if (monitorInterval) clearInterval(monitorInterval);
-                        monitorInterval = setInterval(getDiffs, 10 * 60000)
+                        setTimeout(startMonitoring, 2 * 60000)
                     }
                 } else {
                     toast({

@@ -23,21 +23,22 @@ function MarkdownEditor(props) {
         setValue(value)
         props.onChange(value);
     }
-    
+
+    const gap = disablePreview ? 120 : 20
 
     return <ReactMde
         key={height}
         value={value}
         onChange={onChange}
         disablePreview={disablePreview}
-        minEditorHeight={height - 120}
-        maxEditorHeight={height - 120}
-        minPreviewHeight={height}
+        minEditorHeight={height - gap}
+        maxEditorHeight={height - gap}
+        minPreviewHeight={height - 2*gap}
         selectedTab={selectedTab}
         onTabChange={setSelectedTab}
         generateMarkdownPreview={(markdown) =>
             Promise.resolve(<div onClick={_=>setSelectedTab("write")}>
-                <MarkdownView value={markdown}
+                <MarkdownView value={markdown} height={height - gap}
                 onChange={onChange} />
                 </div>)
         }

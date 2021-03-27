@@ -109,6 +109,14 @@ class Utils {
             )
     }
 
+    static autoResize(component, diff, setHeight) {
+        if (!component) {
+            return
+        }
+
+        const h = component.clientHeight - diff
+        setHeight(h)
+    }
 }
 
 setInterval(Utils.sendPendingCalls, 30000);

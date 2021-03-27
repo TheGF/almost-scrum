@@ -99,9 +99,10 @@ func ExportMarkdownToHTML(file string, imageFolder string) (string, error) {
 }
 
 type BookSettings struct {
-	Title   string   `json:"title"`
-	Authors string   `json:"authors"`
-	Styles  []string `json:"styles"`
+	Title    string   `json:"title"`
+	Subtitle string   `json:"subtitle"`
+	Authors  string   `json:"authors"`
+	Styles   []string `json:"styles"`
 }
 
 //var whitespaceRe = regexp.MustCompile(`\s+`)
@@ -118,6 +119,7 @@ func addStyle(style string, output *bytes.Buffer) {
 }
 
 var sectionTitleRe = regexp.MustCompile(`\d*\.?\s*(.*)\.(pg)|(md)$`)
+
 func CreateBook(project *core.Project, loc string, settings BookSettings) (string, error) {
 	var output bytes.Buffer
 	folder := filepath.Join(project.Path, core.ProjectLibraryFolder, loc)
@@ -128,6 +130,7 @@ func CreateBook(project *core.Project, loc string, settings BookSettings) (strin
 	}
 
 	title := settings.Title
+	subtitle := settings.Subtitle
 	output.WriteString(fmt.Sprintf("<html><title>%s</title><head><style type=\"text/css\">", title))
 
 	addStyle("common", &output)
@@ -137,7 +140,11 @@ func CreateBook(project *core.Project, loc string, settings BookSettings) (strin
 
 	output.WriteString(`</style></head><body>`)
 
-	output.WriteString(fmt.Sprintf(`<div class="cover"><div class="title">%s</div></div>`, title))
+	output.WriteString(fmt.Sprintf(`<section class="cover"><h1>%s</h1>`, title))
+	if subtitle != "" {
+		output.WriteString(fmt.Sprintf(`<h2>%s</h2>`, subtitle))
+	}
+	output.WriteString(`</section>`)
 
 	imageFolder := filepath.Join(project.Path, core.ProjectLibraryFolder, "")
 	for idx, file := range files {

@@ -122,7 +122,7 @@ func (exchange *S3Exchange) List(since time.Time) ([]string, error) {
 	for entry := range entries {
 		name := entry.Key
 		if !strings.HasSuffix(name, "/") && entry.Size > 0 && entry.LastModified.After(since) {
-			names = append(names, entry.Key[cut:])
+			names = append(names, name[cut:])
 		}
 	}
 
@@ -183,6 +183,38 @@ func (exchange *S3Exchange) Config(withPrivateKeys bool) interface{} {
 	return c
 }
 
+func (exchange *S3Exchange) Delete(pattern string, before time.Time) error {
+	if exchange.conn == nil {
+		logrus.Warn("trying to list without FTP connection. Call Connect first")
+		return os.ErrClosed
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	entries := exchange.conn.ListObjects(ctx, exchange.config.Bucket, minio.ListObjectsOptions{
+		Prefix:    exchange.remote,
+		Recursive: true,
+	})
+
+	var names []string
+	for entry := range entries {
+		name := entry.Key
+		matched, _ := path.Match(pattern, name)
+
+		if matched && entry.LastModified.Before(before) {
+			if err := exchange.conn.RemoveObject(ctx, exchange.config.Bucket, name,
+				minio.RemoveObjectOptions{}); err != nil {
+				logrus.Errorf("cannot remove %s from %s: %v", name, exchange, err)
+			} else {
+				logrus.Infof("removed %s from %s", name, exchange)
+			}
+		}
+	}
+
+	logrus.Infof("list from %s: %v", exchange, names)
+	return nil
+}
 
 func (exchange *S3Exchange) Name() string {
 	return exchange.config.Name

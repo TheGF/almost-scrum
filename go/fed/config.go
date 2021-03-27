@@ -16,7 +16,8 @@ type Config struct {
 	ReconnectTime time.Duration            `json:"reconnectTime" yaml:"reconnectTime"`
 	PollTime      time.Duration            `json:"pollTime" yaml:"pollTime"`
 	Span          int                      `json:"span" yaml:"span"`
-	LastExport    time.Time                `json:"last_export" yaml:"lastExport"`
+	LastExport    time.Time                `json:"lastExport" yaml:"lastExport"`
+	LastSync      time.Time                `json:"lastSync" yaml:"lastSync"`
 	S3            []transport.S3Config     `json:"s3" yaml:"s3"`
 	WebDAV        []transport.WebDAVConfig `json:"webDAV" yaml:"webdav"`
 	Ftp           []transport.FTPConfig    `json:"ftp" yaml:"ftp"`
@@ -68,4 +69,3 @@ func WriteConfig(project *core.Project, config *Config) error {
 	path := filepath.Join(project.Path, core.ProjectFedFolder, configFile)
 	return core.WriteYaml(path, config)
 }
-

@@ -204,6 +204,55 @@ func (exchange *FTPExchange) Pull(file string)  (int64, error) {
 	return sz, nil
 }
 
+
+func (exchange *FTPExchange) delete(folder string, pattern string, before time.Time) (int, error) {
+	entries, err := exchange.conn.List(folder)
+	if err != nil {
+		logrus.Warnf("cannot list FTP transport %s: %v",
+			exchange.config.URL, err)
+	}
+
+	filesCount := 0
+	for _, entry := range entries {
+		p := path.Join(folder, entry.Name)
+		switch entry.Type {
+		case ftp.EntryTypeFile:
+			match, _ := path.Match(pattern, entry.Name)
+			if match && entry.Time.Before(before) {
+				if err := exchange.conn.Delete(p); err != nil  {
+					logrus.Errorf("cannot remove %s from %s: %v", entry.Name, exchange, err)
+				} else {
+					logrus.Infof("removed %s from %s", entry.Name, exchange)
+				}
+			} else {
+				filesCount++
+			}
+		case ftp.EntryTypeFolder:
+			count, err := exchange.delete(p, pattern, before)
+			if err != nil {
+				return 0, err
+			}
+			if count == 0 {
+				exchange.conn.Delete(p)
+			}
+		}
+	}
+
+	return filesCount, nil
+}
+
+
+func (exchange *FTPExchange) Delete(pattern string, before time.Time) error {
+	if exchange.conn == nil {
+		logrus.Warn("trying to list without FTP connection. Call Connect first")
+		return os.ErrClosed
+	}
+
+	_, err := exchange.delete("", pattern, before)
+	return err
+}
+
+
 func (exchange *FTPExchange) Name() string {
 	return exchange.config.Name
 }

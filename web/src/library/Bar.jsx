@@ -181,7 +181,7 @@ function Bar(props) {
         <Button onClick={_ => hiddenInput.click()} isLoading={uploading} >
             <T>Upload</T>
         </Button>
-        <Button onClick={newBook} title="Create New Folder">
+        <Button onClick={newFolder} title="Create New Folder">
             <MdCreateNewFolder />
         </Button>
         <Button onClick={newPage} title="Create New Page">

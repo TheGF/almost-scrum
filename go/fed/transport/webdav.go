@@ -47,7 +47,6 @@ func RemoveWebDAVSecret(configs ...WebDAVConfig) {
 	}
 }
 
-
 func (exchange *WebDAVExchange) ID() string {
 	return fmt.Sprintf("webDAV-%s", exchange.config.Name)
 }
@@ -189,6 +188,7 @@ func (exchange *WebDAVExchange) Pull(loc string) (int64, error) {
 	logrus.Infof("loc %s downloaded from %s to %s", loc, exchange, local)
 	return sz, nil
 }
+
 func (exchange *WebDAVExchange) Config(withPrivateKeys bool) interface{} {
 	c := *exchange.config
 	if !withPrivateKeys {
@@ -197,11 +197,60 @@ func (exchange *WebDAVExchange) Config(withPrivateKeys bool) interface{} {
 	return c
 }
 
+func (exchange *WebDAVExchange) delete(folder string, pattern string, before time.Time) (int, error) {
+	files, err := exchange.conn.ReadDir(path.Join(exchange.remote, folder))
+	if err != nil {
+		logrus.Warnf("cannot list WebDAV transport %s: %v",
+			exchange.config.URL, err)
+		return 0, err
+	}
+
+	filesCount := 0
+	for _, file := range files {
+		if file.IsDir() {
+			count, err := exchange.delete(path.Join(folder, file.Name()), pattern, before)
+			if err != nil {
+				return 0, err
+			}
+			if count == 0 {
+				err = exchange.conn.Remove(path.Join(exchange.remote, folder, file.Name()))
+				if err != nil {
+					logrus.Errorf("cannot remove file %s from %s: %v", file.Name(),
+						exchange, err)
+				}
+			}
+		} else {
+			match, _ := path.Match(pattern, file.Name())
+			if match && file.ModTime().Before(before) {
+				if err := exchange.conn.Remove(path.Join(exchange.remote, folder,
+					file.Name())); err != nil {
+					logrus.Error("cannot remove file %s from %s: %v", file.Name(),
+						exchange, err)
+				} else {
+					logrus.Infof("removed %s from %s", file.Name(), exchange)
+				}
+			} else {
+				filesCount++
+			}
+		}
+	}
+
+	return filesCount, nil
+}
+
+func (exchange *WebDAVExchange) Delete(pattern string, before time.Time) error {
+	if exchange.conn == nil {
+		logrus.Warn("trying to list without WebDAV connection. Call Connect first")
+		return os.ErrClosed
+	}
+
+	_, err := exchange.delete("", pattern, before)
+	return err
+}
 
 func (exchange *WebDAVExchange) Name() string {
 	return exchange.config.Name
 }
-
 
 func (exchange *WebDAVExchange) String() string {
 	return fmt.Sprintf("webDAV %s - %s", exchange.config.Name, exchange.config.URL)

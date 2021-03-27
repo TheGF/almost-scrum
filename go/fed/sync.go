@@ -10,7 +10,7 @@ import (
 
 type Status struct {
 	Exchanges map[string]bool `json:"exchanges"`
-	Locs      sync.Map        `json:"locs"`
+	Locs      *sync.Map        `json:"locs"`
 	Stat      map[string]Stat `json:"stat"`
 }
 
@@ -22,7 +22,7 @@ func GetStatus(project *core.Project) Status {
 
 	s := Status{
 		Exchanges: map[string]bool{},
-		Locs:      signal.locs,
+		Locs:      &signal.locs,
 		Stat:      map[string]Stat{},
 	}
 	for exchange, connected := range signal.exchanges {
@@ -35,24 +35,7 @@ func GetStatus(project *core.Project) Status {
 	return s
 }
 
-func syncExchange(signal *Signal, exchange transport.Exchange, since time.Time, r chan error) {
-	logrus.Infof("Federation sync from exchange %s", exchange)
-
-	list, err := exchange.List(since)
-	if err != nil {
-		r <- err
-		return
-	}
-
-	remote := map[string]bool{}
-	for _, loc := range list {
-		remote[loc] = false
-	}
-
-	stat := Stat{}
-
-	var lastErr error
-	// Push files
+func pushExchange(signal *Signal, exchange transport.Exchange, remote map[string]bool, stat *Stat) (errs []error) {
 	start := time.Now()
 	signal.locs.Range(func(loc, refs interface{}) bool {
 		if _, found := remote[loc.(string)]; !found {
@@ -62,7 +45,7 @@ func syncExchange(signal *Signal, exchange transport.Exchange, since time.Time, 
 				stat.Upload += sz
 				stat.Push++
 			} else {
-				lastErr = err
+				errs = append(errs, err)
 				logrus.Warnf("cannot push %s to %s: %v", loc, exchange, err)
 			}
 		} else {
@@ -71,9 +54,11 @@ func syncExchange(signal *Signal, exchange transport.Exchange, since time.Time, 
 		return true
 	})
 	stat.Upload = stat.Upload * int64(time.Second) / int64(time.Since(start))
+	return
+}
 
-	// Pull files
-	start = time.Now()
+func pullExchange(signal *Signal, exchange transport.Exchange, remote map[string]bool, stat *Stat) (errs []error) {
+	start := time.Now()
 	for loc, present := range remote {
 		if !present {
 			if refs, found := signal.locs.LoadOrStore(loc, 1); !found {
@@ -81,7 +66,7 @@ func syncExchange(signal *Signal, exchange transport.Exchange, since time.Time, 
 					stat.Download += sz
 					stat.Pull++
 				} else {
-					lastErr = err
+					errs = append(errs, err)
 					signal.locs.Delete(loc)
 					logrus.Warnf("cannot pull %s from %s: %v", loc, exchange, err)
 				}
@@ -92,9 +77,33 @@ func syncExchange(signal *Signal, exchange transport.Exchange, since time.Time, 
 		}
 	}
 	stat.Download = stat.Download * int64(time.Second) / int64(time.Since(start))
+	return
+}
 
+func syncExchange(signal *Signal, exchange transport.Exchange, since time.Time, r chan bool) {
+	logrus.Infof("Federation sync from exchange %s", exchange)
+
+	list, err := exchange.List(since)
+	if err != nil {
+		r <- false
+		return
+	}
+
+	remote := map[string]bool{}
+	for _, loc := range list {
+		remote[loc] = false
+	}
+
+	stat := Stat{}
+	ok := len(pullExchange(signal, exchange, remote, &stat)) == 0
+	ok = ok && len(pushExchange(signal, exchange, remote, &stat)) == 0
 	signal.stat[exchange] = stat
-	r <- lastErr
+
+	diff := 3 * time.Duration(signal.config.Span) * 24 * time.Hour
+	before := time.Now().Add(-diff)
+	_ = exchange.Delete("dat", before)
+
+	r <- ok
 }
 
 func Sync(project *core.Project, since time.Time) (failedExchanges int, err error) {
@@ -103,11 +112,17 @@ func Sync(project *core.Project, since time.Time) (failedExchanges int, err erro
 		return 0, err
 	}
 
-
 	if since.IsZero() {
 		diff := time.Duration(signal.config.Span) * 24 * time.Hour
 		since = time.Now().Add(-diff)
 	}
+
+	now := time.Now()
+	if diff := time.Now().Sub(signal.config.LastSync).Seconds(); diff < 30 {
+		logrus.Infof("last sync only %f seconds ago; try later", diff)
+		return 0, nil
+	}
+	signal.config.LastSync = now
 
 	logrus.Infof("Synchronize project %s with federation starting from %s", project.Config.UUID, since)
 
@@ -115,17 +130,20 @@ func Sync(project *core.Project, since time.Time) (failedExchanges int, err erro
 		return 0, err
 	}
 
-	r := make(chan error)
+	r := make(chan bool)
 	connected := getConnectedExchanges(signal)
 	for _, exchange := range connected {
 		go syncExchange(signal, exchange, since, r)
 	}
 
 	for range connected {
-		if <-r != nil {
+		if !<-r {
 			failedExchanges++
 		}
 	}
+
+//	_ = WriteConfig(project, signal.config)
+
 	logrus.Infof("Synchronization completed for project %s with %d failed exchanges", project.Config.UUID,
 		failedExchanges)
 	return

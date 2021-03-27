@@ -396,6 +396,7 @@ class Server {
 
     static createFolderInLibrary(project, path, archive = false) {
         path = encodeURIComponent(path)
+        const target = archive ? 'archive' : 'library'
         return axios.put(`/api/v1/projects/${project}/${target}${path}`, null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);

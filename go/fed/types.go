@@ -17,6 +17,7 @@ var (
 const HeaderFile = "ash-header.json"
 
 type Header struct {
+	Version   string    `json:"version"`
 	ProjectID string    `json:"projectId"`
 	Host      string    `json:"host"`
 	Hostname  string    `json:"hostname"`

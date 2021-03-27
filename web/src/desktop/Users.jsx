@@ -74,7 +74,7 @@ function Users(props) {
                         <Button onClick={_ => setUser(user, userInfo)}>
                             Update
                         </Button>
-                        <Button onClick={_ => delUser(u)} disabled={isMe}>
+                        <Button onClick={_ => delUser(user)} disabled={isMe}>
                             Remove
                         </Button>
                     </ButtonGroup>

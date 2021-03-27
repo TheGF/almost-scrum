@@ -1,13 +1,19 @@
-div.cover {
+section.cover {
     margin-top: 10%;
     page-break-after: always;
     page: blank;
 }
 
-div.title {
+section.cover h1 {
     font: 50pt Arial bold;
     text-align: center;
 }
+
+section.cover h2 {
+    font: 36pt Arial italic;
+    text-align: center;
+}
+
 
 div.sectionTitle {
     font: 40px Arial bolder;
@@ -15,7 +21,7 @@ div.sectionTitle {
 }
 
 section {
-    page-break-before: always;
     string-set: header content();
+    page-break-before: right;
     page-break-after: left;
 }
