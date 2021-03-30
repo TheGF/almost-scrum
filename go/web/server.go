@@ -147,8 +147,8 @@ func StartServer(port string, logLevel string, autoExit_ bool, args []string) {
 
 	r := gin.Default()
 	loadStaticContent(r)
-	//setHello(r, true)
-	//setBye(r)
+	setHello(r, true)
+	setBye(r)
 
 	authMiddleware := getJWTMiddleware()
 	r.POST("/auth/login", authMiddleware.LoginHandler)

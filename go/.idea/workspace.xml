@@ -5,23 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/cli/fed.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/systray.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../build.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/assets/bindata.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli/commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/commands.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/crypt.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/crypt.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/project_config.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/project_config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/import.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/import.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/invite.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/invite.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/fed_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/fed_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/systray.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/systray.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_linux" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

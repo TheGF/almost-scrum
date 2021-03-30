@@ -18,7 +18,7 @@ func startSystray() {
 		default: // "linux", "freebsd", "openbsd", "netbsd"
 			display, present := os.LookupEnv("DISPLAY")
 			if !present || display == "" {
-				logrus.Infof("No XServer found. System Icon will not be present")
+				logrus.Warnf("No XServer found. System Icon will not be present")
 				return
 			}
 		}
