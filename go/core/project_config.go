@@ -11,8 +11,8 @@ type ProjectConfigPublic struct {
 }
 
 type ProjectConfig struct {
-	CipherKey string                 `json:"cipherKey" yaml:"cipherKey"`
 	UUID      string                 `json:"uuid" yaml:"uuid"`
+	CipherKey string                 `json:"cipherKey" yaml:"cipherKey"`
 	Public    ProjectConfigPublic    `json:"public" yaml:"public"`
 	Settings  map[string]interface{} `json:"settings" yaml:"settings""`
 }

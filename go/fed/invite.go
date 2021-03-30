@@ -13,10 +13,10 @@ import (
 )
 
 type Claim struct {
-	UUID       string              `yaml:"uuid"`
-	Name       string              `yaml:"name"`
-	BoardTypes map[string][]string `yaml:"boardTypes"`
-	FedConfig  *Config             `yaml:"fedConfig"`
+	UUID        string              `yaml:"uuid"`
+	ProjectName string              `yaml:"name"`
+	BoardTypes  map[string][]string `yaml:"boardTypes"`
+	FedConfig   *Config             `yaml:"fedConfig"`
 }
 
 type Invite struct {
@@ -26,10 +26,10 @@ type Invite struct {
 
 func CreateInvite(project *core.Project, config *Config) (invite Invite, err error) {
 	claim := Claim{
-		UUID:       project.Config.UUID,
-		Name:       project.Config.Public.Name,
-		BoardTypes: project.Config.Public.BoardTypes,
-		FedConfig:  config,
+		UUID:        project.Config.UUID,
+		ProjectName: project.Config.Public.Name,
+		BoardTypes:  project.Config.Public.BoardTypes,
+		FedConfig:   config,
 	}
 
 	data, err := yaml.Marshal(&claim)
@@ -91,7 +91,7 @@ func GetClaimDest(base string, claim *Claim) (dest string, exist bool, err error
 		return ref.Folder, true, nil
 	}
 
-	dest = filepath.Join(base, claim.Name)
+	dest = filepath.Join(base, claim.ProjectName)
 	stat, err := os.Stat(dest)
 
 	if err == nil && stat.IsDir() {
@@ -100,7 +100,7 @@ func GetClaimDest(base string, claim *Claim) (dest string, exist bool, err error
 			return dest, true,nil
 		} else {
 			crc := crc16.Crc16([]byte(claim.UUID))
-			name := fmt.Sprintf("%s-%x", claim.Name, crc)
+			name := fmt.Sprintf("%s-%x", claim.ProjectName, crc)
 			dest = filepath.Join(base, name)
 			_, err = os.Stat(dest)
 			return dest, err == nil, nil
@@ -136,24 +136,24 @@ func mergeFedConfig(project *core.Project, c *Config) {
 	WriteConfig(project, fedConfig)
 }
 
-func ClaimInvite(invite Invite, folder string) error {
+func ClaimInvite(invite Invite, folder string) (*core.Project, error) {
 	token := reWhiteSpace.ReplaceAllString(invite.Token, "")
 	key := reWhiteSpace.ReplaceAllString(invite.Key, "")
 
 	decrypted, err := core.DecryptString(key, token)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var claim Claim
 
 	err = yaml.Unmarshal([]byte(decrypted), &claim)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dest, exist, err  := GetClaimDest(folder, &claim)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var project *core.Project
@@ -163,7 +163,7 @@ func ClaimInvite(invite Invite, folder string) error {
 		project, err = core.InitProject(dest, nil)
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	project.Config.UUID = claim.UUID
@@ -179,5 +179,5 @@ func ClaimInvite(invite Invite, folder string) error {
 		logrus.Infof("succesfully created project with %s(%s) from invite",
 			project.Config.Public.Name, project.Config.UUID)
 	}
-	return nil
+	return project, nil
 }

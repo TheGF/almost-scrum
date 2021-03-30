@@ -48,8 +48,8 @@ func extractItem(project *core.Project, source *zip.File) (string, error) {
 }
 
 
-func ImportDiff(project *core.Project, log *Diff) ([]string, error) {
-	file := filepath.Join(project.Path, core.ProjectFedFilesFolder, log.Input)
+func ImportDiff(project *core.Project, diff *Diff) ([]string, error) {
+	file := filepath.Join(project.Path, core.ProjectFedFilesFolder, diff.Input)
 	r, err := zip.OpenReader(file)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func ImportDiff(project *core.Project, log *Diff) ([]string, error) {
 
 	var names []string
 	for _, f := range r.File {
-		if item, found := log.Items[f.Name]; found && item.Strategy == Extract {
+		if item, found := diff.Items[f.Name]; found && item.Strategy == Extract {
 			if name, err := extractItem(project, f); err != nil {
 				return nil, err
 			} else {

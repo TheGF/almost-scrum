@@ -5,25 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/cli/fed.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/web/systray.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../build.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/assets/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/assets/bindata.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/const.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/const.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cli/commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/commands.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/crypt.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/crypt.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/project_config.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/project_config.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fed/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/export.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/export.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/sync.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/sync.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/transport/exchange.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/exchange.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/transport/ftp.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/ftp.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/transport/s3.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/s3.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/transport/webdav.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/webdav.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/types.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/library/book.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/book.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/import.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/import.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/invite.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/invite.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/fed_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/fed_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_linux" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/assets/styles/article.css" beforeDir="false" afterPath="$PROJECT_DIR$/../web/assets/styles/article.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/assets/styles/booklet.css" beforeDir="false" afterPath="$PROJECT_DIR$/../web/assets/styles/booklet.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -71,7 +68,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/fed/transport" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/cli" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
@@ -81,11 +78,11 @@
       <recent name="$PROJECT_DIR$/core" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/cli" />
       <recent name="$PROJECT_DIR$/fed/transport" />
       <recent name="$PROJECT_DIR$/federation" />
       <recent name="$PROJECT_DIR$/library" />
       <recent name="$PROJECT_DIR$/web" />
-      <recent name="$PROJECT_DIR$/core" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/fed/exchanges" />
@@ -339,16 +336,6 @@
           <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
           <line>26</line>
           <option name="timeStamp" value="141" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/fed/import.go</url>
-          <line>178</line>
-          <option name="timeStamp" value="197" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/fed/import.go</url>
-          <line>93</line>
-          <option name="timeStamp" value="199" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/library/library_test.go</url>

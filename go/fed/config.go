@@ -3,6 +3,7 @@ package fed
 import (
 	"almost-scrum/core"
 	"almost-scrum/fed/transport"
+	uuid2 "github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 const configFile = "fed.yaml"
 
 type Config struct {
+	UUID          string                   `json:"id" yaml:"id"`
 	Secret        string                   `json:"secret" yaml:"secret"`
 	ReconnectTime time.Duration            `json:"reconnectTime" yaml:"reconnectTime"`
 	PollTime      time.Duration            `json:"pollTime" yaml:"pollTime"`
@@ -38,6 +40,7 @@ func ReadConfig(project *core.Project, removeSecret bool) (*Config, error) {
 		}
 	} else if os.IsNotExist(err) {
 		config = Config{
+			UUID:          uuid2.New().String(),
 			Secret:        core.GenerateRandomString(32),
 			ReconnectTime: 10 * time.Minute,
 			PollTime:      time.Minute,

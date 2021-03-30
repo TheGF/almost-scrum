@@ -115,7 +115,7 @@ function Federation(props) {
             <BiTransfer />
             {updates ? updates : null}
         </Button>
-        <Modal isOpen={isOpen} onClose={onClose} size="full" top
+        <Modal isOpen={isOpen} onClose={onClose} size="6xl" top
             scrollBehavior="inside" >
             <ModalOverlay />
             <ModalContent top maxW="70%">
@@ -126,7 +126,8 @@ function Federation(props) {
                         <TabList>
                             <Tab><T>sync</T></Tab>
                             <Tab><T>exchanges</T></Tab>
-                            <Tab><T>share</T></Tab>
+                            <Tab><T>invite</T></Tab>
+                            <Tab><T>join</T></Tab>
                         </TabList>
 
                         <TabPanels>
@@ -135,6 +136,9 @@ function Federation(props) {
                             </TabPanel>
                             <TabPanel>
                                 <Exchanges onClose={onClose}/>
+                            </TabPanel>
+                            <TabPanel>
+                                <Share onClose={onClose}/>
                             </TabPanel>
                             <TabPanel>
                                 <Share onClose={onClose}/>

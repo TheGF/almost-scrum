@@ -201,10 +201,10 @@ func postClaimInviteAPI(c *gin.Context) {
 		return
 	}
 
-	err := fed.ClaimInvite(invite, repository)
+	project, err := fed.ClaimInvite(invite, repository)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	c.JSON(http.StatusOK, "")
+	c.JSON(http.StatusOK, project.Path)
 }

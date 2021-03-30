@@ -8,13 +8,11 @@ import (
 	"github.com/fatih/color"
 	"github.com/getlantern/systray"
 	"github.com/skratchdot/open-golang/open"
-	"log"
 	"mime"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -58,7 +56,7 @@ type hello struct {
 	SystemUser string `json:"systemUser"`
 }
 
-func setHello(r *gin.Engine, portal bool, autoExit bool) {
+func setHello(r *gin.Engine, portal bool) {
 	r.POST("/auth/hello", func(c *gin.Context) {
 		id := c.DefaultQuery("id", "")
 		if id == "" {
@@ -66,13 +64,9 @@ func setHello(r *gin.Engine, portal bool, autoExit bool) {
 			return
 		}
 
-		if autoExit {
-			if _, found := core.FindStringInSlice(knownClients, id); !found {
-				knownClients = append(knownClients, id)
-				logrus.Infof("New polite client %s added to the known list", id)
-			}
-		} else {
-			logrus.Debugf("New polite client %s but auto-exit is off", id)
+		if _, found := core.FindStringInSlice(knownClients, id); !found {
+			knownClients = append(knownClients, id)
+			logrus.Infof("New polite client %s added to the known list", id)
 		}
 
 		c.JSON(http.StatusOK, hello{
@@ -94,16 +88,15 @@ func setBye(r *gin.Engine) {
 		if idx, found := core.FindStringInSlice(knownClients, id); found {
 			knownClients = append(knownClients[0:idx], knownClients[idx+1:]...)
 
-			if len(knownClients) == 0 {
-				logrus.Info("All client disconnected. Time to shutdown")
-
-				log.Println("Try nicely... waiting 5 seconds")
+			if len(knownClients) == 0 && autoExit {
+				logrus.Info("All client disconnected. Time to shutdown. Try nicely... waiting 5 seconds")
 				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
+
 				if err := srv.Shutdown(ctx); err != nil {
 					logrus.Fatal("Server forced to shutdown:", err)
 				}
-
+				systray.Quit()
 			}
 		}
 		c.String(http.StatusOK, "Have a good day")
@@ -111,49 +104,8 @@ func setBye(r *gin.Engine) {
 }
 
 var srv *http.Server
+var autoExit bool
 
-func onReady() {
-
-	var iconExt string
-	if runtime.GOOS == "windows" {
-		iconExt = "ico"
-	} else {
-		iconExt = "png"
-	}
-	if iconData, err := assets.Asset(fmt.Sprintf("assets/icons/grapes.%s", iconExt)); err == nil {
-		systray.SetIcon(iconData)
-	}
-	systray.SetTitle("Almost Scrum")
-	systray.SetTooltip("Pretty awesome")
-	openMenu := systray.AddMenuItem("New Window", "Open a new browser page")
-	systray.AddSeparator()
-	quitMenu := systray.AddMenuItem("Quit", "Quit the whole app")
-
-
-	go func() {
-		for {
-			select {
-				case <- quitMenu.ClickedCh: {
-					systray.Quit()
-					onExit()
-				}
-				case <- openMenu.ClickedCh: {
-					open.Start(ashUrl)
-				}
-			}
-		}
-
-	}()
-
-	// Sets the icon of a menu item. Only available on Mac and Windows.
-//	mQuit.SetIcon(icon.Data)
-}
-
-func onExit() {
-	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		logrus.Fatalf("listen: %s\n", err)
-	}
-}
 
 func runServer(router *gin.Engine, addr string) {
 
@@ -165,11 +117,12 @@ func runServer(router *gin.Engine, addr string) {
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logrus.Fatalf("listen: %s\n", err)
+		} else {
+			logrus.Infof("Ash server started on %s, autoExit %t", addr, autoExit)
 		}
 	}()
 
-
-	systray.Run(onReady, onExit)
+	startSystray()
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -180,7 +133,7 @@ func runServer(router *gin.Engine, addr string) {
 var ashUrl = ""
 
 //StartServer starts the embedded server portal.
-func StartServer(port string, logLevel string, autoExit bool, args []string) {
+func StartServer(port string, logLevel string, autoExit_ bool, args []string) {
 	if len(args) == 0 {
 		color.Red("Please provide repo folder")
 		os.Exit(1)
@@ -190,11 +143,12 @@ func StartServer(port string, logLevel string, autoExit bool, args []string) {
 	}
 
 	repoPath := args[0]
+	autoExit = autoExit_
 
 	r := gin.Default()
 	loadStaticContent(r)
-	setHello(r, true, autoExit)
-	setBye(r)
+	//setHello(r, true)
+	//setBye(r)
 
 	authMiddleware := getJWTMiddleware()
 	r.POST("/auth/login", authMiddleware.LoginHandler)

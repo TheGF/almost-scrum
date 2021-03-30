@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"encoding/hex"
+	"os"
 )
 
 func EncryptString(key string, value string) (string, error) {
@@ -40,6 +41,9 @@ func DecryptString(key string, value string) (string, error) {
 	}
 
 	idx := bytes.IndexByte(ciphertext, 0)
+	if idx < 0 || idx >= len(ciphertext) {
+		return "", os.ErrInvalid
+	}
 	return string(ciphertext[0:idx]), nil
 }
 
