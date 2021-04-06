@@ -15,23 +15,6 @@ const pendingSet = {}
 const setDelay = 2 * 1000
 let pendingInterval = null
 
-function setPendingTasks() {
-    if (pendingSet.length == 0) {
-        const interval = pendingInterval
-        pendingInterval = null
-        cancelInterval(interval)
-    }
-    for (const k in pendingSet) {
-        const [tm, [resolve, reject], f, ...params] = pendingSet[k];
-        if (tm < Date.now()) {
-            delete pendingSet[k];
-
-            f(...params)
-                .then(resolve)
-                .catch(reject);
-        }
-    }
-}
 
 const errorHandlers = []
 
@@ -52,6 +35,25 @@ class Server {
         errorHandlers.push([priority, handler])
         errorHandlers.sort((a, b) => b[0] - a[0])
     }
+
+    static sendPendingTasks() {
+        if (pendingSet.length == 0) {
+            const interval = pendingInterval
+            pendingInterval = null
+            cancelInterval(interval)
+        }
+        for (const k in pendingSet) {
+            const [tm, [resolve, reject], f, ...params] = pendingSet[k];
+            if (tm < Date.now()) {
+                delete pendingSet[k];
+
+                f(...params)
+                    .then(resolve)
+                    .catch(reject);
+            }
+        }
+    }
+
 
     static authenticate(username, password) {
         const credentials = {
@@ -173,7 +175,7 @@ class Server {
 
     static setUser(project, user, userInfo) {
         return axios.put(`/api/v1/projects/${project}/users/${user}`,
-                userInfo, getConfig())
+            userInfo, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -204,7 +206,7 @@ class Server {
 
     static renameBoard(project, oldName, newName) {
         return axios.put(`/api/v1/projects/${project}/boards/${newName}?rename=${oldName}`,
-                null, getConfig())
+            null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -245,11 +247,11 @@ class Server {
     }
 
     static setTaskLater(project, board, name, content) {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             const k = `setTask:${project}/${board}/${name}`
             pendingSet[k] = [Date.now() + setDelay, [resolve, reject], Server.setTask, project, board, name, content]
             if (pendingInterval == null) {
-                pendingInterval = setInterval(setPendingTasks, setDelay)
+                pendingInterval = setInterval(Server.sendPendingTasks, setDelay)
             }
         })
     }
@@ -268,7 +270,7 @@ class Server {
             url += `&title=${encodeURIComponent(title)}`;
         }
         return axios.post(url,
-                null, getConfig())
+            null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -307,20 +309,20 @@ class Server {
         }
 
         return axios.post(`/api/v1/projects/${project}/library${path}?token=${token}`,
-                formData, { config })
+            formData, { config })
             .then(r => r.data.filter(f => !f.name.startsWith('.')))
             .catch(errorHandler);
     }
 
     static uploadFileToLibraryLater(project, path, file, name) {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             const k = name ? `uploadFile:${project}/${path}/${name}` :
                 `uploadFile:${project}/${path}`
             pendingSet[k] = [Date.now() + setDelay, [resolve, reject], Server.uploadFileToLibrary, project,
                 path, file, name
             ]
             if (pendingInterval == null) {
-                pendingInterval = setInterval(setPendingTasks, setDelay)
+                pendingInterval = setInterval(Server.sendPendingTasks, setDelay)
             }
         })
     }
@@ -406,7 +408,7 @@ class Server {
         oldpath = encodeURIComponent(oldpath)
         path = encodeURIComponent(path)
         return axios.post(`/api/v1/projects/${project}/library${path}?action=move&origin=${oldpath}`,
-                null, getConfig())
+            null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -414,7 +416,7 @@ class Server {
     static upgradeVersion(project, path) {
         path = encodeURIComponent(path)
         return axios.post(`/api/v1/projects/${project}/library${path}?action=upgrade`,
-                null, getConfig())
+            null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -422,14 +424,14 @@ class Server {
     static setVisibility(project, path, public_) {
         path = encodeURIComponent(path)
         return axios.post(`/api/v1/projects/${project}/library${path}?action=visibility&public=${public_}`,
-                null, getConfig())
+            null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
 
     static getLibraryStat(project, files) {
         return axios.post(`/api/v1/projects/${project}/library-stat`,
-                files, getConfig())
+            files, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
@@ -458,8 +460,9 @@ class Server {
             .catch(errorHandler);
     }
 
-    static postFedShare(project, exchanges, removeCredentials) {
+    static postFedShare(project, key, exchanges, removeCredentials) {
         const c = {
+            key: key,
             exchanges: exchanges,
             removeCredentials: removeCredentials,
         }
@@ -469,8 +472,12 @@ class Server {
             .catch(errorHandler);
     }
 
-    static postFedClaim(invite) {
-        let url = `/api/v1/claim`
+    static postFedJoin(project, key, token) {
+        const invite = {
+            key: key,
+            token: token,
+        }
+        let url = `/api/v1/projects/${project}/fed/join`
         return axios.post(url, invite, getConfig())
             .then(r => r.data)
             .catch(errorHandler);

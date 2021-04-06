@@ -59,10 +59,12 @@ function CreateProject(props) {
             </List>
         </FormControl>
 
-
         <br />
         <ButtonGroup>
-            <Button colorScheme="blue" onClick={createProject}>Create</Button>
+            <Button colorScheme="blue" onClick={createProject}
+                isDisabled={name == null || name.length == 0}>
+                Create
+                </Button>
             <Button onClick={onClose}>Cancel</Button>
         </ButtonGroup>
     </VStack>

@@ -1,16 +1,24 @@
 import {
-    Box, Button, ButtonGroup, FormControl, FormLabel, Input, Link, Modal,
+    Box, Button, ButtonGroup, FormControl, FormLabel, Image, Input, Link, Modal,
     ModalBody, ModalCloseButton, ModalContent, ModalHeader, Spacer,
-    Text, Textarea, useDisclosure, useToast, VStack
+    Stack,
+    Text, Textarea, useDisclosure, useToast, VStack, Wrap, WrapItem
 } from "@chakra-ui/react";
 import { React, useEffect, useState } from "react";
 import { BiWorld } from "react-icons/bi";
 import T from "../core/T";
 import Server from "../server";
 
+const images = ['banana', 'beer', 'burger', 'chocolate', 'coke', 'cornflakes',
+    'cupcake', 'egg', 'fries', 'hotdog', 'juice', 'muffin', 'orange',
+    'pasta', 'pizza', 'popcorn', 'steak', 'sushi', 'water', 'wine'
+]
+
+
 function Join(props) {
-    const [token, setToken] = useState(null)
-    const [key, setKey] = useState(null)
+    const { onClose, project } = props
+    const [token, setToken] = useState(props.token || null)
+    const [selected, setSelected] = useState([])
     const toast = useToast()
 
     function lookForInvite() {
@@ -25,11 +33,9 @@ function Join(props) {
     }
     useEffect(lookForInvite, [])
 
-    function claim() {
-        Server.postFedClaim({
-            token: token,
-            key: key,
-        }).then(_ => {
+    function join() {
+        const key = selected.join(',')
+        Server.postFedJoin(project, key, token).then(_ => {
             toast({
                 title: `Claim Success`,
                 description: 'The invite has been successfully claimed',
@@ -37,21 +43,44 @@ function Join(props) {
                 duration: 9000,
                 isClosable: true,
             })
-
         })
+
+        onClose()
     }
+
+    function clickIcon(name) {
+        if (selected.includes(name)) {
+            setSelected(selected.filter(n => n != name))
+        } else {
+            setSelected([...selected, name])
+        }
+    }
+
+    const icons = images.map(n => <WrapItem>
+        <Box bg={selected.includes(n) ? 'yellow' : null} borderWidth={1} p={1}
+            onClick={_ => clickIcon(n)}>
+            <VStack>
+                <Image boxSize="50px" src={`/icons/${n}.svg`} ></Image>
+                <label>{n}</label>
+            </VStack>
+        </Box>
+    </WrapItem>)
 
     return <VStack>
         <FormControl isRequired>
-            <FormLabel><T>decryption key</T></FormLabel>
-            <Input value={key} onChange={e => setKey(e.target.value)} />
+            <FormLabel>What had the Gopher for dinner?</FormLabel>
+            <Wrap>
+                {icons}
+            </Wrap>
+
         </FormControl>
         <FormControl isRequired>
             <FormLabel>Token</FormLabel>
             <Textarea rows={12} value={token} onChange={e => setToken(e.target.value)} />
         </FormControl>
         <ButtonGroup>
-            <Button colorScheme="blue" onClick={claim}>Claim</Button>
+            <Button colorScheme="blue" isDisabled={token == null || token.length == 0 || selected.length != 2} 
+                onClick={join}>Confirm</Button>
             <Button onClick={onClose}>Close</Button>
         </ButtonGroup>
     </VStack>

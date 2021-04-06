@@ -23,12 +23,6 @@ function PageEditor(props) {
         if (page) {
             Server.downloadFromlibrary(project, page)
                 .then(setContent)
-                // .then(_ => setInterval(_=>{ 
-                //         const h = document.getElementById('PageEditor') &&
-                //         document.getElementById('PageEditor').clientHeight - 100
-                //     console.log('height', h)
-                //     if (h) setHeight(h - 100);
-                //     }, 1000))
         }
     }
 
@@ -52,6 +46,9 @@ function PageEditor(props) {
         const lastSlash = page.lastIndexOf("/")
         const folder = page.substring(0, lastSlash)
         const name =  page.substring(lastSlash+1)
+
+        console.log('Write update', value)
+
         Server.uploadFileToLibraryLater(project, folder, new Blob([value]), name)
     }
 

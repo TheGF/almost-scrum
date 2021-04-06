@@ -1,69 +1,86 @@
 import {
-    Button, HStack, Img, Modal, ModalBody, ModalCloseButton, ModalContent,
+    Button, HStack, Img, Input, Modal, ModalBody, ModalCloseButton, ModalContent,
     ModalFooter, ModalHeader, ModalOverlay, Radio, RadioGroup, Slider,
     SliderFilledTrack, SliderThumb, SliderTrack, Stack, useDisclosure, VStack
 } from '@chakra-ui/react';
 import { React, useContext, useState } from "react";
 import UserContext from '../UserContext';
 
+
+function parseUrl(url) {
+    const sharp = url.lastIndexOf('#');
+    if (sharp === -1) {
+        return [url, 'left', 100, null]
+    }
+    const options = url.substring(sharp + 1).split(',');
+    let align = 'left'
+    let size = 50
+    let caption = null
+
+    for (const option of options) {
+        const parts = option.split('=')
+        if (parts.length !== 2) continue
+
+        switch (parts[0]) {
+            case 'align': align = parts[1]
+            case 'size': if (isNaN(parts[1]) == false) {
+                size = parseInt(parts[1], 10)
+            }
+            case 'caption': caption = decodeURIComponent(parts[1])
+        }
+    }
+    return [url.substring(0, sharp), align, size, caption]
+}
+
+const alignToStyle = {
+    left: 'cursor:pointer',
+    center: 'cursor:pointer;margin-left:auto;margin-right:auto',
+    right: 'cursor:pointer;margin-left:auto',
+}
+
+function getImg(url, id) {
+    const [_, align, size, caption] = parseUrl(url)
+
+    let style = alignToStyle[align]
+    return `<img id="${id}" src="${url}" style="${style}" \
+            width="${size}%" title="${caption}"/>`
+}
+
+
 function MarkdownImage(props) {
-    const token = localStorage.token
     const { project } = useContext(UserContext);
-    const { readOnly } = props
-    const [alt, _align, _size] = parseOptions()
-    const [align, setAlign] = useState(_align)
-    const [size, setSize] = useState(_size)
-    const { isOpen, onOpen, onClose } = useDisclosure()
-
-    function parseOptions() {
-        const options = props.alt && props.alt.split(' ') || []
-        let alt2 = []
-        let align = 'center'
-        let size = 50
-
-        for (const option of options) {
-            if (['left', 'center', 'right'].includes(option)) {
-                align = option
-            }
-            else if (option.endsWith('%')) {
-                size = parseInt(option, 10)
-            }
-            else {
-                alt2.push(option)
-            }
-        }
-        return [alt2.join(' '), align, size]
+    const { readOnly, image, setImage } = props
+    if (!image) {
+        return null
     }
 
-    function getMore() {
-        let more = {
-            style: { cursor: 'pointer' },
-            htmlWidth: `${size}%`,
-            htmlHeight: `${size}%`,
-        }
-        switch (align) {
-            case 'right': more = { ...more, marginLeft: 'auto' }; break
-            case 'center': more = { ...more, marginLeft: 'auto', marginRight: 'auto' }; break
-        }
-        return more
-    }
+    const [url_, align_, size_, caption_] = parseUrl(props.image.src)
+    const [align, setAlign] = useState(align_);
+    const [size, setSize] = useState(size_);
+    const [caption, setCaption] = useState(caption_);
 
-    function save() {
-        const orig = `[${props.alt}](${props.src})`
-        const update = `[${alt} ${align} ${size}%](${props.src})`
-        props.onUpdate && props.onUpdate(orig, update)
-    }
+    image.src = `${url_}#size=${size},align=${align},caption=${encodeURIComponent(caption)}`
+    image.style = alignToStyle[align]
+    image.width = image.parentElement.clientWidth * size / 100
+    image.title = caption
+
+    // function update() {
+    //     const [url, _, __, ___] = parseUrl(image.src)
+
+    //     image.src = `${url}#size=${size},align=${align}`
+    //     image.style = alignToStyle[align]
+    //     image.width = image.parentElement.clientWidth * size / 100
+    // }
 
     const onClick = readOnly ? null : e => {
         e.stopPropagation()
         onOpen(true)
     }
-    let src = props.src.replace('~library', `/api/v1/projects/${project}/library`)
-    src = src.replace('~public', ``)
-    src = token ? `${src}?token=${token}` : src
+
+
+
     return <>
-        <Img alt={alt}{...getMore()} src={src} onClick={onClick} />
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={image} onClose={_ => setImage(null)}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Image Settings</ModalHeader>
@@ -91,16 +108,24 @@ function MarkdownImage(props) {
                             </Slider>
                             <label>{size}%</label>
                         </HStack>
+                        <HStack>
+                            <label>Caption</label>
+                            <Input value={caption}
+                                onChange={e => setCaption(e.target.value)} />
+                        </HStack>
                     </VStack>
                 </ModalBody>
                 <ModalFooter>
-                    <Button colorScheme="blue" mr={3} onClick={save}>
-                        Save
-                    </Button>
+                    {<Button colorScheme="blue" mr={3} onClick={_ => setImage(null)}>
+                        Close
+                    </Button>}
                 </ModalFooter>
             </ModalContent>
         </Modal>
     </>
 }
+
+MarkdownImage.parseUrl = parseUrl
+MarkdownImage.getImg = getImg
 
 export default MarkdownImage

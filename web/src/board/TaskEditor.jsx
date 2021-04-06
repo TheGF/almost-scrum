@@ -49,6 +49,7 @@ function TaskEditor(props) {
       <MarkdownEditor
         value={value}
         height={height}
+        readOnly={readOnly}
         onChange={onChange}
         disablePreview={true}
         loadSuggestions={loadSuggestions}

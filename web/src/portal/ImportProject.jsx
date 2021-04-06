@@ -72,7 +72,9 @@ function ImportProject(props) {
 
         <br />
         <ButtonGroup>
-            <Button colorScheme="blue" onClick={importProject} isLoading={importInProgress}>
+            <Button colorScheme="blue" onClick={importProject}
+                isDisabled={folder == null || folder.length == 0}
+                isLoading={importInProgress}>
                 Import
             </Button>
             <Button onClick={onClose}>Cancel</Button>

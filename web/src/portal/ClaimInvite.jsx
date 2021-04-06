@@ -1,81 +1,58 @@
 import {
-    Box, Button, ButtonGroup, FormControl, FormLabel, Input, Link, Modal,
-    ModalBody, ModalCloseButton, ModalContent, ModalHeader, Spacer,
-    Text, Textarea, useDisclosure, useToast, VStack
+    Button, ButtonGroup, FormControl, FormLabel, Modal,
+    ModalBody, ModalContent, ModalHeader, Select,
+    useToast, VStack
 } from "@chakra-ui/react";
-import { React, useEffect, useState } from "react";
-import { BiWorld } from "react-icons/bi";
+import { React, useState } from "react";
 import T from "../core/T";
+import Join from "../federation/Join";
 import Server from "../server";
 
 function ClaimInvite(props) {
-    const { isOpen, onOpen, onClose } = useDisclosure()
-    const [token, setToken] = useState(null)
-    const [key, setKey] = useState(null)
+    const { projects, activeProject, token, setToken } = props
+    const [selectedProject, setSelectedProject] = useState(activeProject || null)
+    const [confirm, setConfirm] = useState(false)
     const toast = useToast()
 
-    function lookForInvite() {
-        const queryParams = new URLSearchParams(window.location.search);
-        const invite = queryParams.get('invite');
-        const token = queryParams.get('token');
 
-        if (invite == "" && token) {
-            setToken(token)
-            onOpen()
-        }
-    }
-    useEffect(lookForInvite, [])
+    // function join() {
+    //     Server.postFedClaim(project, key, token).then(_ => {
+    //         toast({
+    //             title: `Claim Success`,
+    //             description: 'The invite has been successfully claimed',
+    //             status: "success",
+    //             duration: 9000,
+    //             isClosable: true,
+    //         })
+    //         setInvite(null)
+    //     })
+    // }
 
-    function claim() {
-        Server.postFedClaim({
-            token: token,
-            key: key,
-        }).then(_ => {
-            toast({
-                title: `Claim Success`,
-                description: 'The invite has been successfully claimed',
-                status: "success",
-                duration: 9000,
-                isClosable: true,
-            })
+    const projectsUI = projects.filter(p => p).map(p => <option key={p} value={p}>{p}</option>)
 
-            onClose()
-        })
-    }
+    const selectProjectUI = <VStack>
+        <FormControl isRequired>
+            <FormLabel><T>choose a project</T></FormLabel>
+            <Select placeholder="Select option" value={selectedProject} onChange={e => setSelectedProject(e.target.value)}>
+                {projectsUI}
+            </Select>
+        </FormControl>
+        <ButtonGroup>
+            <Button colorScheme="blue" onClick={_=>setConfirm(true)} isDisabled={!selectedProject}>Confirm</Button>
+            <Button onClick={_ => setToken(null)}>Close</Button>
+        </ButtonGroup>
+    </VStack>
 
-    const modal = <Modal isOpen={isOpen} size="lg" >
+
+    return <Modal isOpen={token} size="6xl" >
         <ModalContent>
-            <ModalHeader>Claim Invite</ModalHeader>
-            <ModalCloseButton />
+            <ModalHeader>Accept Invite</ModalHeader>
             <ModalBody>
-                <VStack>
-                    <FormControl isRequired>
-                        <FormLabel><T>decryption key</T></FormLabel>
-                        <Input value={key} onChange={e => setKey(e.target.value)} />
-                    </FormControl>
-                    <FormControl isRequired>
-                        <FormLabel>Token</FormLabel>
-                        <Textarea rows={12} value={token} onChange={e => setToken(e.target.value)} />
-                    </FormControl>
-                    <ButtonGroup>
-                        <Button colorScheme="blue" onClick={claim}>Claim</Button>
-                        <Button onClick={onClose}>Close</Button>
-                    </ButtonGroup>
-                </VStack>
+                {confirm ? <Join project={selectedProject} token={token} onClose={_=>setToken(null)}/> : 
+                selectProjectUI}
             </ModalBody>
         </ModalContent>
     </Modal >
-
-    return <Link onClick={onOpen} >
-        <Box w="12em" h="12em" bg="red.500" >
-            <VStack textAlign="center" spacing="24px" >
-                <Spacer />
-                <BiWorld size="50" />
-                <Text color="white" isTruncated>Claim Fed Invite</Text>
-            </VStack>
-        </Box>
-        {modal}
-    </Link>
 }
 
 export default ClaimInvite

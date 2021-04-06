@@ -30,9 +30,9 @@ func embedImage(file string) (string, error) {
 	return fmt.Sprintf("data:%s;base64,%s", mime.String(), enc), nil
 }
 
-var reImage = regexp.MustCompile(`<img\s+src="~library([^"]+)" alt="([^"]+)"`)
+var reImage = regexp.MustCompile(`<img\s+src="~library/([^#]+)#([^"]+)"`)
 
-func replaceImg(html string, imageFolder string) string {
+func replaceImg(html string, libraryFolder string) string {
 	var output bytes.Buffer
 	pos := 0
 	matches := reImage.FindAllStringSubmatchIndex(html, -1)
@@ -41,9 +41,9 @@ func replaceImg(html string, imageFolder string) string {
 		img := html[match[0]:match[1]]
 		loc := html[match[2]:match[3]]
 		alt := html[match[4]:match[5]]
-		opts := strings.Split(alt, " ")
+		opts := strings.Split(alt, ",")
 
-		imageSrc, err := embedImage(filepath.Join(imageFolder, loc))
+		imageSrc, err := embedImage(filepath.Join(libraryFolder, loc))
 		if err != nil {
 			output.WriteString(html[pos:match[1]])
 			pos = match[1]
@@ -52,28 +52,26 @@ func replaceImg(html string, imageFolder string) string {
 
 		classNames := make([]string, 0)
 		size := ""
-		alts := make([]string, 0)
 		for _, opt := range opts {
-			switch {
-			case opt == "center":
+			parts := strings.Split(opt, "=")
+			if len(parts) != 2 {
+				continue
+			}
+
+			switch parts[0] {
+			case "align":
 				{
-					classNames = append(classNames, "centerImage")
+					classNames = append(classNames, fmt.Sprintf("%sImage", parts[1]))
 				}
-			case opt == "right":
+			case "size":
 				{
-					classNames = append(classNames, "rightImage")
+					size = fmt.Sprintf("width=\"%s%%\"", parts[1])
 				}
-			case opt == "left":
-			case strings.HasSuffix(opt, "%"):
-				{
-					size = fmt.Sprintf("width=\"%s\"", opt)
-				}
-			default:
-				alts = append(alts, opt)
 			}
 		}
-		img = fmt.Sprintf(`<img class="%s" alt="%s" %s src="%s" `,
-			strings.Join(classNames, " "), strings.Join(alts, " "), size, imageSrc)
+
+		img = fmt.Sprintf(`<img class="%s" %s src="%s"`,
+			strings.Join(classNames, " "), size, imageSrc)
 
 		output.WriteString(html[pos:match[0]])
 		output.WriteString(img)
@@ -84,7 +82,7 @@ func replaceImg(html string, imageFolder string) string {
 	return output.String()
 }
 
-func ExportMarkdownToHTML(file string, imageFolder string) (string, error) {
+func ExportMarkdownToHTML(file string, libraryFolder string) (string, error) {
 	input, err := ioutil.ReadFile(file)
 	if err != nil {
 		return "", err
@@ -95,7 +93,7 @@ func ExportMarkdownToHTML(file string, imageFolder string) (string, error) {
 			blackfriday.HardLineBreak|
 			blackfriday.NoEmptyLineBeforeBlock,
 	))
-	return replaceImg(string(body), imageFolder), nil
+	return replaceImg(string(body), libraryFolder), nil
 }
 
 type BookSettings struct {
@@ -146,13 +144,13 @@ func CreateBook(project *core.Project, loc string, settings BookSettings) (strin
 	}
 	output.WriteString(`</section>`)
 
-	imageFolder := filepath.Join(project.Path, core.ProjectLibraryFolder, "")
+	libraryFolder := filepath.Join(project.Path, core.ProjectLibraryFolder, "")
 	for idx, file := range files {
 		name := file.Name()
 		match := sectionTitleRe.FindStringSubmatch(name)
 		if len(match) == 4 {
 			sectionTitle := match[1]
-			part, err := ExportMarkdownToHTML(filepath.Join(folder, name), imageFolder)
+			part, err := ExportMarkdownToHTML(filepath.Join(folder, name), libraryFolder)
 			if err == nil {
 				output.WriteString(
 					fmt.Sprintf(`<section id="section-%d"><div class="sectionTitle">%s</div>`,

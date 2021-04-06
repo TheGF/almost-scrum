@@ -1,51 +1,137 @@
 
-import { React, useContext, useState } from "react";
-import ReactMde from "react-mde";
+import '@toast-ui/editor/dist/toastui-editor.css';
+import { Editor, Viewer } from '@toast-ui/react-editor';
+import 'codemirror/lib/codemirror.css';
+import { React, useContext, useRef, useState } from "react";
 import "react-mde/lib/styles/css/react-mde-all.css";
 import Server from '../server';
 import UserContext from '../UserContext';
-import MarkdownView from './MarkdownView';
+import MarkdownImage from './MarkdownImage';
+import uml from '@toast-ui/editor-plugin-uml';
+import tableMergedCell from '@toast-ui/editor-plugin-table-merged-cell';
+import 'tui-color-picker/dist/tui-color-picker.css';
+import colorSyntax from '@toast-ui/editor-plugin-color-syntax';
+import 'highlight.js/styles/github.css';
+import codeSyntaxHighlight from '@toast-ui/editor-plugin-code-syntax-highlight';
+import 'tui-chart/dist/tui-chart.css';
+import chart from '@toast-ui/editor-plugin-chart';
 
 function MarkdownEditor(props) {
     const { project } = useContext(UserContext);
-    const { imageFolder, height, onSave, disablePreview, ...more } = props
-    const [value, setValue] = useState(null)
-    const [selectedTab, setSelectedTab] = useState(disablePreview ? "write" : "preview");
+    const { imageFolder, height, onSave, disablePreview, readOnly, ...more } = props
+    const libraryPath = `/api/v1/projects/${project}/library`
 
-    const saveImage = async function* (data) {
+    const [value, setValue] = useState(props.value && `${props.value}`.replaceAll('~library', libraryPath) || null);
+    const editorRef = useRef(null)
+    const [editImage, setEditImage] = useState(null)
+    const [refresh, setRefresh] = useState(false)
+    
+    function uploadFile(e) {
+        function replaceHtml() {
+            let url = `/api/v1/projects/${project}/library`
+            url += `${imageFolder}/${name}#size=50,align=center`
+            target.innerHTML = MarkdownImage.getImg(url)
+        }
+
         const name = `${Date.now()}`
-        await Server.uploadFileToLibrary(project, imageFolder, new Blob([data]), name)
-        yield `~library${imageFolder}/${name}`;
-        return true;
-    };
+        const items = e.clipboardData && e.clipboardData.items
+        const target = e.target
 
-    function onChange(value) {
-        setValue(value)
-        props.onChange(value);
+        if (items) {
+            for (const item of items) {
+                if (item.kind == 'file') {
+                    const blob = item.getAsFile()
+                    Server.uploadFileToLibrary(project, imageFolder,
+                        blob, name)
+                        .then(replaceHtml)
+                }
+            }
+        }
     }
 
-    const gap = disablePreview ? 120 : 20
+    function onLoad(editor) {
+        editor.getUI().el.addEventListener('paste', uploadFile)
+    }
 
-    return <ReactMde
-        key={height}
-        value={value}
-        onChange={onChange}
-        disablePreview={disablePreview}
-        minEditorHeight={height - gap}
-        maxEditorHeight={height - gap}
-        minPreviewHeight={height - 2*gap}
-        selectedTab={selectedTab}
-        onTabChange={setSelectedTab}
-        generateMarkdownPreview={(markdown) =>
-            Promise.resolve(<div onClick={_=>setSelectedTab("write")}>
-                <MarkdownView value={markdown} height={height - gap}
-                onChange={onChange} />
-                </div>)
+    function onChange() {
+        const value = editorRef.current.getInstance().getMarkdown()
+        setValue(value)
+        props.onChange(value.replaceAll(libraryPath, '~library'));
+    }
+
+    function addImageBlobHook(blob, callback) {
+        const name = `${Date.now()}`
+        let url = `/api/v1/projects/${project}/library`
+        url += `${imageFolder}/${name}#size=50,align=center`
+
+        Server.uploadFileToLibrary(project, imageFolder,
+            blob, name)
+            .then(_=> {
+                callback(url, ' ')
+                setTimeout(_=>setRefresh(!refresh), 500)
+            })
+        return false;
+    }
+
+    function renderImage(node, context) {
+        function setOpenImageSettings() {
+            const img = document.getElementById(id)
+            if (img) {
+                img.onclick = _ => setEditImage(img)
+            } else {
+                setTimeout(setOpenImageSettings, 20)
+            }
         }
-        paste={{
-            saveImage: saveImage
+
+        if (!context.entering) return null
+
+        const id = `${Date.now()}.${Math.random()}`
+        const content = MarkdownImage.getImg(node.destination, id)
+        setTimeout(setOpenImageSettings, 20)
+
+        return {
+            type: 'html',
+            content: content,
+        };
+    }
+
+    const plugins = [chart, codeSyntaxHighlight, colorSyntax, tableMergedCell, uml]
+
+    const gap = disablePreview ? 120 : 20
+    return readOnly ? <Viewer
+        initialValue={value}
+        previewStyle="tab"
+        height={height - 40}
+        initialEditType="wysiwyg"
+        useCommandShortcut={true}
+        ref={editorRef}
+        customHTMLRenderer={{
+            image: renderImage,
         }}
-        {...more}
-    />
+        plugins={plugins}
+    /> : <>
+        <MarkdownImage image={editImage} setImage={setEditImage} />
+        <Editor
+            key={refresh}
+            initialValue={value}
+            previewStyle="tab"
+            height={height - 40}
+            initialEditType="wysiwyg"
+            useCommandShortcut={true}
+            ref={editorRef}
+            hooks={{
+                addImageBlobHook: addImageBlobHook,
+            }}
+            events={{
+                load: onLoad,
+                change: onChange,
+            }}
+            customHTMLRenderer={{
+                image: renderImage,
+            }}
+            plugins={plugins}
+        />
+    </>
+
 }
 export default MarkdownEditor

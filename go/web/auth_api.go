@@ -90,7 +90,7 @@ func getJWTMiddleware() *jwt.GinJWTMiddleware {
 				"message": message,
 			})
 		},
-		TokenLookup: "header: Authorization, query: token",
+		TokenLookup: "header: Authorization, query: token, cookie: jwt",
 		TimeFunc:    time.Now,
 	}
 

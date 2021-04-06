@@ -13,12 +13,6 @@ import CloneFromGit from './CloneFromGit';
 function AddProject(props) {
     const { isOpen, onCreate, onClose } = props
 
-    function loadUserList() {
-        // Server.authenticate(username, password)
-        //     .then(r => onToken(r))
-        //     .catch(r => setError(`Invalid Credentials: ${r.message}`));
-    }
-
     return <Modal isOpen={isOpen} size="lg" >
         <ModalContent>
             <ModalHeader>Add Project</ModalHeader>

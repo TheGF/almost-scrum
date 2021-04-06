@@ -15,6 +15,7 @@ import AddProject from './AddProject';
 import ChangePassword from './ChangePassword';
 import ClaimInvite from './ClaimInvite';
 import Login from './Login';
+import Cookies from 'js-cookie'
 
 
 function Portal(props) {
@@ -27,8 +28,19 @@ function Portal(props) {
     const [showNewProject, setShowNewProject] = useState(false)
     const [showHelp, setShowHelp] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false)
+    const [invite, setInvite] = useState(null)
 
     const [filter, setFilter] = useState('')
+
+    function lookForInvite() {
+        const queryParams = new URLSearchParams(window.location.search);
+        const token = queryParams.get('invite');
+
+        if (token) {
+            setInvite(token)
+        }
+    }
+    useEffect(lookForInvite, [])
 
     function getProjectsList() {
         token && Server.getProjectsList()
@@ -63,6 +75,7 @@ function Portal(props) {
     }
 
     function authenticated(token, weakPassword) {
+        Cookies.set('jwt', token)
         setToken(token)
         setShowChangePassword(weakPassword)
     }
@@ -90,8 +103,6 @@ function Portal(props) {
             </VStack>
         </Box>
     </Link>)
-    
-    projectsBoxes.push(<ClaimInvite key="claimInvite"/>)
 
     projectsBoxes.push(<Link key="#users"
         onClick={_ => setShowUsers(true)} >
@@ -113,11 +124,14 @@ function Portal(props) {
                 onClose={_ => setShowChangePassword(false)} />
         }
 
-        if (activeProject && projects.includes(activeProject)) {
-            return <Desktop key={activeProject} project={activeProject} onExit={_=>selectProject(null)} />
+        if (!invite && activeProject && projects.includes(activeProject)) {
+            return <Desktop key={activeProject} project={activeProject}
+                onExit={_ => selectProject(null)} />
         }
 
         return <Center>
+            <ClaimInvite projects={projects} token={invite} setToken={setInvite}
+                activeProject={activeProject} />
             <ChangePassword isOpen={showChangePassword}
                 onClose={_ => setShowChangePassword(false)} />
             <Access isOpen={showUsers} onClose={_ => setShowUsers(false)} />

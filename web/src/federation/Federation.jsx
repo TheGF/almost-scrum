@@ -11,14 +11,14 @@ import Sync from "./Sync";
 import UserContext from '../UserContext';
 import { MdSignalCellular0Bar, MdSignalCellular1Bar, MdSignalCellular2Bar, MdSignalCellular3Bar, MdSignalCellular4Bar } from "react-icons/md";
 import Exchanges from "./Exchanges";
-import Share from "./Share";
+import Invite from "./Invite";
+import Join from './Join';
 
 let monitorInterval = null
 
 function Federation(props) {
     const { project } = useContext(UserContext)
     const { isOpen, onOpen, onClose } = useDisclosure()
-//    const [diffs, setDiffs] = useState([])
     const [strenght, setStrength] = useState(0)
     const [updates, setUpdates] = useState(0)
     const toast = useToast()
@@ -77,36 +77,28 @@ function Federation(props) {
                         monitorInterval = setInterval(getDiffs, 2 * 60000)
                         toast({
                             title: `Connected`,
-                            description: 'Successfully connected to '+connectedExchanges,
+                            description: 'Successfully connected to ' + connectedExchanges,
                             status: "warning",
                             duration: 9000,
                             isClosable: true,
                         })
-                        } else {
+                    } else {
                         if (monitorInterval) clearInterval(monitorInterval);
                         setTimeout(startMonitoring, 2 * 60000)
                     }
-                } else {
-                    toast({
-                        title: `No Exchanges`,
-                        description: 'No exchanges are configured and federation is not available',
-                        status: "warning",
-                        duration: 9000,
-                        isClosable: true,
-                    })
                 }
             })
 
     }
     useEffect(startMonitoring, [])
 
-    let signalBar = 0 
+    let signalBar = 0
     switch (strenght) {
-        case 0: signalBar = <MdSignalCellular0Bar/>; break
-        case 1: signalBar = <MdSignalCellular1Bar/>; break
-        case 2: signalBar = <MdSignalCellular2Bar/>; break
-        case 3: signalBar = <MdSignalCellular3Bar/>; break
-        default: signalBar = <MdSignalCellular4Bar/>
+        case 0: signalBar = <MdSignalCellular0Bar />; break
+        case 1: signalBar = <MdSignalCellular1Bar />; break
+        case 2: signalBar = <MdSignalCellular2Bar />; break
+        case 3: signalBar = <MdSignalCellular3Bar />; break
+        default: signalBar = <MdSignalCellular4Bar />
     }
 
     return <>
@@ -124,10 +116,10 @@ function Federation(props) {
                 <ModalBody>
                     <Tabs isLazy>
                         <TabList>
-                            <Tab><T>sync</T></Tab>
+                            <Tab isDisabled={strenght == 0}><T>sync</T></Tab>
                             <Tab><T>exchanges</T></Tab>
-                            <Tab><T>invite</T></Tab>
                             <Tab><T>join</T></Tab>
+                            <Tab isDisabled={strenght == 0}><T>invite</T></Tab>
                         </TabList>
 
                         <TabPanels>
@@ -135,13 +127,13 @@ function Federation(props) {
                                 <Sync key={isOpen} onClose={onClose} />
                             </TabPanel>
                             <TabPanel>
-                                <Exchanges onClose={onClose}/>
+                                <Exchanges onClose={onClose} />
                             </TabPanel>
                             <TabPanel>
-                                <Share onClose={onClose}/>
+                                <Join onClose={onClose} project={project}/>
                             </TabPanel>
                             <TabPanel>
-                                <Share onClose={onClose}/>
+                                <Invite onClose={onClose} />
                             </TabPanel>
                         </TabPanels>
                     </Tabs>

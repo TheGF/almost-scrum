@@ -77,7 +77,9 @@ function CloneFromGit(props) {
 
         <br />
         <ButtonGroup>
-            <Button colorScheme="blue" onClick={cloneFromGit} isLoading={cloneInProgress}>
+            <Button colorScheme="blue" onClick={cloneFromGit} 
+            isDisabled={url == null || url.length == 0}
+            isLoading={cloneInProgress}>
                 Clone
             </Button>
             <Button onClick={onClose}>Cancel</Button>

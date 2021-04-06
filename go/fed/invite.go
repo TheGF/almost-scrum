@@ -12,49 +12,48 @@ import (
 	"regexp"
 )
 
-type Claim struct {
+type Invite struct {
 	UUID        string              `yaml:"uuid"`
 	ProjectName string              `yaml:"name"`
 	BoardTypes  map[string][]string `yaml:"boardTypes"`
 	FedConfig   *Config             `yaml:"fedConfig"`
 }
 
-type Invite struct {
-	Key   string `json:"key"`
-	Token string `json:"token"`
+func padKey(key string) string {
+	if len(key) < 16 {
+		return fmt.Sprintf("%*s", 16, key)
+	} else {
+		return key[0:16]
+	}
 }
 
-func CreateInvite(project *core.Project, config *Config) (invite Invite, err error) {
-	claim := Claim{
-		UUID:        project.Config.UUID,
+func CreateInvite(project *core.Project, key string, config *Config) (token string, err error) {
+	invite := Invite{
 		ProjectName: project.Config.Public.Name,
 		BoardTypes:  project.Config.Public.BoardTypes,
 		FedConfig:   config,
 	}
 
-	data, err := yaml.Marshal(&claim)
+	key = padKey(key)
+	data, err := yaml.Marshal(&invite)
 	if err != nil {
-		return Invite{}, err
+		return "", err
 	}
 
-	key := core.GenerateRandomString(16)
-	token, err := core.EncryptString(key, string(data))
+	token, err = core.EncryptString(key, string(data))
 	if err != nil {
-		return Invite{}, err
+		return "", err
 	}
 
-	//	logrus.Infof("created invite %s", string(data))
-
-	return Invite{
-		Key:   key,
-		Token: token,
-	}, nil
+	logrus.Infof("created invite %s", token)
+	return token, nil
 }
 
-func CreateInviteForExchanges(project *core.Project, exchanges []string, removeCredentials bool) (invite Invite, err error) {
+func CreateInviteForExchanges(project *core.Project, key string, exchanges []string,
+	removeCredentials bool) (token string, err error) {
 	config, err := ReadConfig(project, removeCredentials)
 	if err != nil {
-		return Invite{}, err
+		return "", err
 	}
 
 	logrus.Infof("creating invite in project %s with exchanges %v", project.Config.UUID, exchanges)
@@ -83,10 +82,10 @@ func CreateInviteForExchanges(project *core.Project, exchanges []string, removeC
 	}
 	config.Ftp = ftpConfigs
 
-	return CreateInvite(project, config)
+	return CreateInvite(project, key, config)
 }
 
-func GetClaimDest(base string, claim *Claim) (dest string, exist bool, err error) {
+func GetClaimDest(base string, claim *Invite) (dest string, exist bool, err error) {
 	if ref := core.FindProjInConfigByUUID(claim.UUID); ref != nil {
 		return ref.Folder, true, nil
 	}
@@ -136,48 +135,41 @@ func mergeFedConfig(project *core.Project, c *Config) {
 	WriteConfig(project, fedConfig)
 }
 
-func ClaimInvite(invite Invite, folder string) (*core.Project, error) {
-	token := reWhiteSpace.ReplaceAllString(invite.Token, "")
-	key := reWhiteSpace.ReplaceAllString(invite.Key, "")
+func Join(project *core.Project, key string, token string) error {
+	token = reWhiteSpace.ReplaceAllString(token, "")
+	key = reWhiteSpace.ReplaceAllString(key, "")
 
+	key = padKey(key)
 	decrypted, err := core.DecryptString(key, token)
 	if err != nil {
-		return nil, err
+		return os.ErrInvalid
 	}
-	var claim Claim
+	var invite Invite
 
-	err = yaml.Unmarshal([]byte(decrypted), &claim)
+	err = yaml.Unmarshal([]byte(decrypted), &invite)
 	if err != nil {
-		return nil, err
+		return os.ErrInvalid
 	}
 
-	dest, exist, err  := GetClaimDest(folder, &claim)
+	config, err := ReadConfig(project, false)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var project *core.Project
-	if exist {
-		project, err = core.OpenProject(dest)
+
+	if invite.FedConfig.UUID == config.UUID {
+		logrus.Infof("merge fed config with %d S3, %d WebDev, %d FTP",
+			len(invite.FedConfig.S3), len(invite.FedConfig.WebDAV), len(invite.FedConfig.Ftp))
+		mergeFedConfig(project, invite.FedConfig)
 	} else {
-		project, err = core.InitProject(dest, nil)
+		logrus.Infof("set fed config with %d S3, %d WebDev, %d FTP",
+			len(invite.FedConfig.S3), len(invite.FedConfig.WebDAV), len(invite.FedConfig.Ftp))
+		WriteConfig(project, invite.FedConfig)
 	}
-	if err != nil {
-		return nil, err
-	}
 
-	project.Config.UUID = claim.UUID
-	project.Config.Public.BoardTypes = claim.BoardTypes
+	delete(states, project.Config.UUID)
 
-
-	mergeFedConfig(project, claim.FedConfig)
-
-	if exist {
-		logrus.Infof("succesfully updated project with %s(%s) from invite",
-			project.Config.Public.Name, project.Config.UUID)
-	} else {
-		logrus.Infof("succesfully created project with %s(%s) from invite",
-			project.Config.Public.Name, project.Config.UUID)
-	}
-	return project, nil
+	logrus.Infof("succesfully updated project with %s(%s) from invite",
+		project.Config.Public.Name, project.Config.UUID)
+	return nil
 }

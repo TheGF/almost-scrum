@@ -54,12 +54,9 @@ func syncCommand(projectPath string, args []string) {
 
 }
 
-func claimCommand(projectPath string, args []string) {
-	if len(args) == 1 {
-		color.Red("destination folder required!")
-		os.Exit(1)
-	}
-	folder := args[1]
+func joinCommand(projectPath string, args []string) {
+	project := getProject(projectPath)
+
 	prompt := promptui.Prompt{
 		Label: "Enter the token",
 	}
@@ -70,8 +67,7 @@ func claimCommand(projectPath string, args []string) {
 	}
 	key, _ := prompt.Run()
 
-	project, err := fed.ClaimInvite(fed.Invite{Key: key, Token: token}, folder)
-	if err != nil {
+	if err := fed.Join(project, key, token); err != nil {
 		color.Red("Cannot create project from invite: %v", err)
 	} else {
 		color.Green("Invite accepted. Project %s created in %s",
@@ -88,7 +84,7 @@ func processFed(projectPath string, args []string) {
 	subCmd := args[0]
 	switch subCmd {
 	case "sync": syncCommand(projectPath, args)
-	case "claim": claimCommand(projectPath, args)
+	case "claim": joinCommand(projectPath, args)
 	default: color.Red("unknown command %s", subCmd)
 	}
 

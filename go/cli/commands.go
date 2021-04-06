@@ -30,7 +30,7 @@ func usage() {
 		"\tusers add <id>    Add a user to current project\n" +
 		"\tusers del <id>    Remove a user to current project\n" +
 		"\tfed sync	[days]   Sync the project with the Federation. Optionally #days to consider \n" +
-		"\tfed claim <dest>  Claim an invite to the Federation\n" +
+		"\tfed join          Join the Federation\n" +
 		"\tfed share <file>  Make a file public to the Federation\n" +
 		"\tweb               Start the Web UI\n\n" +
 		"\treindex [full]    Rebuild the search index \n\n" +
