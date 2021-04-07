@@ -6,12 +6,12 @@ A special board is __All__, which is a convenient view to display all tasks from
 ## How to create a board
 Just select *New Board* in the Actions menu
 
-![image 15% left](~public/help/newBoard.png)
+![](/help/newBoard.png#size=15,align=left)
 
 ## The board content
 The board contains a filter panel and a list of tasks.
 
-![image 80% left](~public/help/board.png)
+![](/help/board.png#size=90,align=left)
 The filter panel includes:
 - a button to create a new task
 - a search field to filter the tasks
@@ -25,7 +25,7 @@ A task represents some activity assigned to a person (owner).
 The task owner may usually changes during the project life. 
 For instance at creation many tasks are assigned to the product owner and their owner changes during the Sprint planning.
 
-![image 80% left](~public/help/taskHeader.png)
+![](/help/taskHeader.png#size=80,align=left)
 
 Each task has an header and a body. The body can hide when the user clicks the collapse button in the filter panel or when the user clicks on the header.
 
@@ -42,7 +42,7 @@ The header shows:
 The user can change the name, the board and the owner.
 A user should not reassign a task when he is not the owner: when multiple users are editing the same task, a conflict may occur during Git pull.
 
-![image 80% left](~public/help/task.png)
+![](/help/task.png#size=80,align=left)
 
 The body of the task shows the content of the task in multiple tabs:
 - a View tab that shows the Markdown formatted in _HTML_
@@ -65,20 +65,20 @@ A tag is any token in the task that starts with the character __#__. Tags are sp
 A task property can contain tags (e.g. Status)
 
 ### About Indexing
-![image 20% left](~public/help/searchLorem.png)
+![](/help/searchLorem.png#size=20,align=left)
 All content in a task is automatically indexed. 
 Then a user can filter the tasks by typing indexed words in the filter panel. The filter is able to suggest words that are relevant.
 
-![image 20% left](~public/help/searchStatus.png)
+![](/help/searchStatus.png#size=20,align=left)
 
 When the word starts with _#_, the search is for a tag. 
 When the work starts with _@_, the search is for a user
 
 ### About Images 
-![image 60% left](~public/help/imageEdit.png)
+![](/help/imageEdit.png#size=60,align=left)
 The Markdown editor supports _copy and paste_ or _drag and drop_ of images. 
 
-![image 60% left](~public/help/imageView.png)
+![](/help/imageView.png#size=60,align=left)
 Once the image has been pasted in the editor, it can be resized and aligned in the HTML view (click on the image).
 
 

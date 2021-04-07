@@ -8,7 +8,7 @@ Also the library allows to create simple wiki pages (Page).
 Just click on the __Library__ button at the top of the screen.
 
 ## The header
-![image 60% left](~public/help/libraryHeader.png)
+![](/help/libraryHeader.png#size=60,align=left)
 
 The library header shows:
 - the current folder in the library 

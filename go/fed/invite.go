@@ -158,18 +158,18 @@ func Join(project *core.Project, key string, token string) error {
 
 
 	if invite.FedConfig.UUID == config.UUID {
-		logrus.Infof("merge fed config with %d S3, %d WebDev, %d FTP",
-			len(invite.FedConfig.S3), len(invite.FedConfig.WebDAV), len(invite.FedConfig.Ftp))
+		logrus.Infof("merge fed node %s with %d S3, %d WebDev, %d FTP",
+			config.UUID, len(invite.FedConfig.S3), len(invite.FedConfig.WebDAV), len(invite.FedConfig.Ftp))
 		mergeFedConfig(project, invite.FedConfig)
 	} else {
-		logrus.Infof("set fed config with %d S3, %d WebDev, %d FTP",
-			len(invite.FedConfig.S3), len(invite.FedConfig.WebDAV), len(invite.FedConfig.Ftp))
+		logrus.Infof("connect to new Federation node %s with %d S3, %d WebDev, %d FTP",
+			invite.FedConfig.UUID, len(invite.FedConfig.S3), len(invite.FedConfig.WebDAV), len(invite.FedConfig.Ftp))
 		WriteConfig(project, invite.FedConfig)
 	}
 
 	delete(states, project.Config.UUID)
 
-	logrus.Infof("succesfully updated project with %s(%s) from invite",
+	logrus.Infof("succesfully updated project with %s with invite from node %s",
 		project.Config.Public.Name, project.Config.UUID)
 	return nil
 }

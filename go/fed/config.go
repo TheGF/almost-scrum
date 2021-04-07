@@ -13,7 +13,7 @@ import (
 const configFile = "fed.yaml"
 
 type Config struct {
-	UUID          string                   `json:"id" yaml:"id"`
+	UUID          string                   `json:"uuid" yaml:"uuid"`
 	Secret        string                   `json:"secret" yaml:"secret"`
 	ReconnectTime time.Duration            `json:"reconnectTime" yaml:"reconnectTime"`
 	PollTime      time.Duration            `json:"pollTime" yaml:"pollTime"`

@@ -20,7 +20,7 @@ func getExchanges(config *Config) []transport.Exchange {
 	return exchanges
 }
 
-func loadLocs(signal *Signal) error {
+func loadLocs(signal *Connection) error {
 	locs := sync.Map{}
 	count := 0
 	err := filepath.Walk(signal.local, func(p string, info os.FileInfo, err error) error {
@@ -41,7 +41,7 @@ func loadLocs(signal *Signal) error {
 	return nil
 }
 
-func GetSignal(project *core.Project) (*Signal, error) {
+func Connect(project *core.Project) (*Connection, error) {
 	if signal, found := states[project.Config.UUID]; found {
 		return signal, nil
 	}
@@ -57,9 +57,9 @@ func GetSignal(project *core.Project) (*Signal, error) {
 		return nil, err
 	}
 
-	signal := &Signal{
+	connection := &Connection{
 		local:     localRoot,
-		remote:    project.Config.UUID,
+		remote:    config.UUID,
 		locs:      sync.Map{},
 		exchanges: map[transport.Exchange]bool{},
 		config:    config,
@@ -67,25 +67,25 @@ func GetSignal(project *core.Project) (*Signal, error) {
 	}
 
 	for _, exchange := range getExchanges(config) {
-		signal.exchanges[exchange] = false
+		connection.exchanges[exchange] = false
 	}
 
-	if err := loadLocs(signal); err != nil {
+	if err := loadLocs(connection); err != nil {
 		return nil, err
 	}
 
-	connect(signal)
+	open(connection)
 
 	go func() {
-		signal.reconnect = time.NewTicker(signal.config.ReconnectTime)
-		for range signal.reconnect.C {
-			connect(signal)
+		connection.reconnect = time.NewTicker(connection.config.ReconnectTime)
+		for range connection.reconnect.C {
+			open(connection)
 		}
 	}()
 
 	logrus.Infof("federation for project %s started successfully", project.Config.UUID)
-	states[project.Config.UUID] = signal
-	return signal, nil
+	states[project.Config.UUID] = connection
+	return connection, nil
 }
 
 func GetTimeDiff() (int64, error) {
@@ -114,15 +114,15 @@ func checkTime() error {
 				return nil
 			}
 		} else {
-			logrus.Warnf("cannot connect to time server. Retry %d/10: %v", i, err)
+			logrus.Warnf("cannot open to time server. Retry %d/10: %v", i, err)
 			time.Sleep(2 * time.Second)
 		}
 	}
-	logrus.Errorf("cannot connect to time server")
+	logrus.Errorf("cannot open to time server")
 	return ErrFedNoTimeServer
 }
 
-func getConnectedExchanges(signal *Signal) []transport.Exchange {
+func getConnectedExchanges(signal *Connection) []transport.Exchange {
 	var exchanges []transport.Exchange
 	for exchange, connected := range signal.exchanges {
 		if connected {
@@ -132,7 +132,7 @@ func getConnectedExchanges(signal *Signal) []transport.Exchange {
 	return exchanges
 }
 
-func asyncUpdates(signal *Signal, exchange transport.Exchange, ch transport.UpdatesCh) {
+func asyncUpdates(signal *Connection, exchange transport.Exchange, ch transport.UpdatesCh) {
 	for {
 		locs, open := <-ch
 		if !open {
@@ -150,11 +150,11 @@ func asyncUpdates(signal *Signal, exchange transport.Exchange, ch transport.Upda
 	}
 }
 
-func connect(signal *Signal) int {
+func open(connection *Connection) int {
 	c := make(chan bool)
 
 	var disconnected []transport.Exchange
-	for exchange, connected := range signal.exchanges {
+	for exchange, connected := range connection.exchanges {
 		if !connected {
 			disconnected = append(disconnected, exchange)
 		}
@@ -162,17 +162,17 @@ func connect(signal *Signal) int {
 
 	for _, exchange := range disconnected {
 		go func(exchange transport.Exchange) {
-			ch, err := exchange.Connect(signal.remote, signal.local)
+			ch, err := exchange.Connect(connection.remote, connection.local)
 			if err == nil {
 				logrus.Infof("connected to transport %s", exchange)
 				c <- true
-				signal.exchanges[exchange] = true
+				connection.exchanges[exchange] = true
 				if ch != nil {
-					go asyncUpdates(signal, exchange, ch)
+					go asyncUpdates(connection, exchange, ch)
 				}
 			} else {
 				c <- false
-				logrus.Infof("failed connect to transport %s: %v", exchange, err)
+				logrus.Infof("failed open to transport %s: %v", exchange, err)
 			}
 		}(exchange)
 	}
@@ -184,7 +184,7 @@ func connect(signal *Signal) int {
 		}
 	}
 
-	return len(signal.exchanges) - len(disconnected) + newConnected
+	return len(connection.exchanges) - len(disconnected) + newConnected
 }
 
 func Disconnect(project *core.Project) {

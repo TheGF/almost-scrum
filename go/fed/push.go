@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func pushToExchange(signal *Signal, exchange transport.Exchange, r chan error) {
+func pushToExchange(signal *Connection, exchange transport.Exchange, r chan error) {
 	span := time.Duration(signal.config.Span) * time.Hour * 24
 	since := time.Now().Add(-span)
 	files, err := exchange.List(since)
@@ -31,7 +31,7 @@ func pushToExchange(signal *Signal, exchange transport.Exchange, r chan error) {
 }
 
 func Push(project *core.Project) (int, error) {
-	signal, _ := GetSignal(project)
+	signal, _ := Connect(project)
 	signal.inUse.Add(1)
 	defer signal.inUse.Done()
 

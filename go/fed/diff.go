@@ -164,7 +164,7 @@ func CreateDiff(project *core.Project, file string) (*Diff, error) {
 func GetDiffs(project *core.Project) ([]*Diff, error) {
 	var diffs []*Diff
 
-	state, err := GetSignal(project)
+	state, err := Connect(project)
 	if err != nil {
 		return nil, err
 	}

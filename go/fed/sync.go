@@ -15,7 +15,7 @@ type Status struct {
 }
 
 func GetStatus(project *core.Project) Status {
-	signal, err := GetSignal(project)
+	signal, err := Connect(project)
 	if err != nil {
 		return Status{}
 	}
@@ -35,7 +35,7 @@ func GetStatus(project *core.Project) Status {
 	return s
 }
 
-func pushExchange(signal *Signal, exchange transport.Exchange, remote map[string]bool, stat *Stat) (errs []error) {
+func pushExchange(signal *Connection, exchange transport.Exchange, remote map[string]bool, stat *Stat) (errs []error) {
 	start := time.Now()
 	signal.locs.Range(func(loc, refs interface{}) bool {
 		if _, found := remote[loc.(string)]; !found {
@@ -57,7 +57,7 @@ func pushExchange(signal *Signal, exchange transport.Exchange, remote map[string
 	return
 }
 
-func pullExchange(signal *Signal, exchange transport.Exchange, remote map[string]bool, stat *Stat) (errs []error) {
+func pullExchange(signal *Connection, exchange transport.Exchange, remote map[string]bool, stat *Stat) (errs []error) {
 	start := time.Now()
 	for loc, present := range remote {
 		if !present {
@@ -80,7 +80,7 @@ func pullExchange(signal *Signal, exchange transport.Exchange, remote map[string
 	return
 }
 
-func syncExchange(signal *Signal, exchange transport.Exchange, since time.Time, r chan bool) {
+func syncExchange(connection *Connection, exchange transport.Exchange, since time.Time, r chan bool) {
 	logrus.Infof("Federation sync from exchange %s", exchange)
 
 	list, err := exchange.List(since)
@@ -95,11 +95,11 @@ func syncExchange(signal *Signal, exchange transport.Exchange, since time.Time, 
 	}
 
 	stat := Stat{}
-	ok := len(pullExchange(signal, exchange, remote, &stat)) == 0
-	ok = ok && len(pushExchange(signal, exchange, remote, &stat)) == 0
-	signal.stat[exchange] = stat
+	ok := len(pullExchange(connection, exchange, remote, &stat)) == 0
+	ok = ok && len(pushExchange(connection, exchange, remote, &stat)) == 0
+	connection.stat[exchange] = stat
 
-	diff := 3 * time.Duration(signal.config.Span) * 24 * time.Hour
+	diff := 3 * time.Duration(connection.config.Span) * 24 * time.Hour
 	before := time.Now().Add(-diff)
 	_ = exchange.Delete("dat", before)
 
@@ -107,33 +107,34 @@ func syncExchange(signal *Signal, exchange transport.Exchange, since time.Time, 
 }
 
 func Sync(project *core.Project, since time.Time) (failedExchanges int, err error) {
-	signal, err := GetSignal(project)
+	connection, err := Connect(project)
 	if err != nil {
 		return 0, err
 	}
 
 	if since.IsZero() {
-		diff := time.Duration(signal.config.Span) * 24 * time.Hour
+		diff := time.Duration(connection.config.Span) * 24 * time.Hour
 		since = time.Now().Add(-diff)
 	}
 
 	now := time.Now()
-	if diff := time.Now().Sub(signal.config.LastSync).Seconds(); diff < 30 {
+	if diff := time.Now().Sub(connection.config.LastSync).Seconds(); diff < 30 {
 		logrus.Infof("last sync only %f seconds ago; try later", diff)
 		return 0, nil
 	}
-	signal.config.LastSync = now
+	connection.config.LastSync = now
 
-	logrus.Infof("Synchronize project %s with federation starting from %s", project.Config.UUID, since)
+	logrus.Infof("Synchronize project %s with federation node %s starting from %s", project.Config.Public.Name,
+		connection.config.UUID, since)
 
-	if err := loadLocs(signal); err != nil {
+	if err := loadLocs(connection); err != nil {
 		return 0, err
 	}
 
 	r := make(chan bool)
-	connected := getConnectedExchanges(signal)
+	connected := getConnectedExchanges(connection)
 	for _, exchange := range connected {
-		go syncExchange(signal, exchange, since, r)
+		go syncExchange(connection, exchange, since, r)
 	}
 
 	for range connected {
@@ -142,9 +143,9 @@ func Sync(project *core.Project, since time.Time) (failedExchanges int, err erro
 		}
 	}
 
-//	_ = WriteConfig(project, signal.config)
+//	_ = WriteConfig(project, connection.config)
 
-	logrus.Infof("Synchronization completed for project %s with %d failed exchanges", project.Config.UUID,
-		failedExchanges)
+	logrus.Infof("Synchronization completed for project %s on node %s with %d failed exchanges",
+		project.Config.Public.Name, connection.config.UUID,	failedExchanges)
 	return
 }

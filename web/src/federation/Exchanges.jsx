@@ -1,5 +1,5 @@
 import {
-    Accordion, Button, ButtonGroup, Input, Spacer, Table, Td, Tr, useToast, VStack
+    Accordion, Button, ButtonGroup, FormLabel, Input, Spacer, Table, Td, Tr, useToast, VStack
 } from '@chakra-ui/react';
 import { React, useContext, useEffect, useState } from "react";
 import T from '../core/T';
@@ -95,9 +95,9 @@ function Exchanges(props) {
     return config ? <VStack>
         <Table size="sm" padding="0" spacing="0">
             <Tr>
-                <Td><label><T>secret</T></label></Td>
-                <Td><Input value={config.secret} /></Td>
-                <Td><label><T>span (days)</T></label></Td>
+                <Td><FormLabel><T>Federation ID</T></FormLabel></Td>
+                <Td><Input value={config.uuid} /></Td>
+                <Td><FormLabel><T>span (days)</T></FormLabel></Td>
                 <Td><Input type="number" value={config.span} /></Td>
             </Tr>
             <Tr>

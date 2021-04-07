@@ -8,7 +8,7 @@ import (
 )
 
 
-func pullFromExchange(signal *Signal, exchange transport.Exchange, since time.Time, r chan error)  {
+func pullFromExchange(signal *Connection, exchange transport.Exchange, since time.Time, r chan error)  {
 	go func() {
 		logrus.Infof("start pull from transport %s for locs newer than %s", exchange, since)
 		locs, err := exchange.List(since)
@@ -39,7 +39,7 @@ func pullFromExchange(signal *Signal, exchange transport.Exchange, since time.Ti
 
 
 func Pull(project *core.Project, since time.Time) (int, error) {
-	signal, err := GetSignal(project)
+	signal, err := Connect(project)
 	if err != nil {
 		return 0, err
 	}

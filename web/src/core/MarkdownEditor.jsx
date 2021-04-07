@@ -19,9 +19,10 @@ import chart from '@toast-ui/editor-plugin-chart';
 function MarkdownEditor(props) {
     const { project } = useContext(UserContext);
     const { imageFolder, height, onSave, disablePreview, readOnly, ...more } = props
-    const libraryPath = `/api/v1/projects/${project}/library`
+    const projectPath = `/api/v1/projects/${project}`
 
-    const [value, setValue] = useState(props.value && `${props.value}`.replaceAll('~library', libraryPath) || null);
+    const [value, setValue] = useState(props.value && `${props.value}`
+                                        .replaceAll('~', projectPath) || null);
     const editorRef = useRef(null)
     const [editImage, setEditImage] = useState(null)
     const [refresh, setRefresh] = useState(false)
@@ -56,7 +57,7 @@ function MarkdownEditor(props) {
     function onChange() {
         const value = editorRef.current.getInstance().getMarkdown()
         setValue(value)
-        props.onChange(value.replaceAll(libraryPath, '~library'));
+        props.onChange(value.replaceAll(projectPath, '~'));
     }
 
     function addImageBlobHook(blob, callback) {

@@ -1,5 +1,5 @@
 import { React, useEffect, useState } from "react";
-import MarkdownView from '../core/MarkdownView';
+import MarkdownEditor from '../core/MarkdownEditor';
 import Server from '../server';
 
 
@@ -13,10 +13,7 @@ function HelpTab(props) {
     }
     useEffect(loadFile, [])
 
-    return <div className="mde-preview">
-        <div className="mde-preview-content task-viewer" style={{ overflow: 'auto' }}>
-            <MarkdownView value={value} readOnly={true} />
-        </div>
-    </div>
+    return value && value.length && <MarkdownEditor value={value} readOnly={true} />
+
 }
 export default HelpTab

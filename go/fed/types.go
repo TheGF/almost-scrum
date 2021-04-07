@@ -32,7 +32,7 @@ type Stat struct {
 	Pull     int   `json:"pull"`
 }
 
-type Signal struct {
+type Connection struct {
 	local      string
 	remote     string
 	config     *Config
@@ -45,5 +45,5 @@ type Signal struct {
 }
 
 var (
-	states = map[string]*Signal{}
+	states = map[string]*Connection{}
 )
