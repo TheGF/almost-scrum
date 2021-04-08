@@ -15,37 +15,15 @@ import (
 	"time"
 )
 
-type exportItem struct {
-	folders []string
-	system  bool
-	prefix  string
-}
-
-var exportItems = []exportItem{
-	{
-		folders: []string{
-			core.ProjectBoardsFolder,
-			core.ProjectArchiveFolder,
-			core.ProjectLibraryFolder,
-		},
-		system: false,
-		prefix: "da",
-	},
-	{
-		folders: []string{core.ProjectModelsFolder},
-		system:  true,
-		prefix:  "sy",
-	},
-}
 
 const maxExportSizePerFile = 16 * 1024 * 1024
 
-func getFiles(path string, system bool, time time.Time) []string {
+func getFiles(path string, includePrivate bool, time time.Time) []string {
 	var files []string
 
 	_ = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if info != nil && !info.IsDir() && info.ModTime().After(time) && info.Name() != fs.AttrsFileName {
-			if system {
+			if includePrivate {
 				files = append(files, path)
 			} else if attr, _ := fs.GetExtendedAttr(path); attr.Public {
 				files = append(files, path)
@@ -58,15 +36,12 @@ func getFiles(path string, system bool, time time.Time) []string {
 
 const v1 = "v1"
 
-func addHeader(projectId string, writer *zip.Writer, user string, time time.Time) error {
-	config := core.ReadConfig()
+func addHeader(origin string, writer *zip.Writer, user string, time time.Time) error {
 	header := Header{
-		Version:   v1,
-		ProjectID: projectId,
-		Host:      config.Host,
-		Hostname:  config.Hostname,
-		Time:      time,
-		User:      user,
+		Version:  v1,
+		Host:     origin,
+		Time:     time,
+		User:     user,
 	}
 	bytes_, err := json.Marshal(header)
 	if err != nil {
@@ -158,9 +133,11 @@ func nextWriter(path string, prefix string, time time.Time, writer *zip.Writer,
 	return zip.NewWriter(zipFile), files_, nil
 }
 
-func buildPackage(project *core.Project, dest string, prefix string, user string, files []string) ([]string, error) {
+func buildPackage(project *core.Project, origin string, prefix string, user string, files []string) ([]string, error) {
+	dest := filepath.Join(project.Path, core.ProjectFedFilesFolder, origin)
+
 	if err := os.MkdirAll(dest, 0755); err != nil {
-		logrus.Errorf("cannot create output folder %s: %v", dest, err)
+		logrus.Errorf("cannot create output dest %s: %v", origin, err)
 		return nil, err
 	}
 
@@ -173,7 +150,7 @@ func buildPackage(project *core.Project, dest string, prefix string, user string
 		return nil, err
 	}
 
-	if err = addHeader(project.Config.UUID, writer, user, tm); err != nil {
+	if err = addHeader(origin, writer, user, tm); err != nil {
 		logrus.Warnf("cannot add header in zip export: %v", err)
 		return nil, err
 	}
@@ -182,7 +159,7 @@ func buildPackage(project *core.Project, dest string, prefix string, user string
 		total += size
 		cnt += 1
 		if size > maxExportSizePerFile {
-			writer, zipFiles, err = nextWriter(dest, prefix, tm, writer, zipFiles)
+			writer, zipFiles, err = nextWriter(origin, prefix, tm, writer, zipFiles)
 			if err != nil {
 				return nil, err
 			}
@@ -195,20 +172,20 @@ func buildPackage(project *core.Project, dest string, prefix string, user string
 	return zipFiles, nil
 }
 
-func export(project *core.Project, item exportItem, user string,
+func export(project *core.Project, item syncItem, user string,
 	host string, since time.Time) ([]string, error) {
 	var files []string
 	for _, path := range item.folders {
 		path = filepath.Join(project.Path, path)
-		files = append(files, getFiles(path, item.system, since)...)
+		files = append(files, getFiles(path, item.includePrivate, since)...)
 	}
 	if len(files) == 0 {
 		return nil, nil
 	}
 	logrus.Infof("file changed since %s: %v", since, files)
 
-	dest := filepath.Join(project.Path, core.ProjectFedFilesFolder, host)
-	zipFiles, err := buildPackage(project, dest, item.prefix, user, files)
+	origin := fmt.Sprintf("%s.%s", project.Config.Public.Name, host)
+	zipFiles, err := buildPackage(project, origin, item.prefix, user, files)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +206,7 @@ func Export(project *core.Project, user string, since time.Time) ([]string, erro
 	}
 
 	c := core.ReadConfig()
-	for _, item := range exportItems {
+	for _, item := range syncItems {
 		files_, err := export(project, item, user, c.Host, since)
 		if err != nil {
 			return nil, err

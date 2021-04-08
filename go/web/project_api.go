@@ -267,6 +267,7 @@ func projectRoute(group *gin.RouterGroup) {
 type ProjectInfo struct {
 	SystemUser string                   `json:"systemUser"`
 	LoginUser  string                   `json:"loginUser"`
+	Host       string                   `json:"host"`
 	Config     core.ProjectConfigPublic `json:"config"`
 	Models     []core.Model             `json:"models"`
 	GitProject bool                     `json:"gitProject"`
@@ -285,6 +286,7 @@ func getProjectInfoAPI(c *gin.Context) {
 	info := ProjectInfo{
 		SystemUser: core.GetSystemUser(),
 		LoginUser:  getWebUser(c),
+		Host:       core.ReadConfig().Host,
 		Config:     project.Config.Public,
 		Models:     project.Models,
 		GitProject: gitProject,

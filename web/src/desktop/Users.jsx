@@ -1,6 +1,8 @@
 import {
     Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel,
-    Box, Button, ButtonGroup, HStack, Input, VStack
+    Box, Button, ButtonGroup, HStack, Input, MenuItem, Modal,
+    ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader,
+    ModalOverlay, VStack, useDisclosure
 } from "@chakra-ui/react";
 import { React, useContext, useEffect, useState } from "react";
 import { CgUserlane } from 'react-icons/all';
@@ -8,10 +10,13 @@ import T from "../core/T";
 import Server from '../server';
 import UserContext from '../UserContext';
 
+
 function Users(props) {
-    const { project, info } = useContext(UserContext)
+    const { project, info, reload } = useContext(UserContext)
     const [users, setUsers] = useState([])
     const [username, setUsername] = useState(null)
+    const { isOpen, onClose } = props
+    const [requireReload, setRequireReload] = useState(false)
 
     function loadUserList() {
         Server.listUsers(project)
@@ -25,7 +30,10 @@ function Users(props) {
 
     function delUser(name) {
         Server.delUser(project, name)
-            .then(loadUserList)
+            .then(_ => {
+                loadUserList()
+                setRequireReload(true)
+            })
     }
 
     function addUser() {
@@ -33,7 +41,16 @@ function Users(props) {
             .then(_ => {
                 loadUserList()
                 setUsername('')
+                setRequireReload(true)
             })
+    }
+
+    function closeModal() {
+        onClose()
+        if (requireReload) {
+            reload()
+            setRequireReload(false)
+        }
     }
 
     function UserProfile(props) {
@@ -88,11 +105,12 @@ function Users(props) {
     </AccordionItem>)
 
 
-    return <VStack align="left">
+    const body = <VStack align="left">
         <HStack>
             <Input type="text" w="100%" value={username}
                 onChange={e => setUsername(e.target.value)} />
-            <Button minW="10em" onClick={addUser}>
+            <Button minW="10em" onClick={addUser}
+                isDisabled={!username || !username.length} >
                 <T>Add User</T>
             </Button>
         </HStack>
@@ -100,7 +118,23 @@ function Users(props) {
             {userList}
         </Accordion>
         <a href="https://www.vecteezy.com/free-vector/avatar-icon">Avatar Icon Vectors by Vecteezy</a>
-
     </VStack >
+
+    return <Modal isOpen={isOpen} onClose={closeModal} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+            <ModalHeader>Users</ModalHeader>
+            <ModalBody>
+                {body}
+            </ModalBody>
+
+            <ModalFooter>
+                <Button colorScheme="blue" mr={3} onClick={closeModal}>
+                    Close
+                  </Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+
 }
 export default Users

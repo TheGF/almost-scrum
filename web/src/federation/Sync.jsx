@@ -9,9 +9,9 @@ import UserContext from '../UserContext';
 
 
 function Sync(props) {
-    const { project } = useContext(UserContext)
+    const { project, reload } = useContext(UserContext)
     const [diffs, setDiffs] = useState(null)
-    const [exported, setExported] = useState(null)
+//    const [exported, setExported] = useState(null)
     const [updated, setUpdated] = useState(false)
     const { onClose } = props
 
@@ -25,13 +25,13 @@ function Sync(props) {
         setDiffs(null)
         Server.postFedImport(project, diffs)
             .then(_ => setUpdated(true))
-            .then(getDiffs)
+            .then(reload)
     }
 
-    function exportFiles() {
-        Server.postFedExport(project, diffs)
-            .then(setExported)
-    }
+    // function exportFiles() {
+    //     Server.postFedExport(project, diffs)
+    //         .then(setExported)
+    // }
 
 
     function Row(props) {
@@ -71,12 +71,11 @@ function Sync(props) {
                 </Tbody>
             </Table>
         </Flex> : <h1>No updates</h1>}
-        {exported && exported.length ? <h1>
+        {/* {exported && exported.length ? <h1>
             Exported {exported.length} file{exported.length > 1 ? 's' : ''}: {exported.join(',')}
-        </h1> : <h1>No exports</h1>}
+        </h1> : <h1>No exports</h1>} */}
         <ButtonGroup>
             <Button colorScheme="blue" onClick={importFiles} isDisabled={!rows.length}><T>import</T></Button>
-            <Button colorScheme="blue" onClick={exportFiles} isDisabled={!updated && rows.length>0}><T>export</T></Button>
             <Button onClick={onClose}><T>close</T></Button>
         </ButtonGroup>
 

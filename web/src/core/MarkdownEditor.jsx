@@ -44,7 +44,10 @@ function MarkdownEditor(props) {
                     const blob = item.getAsFile()
                     Server.uploadFileToLibrary(project, imageFolder,
                         blob, name)
-                        .then(replaceHtml)
+                        .then(_=> {
+                            replaceHtml()
+                            Server.setVisibility(project, `${imageFolder}/${name}`, true)
+                        })
                 }
             }
         }
@@ -69,6 +72,7 @@ function MarkdownEditor(props) {
             blob, name)
             .then(_=> {
                 callback(url, ' ')
+                Server.setVisibility(project, `${imageFolder}/${name}`, true)
                 setTimeout(_=>setRefresh(!refresh), 500)
             })
         return false;

@@ -22,7 +22,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-
 func loadStaticContent(router *gin.Engine) {
 	for _, name := range assets.AssetNames() {
 		if !strings.HasPrefix(name, "build") {
@@ -51,8 +50,9 @@ func loadStaticContent(router *gin.Engine) {
 var knownClients = make([]string, 0)
 
 type hello struct {
-	Version string `json:"version"`
-	Portal  bool   `json:"portal"`
+	Version    string `json:"version"`
+	Host       string `json:"host"`
+	Portal     bool   `json:"portal"`
 	SystemUser string `json:"systemUser"`
 }
 
@@ -69,9 +69,12 @@ func setHello(r *gin.Engine, portal bool) {
 			logrus.Infof("New polite client %s added to the known list", id)
 		}
 
+		config := core.ReadConfig()
+
 		c.JSON(http.StatusOK, hello{
-			Version: core.AshVersion,
-			Portal:  portal,
+			Version:    core.AshVersion,
+			Host:       config.Host,
+			Portal:     portal,
 			SystemUser: core.GetSystemUser(),
 		})
 	})
@@ -105,7 +108,6 @@ func setBye(r *gin.Engine) {
 
 var srv *http.Server
 var autoExit bool
-
 
 func runServer(router *gin.Engine, addr string) {
 

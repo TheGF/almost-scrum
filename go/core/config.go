@@ -3,10 +3,12 @@ package core
 import (
 	"crypto/rand"
 	"encoding/hex"
-	uuid2 "github.com/google/uuid"
+	"fmt"
+	rand2 "math/rand"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -31,7 +33,6 @@ type ProjectRef struct {
 type Config struct {
 	Editor       string
 	Host         string
-	Hostname     string
 	User         string
 	Passwords    map[string]string
 	Projects     []ProjectRef
@@ -62,6 +63,15 @@ func getConfigPath() string {
 	return filepath.Join(configFolder, "almost-scrum.yaml")
 }
 
+
+func generateHost() string {
+	r := rand2.New(rand2.NewSource(time.Now().UnixNano()))
+
+	prefix := hostnames[r.Int() % len(hostnames)]
+	num := r.Int31()
+	return fmt.Sprintf("%s.%x", prefix, num)
+}
+
 //ReadConfig returns the global configuration
 func ReadConfig() *Config {
 	configPath := getConfigPath()
@@ -74,8 +84,7 @@ func ReadConfig() *Config {
 		WriteConfig(&Config{
 			Editor:       "",
 			User:         "",
-			Host:         uuid2.New().String(),
-			Hostname:     "aloha",
+			Host:         generateHost(),
 			Passwords:    map[string]string{},
 			Projects:     []ProjectRef{},
 			Secret:       getSecret(),

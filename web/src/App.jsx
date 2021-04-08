@@ -29,8 +29,7 @@ function App() {
   useEffect(chooseMode, [])
 
   const systemUser = hello && hello.systemUser
-  const entry = hello == null ? null :
-    hello.portal ? <Portal systemUser={systemUser} /> : <Desktop project="~" />;
+  const entry = hello && <Portal systemUser={systemUser} />|| null ;
   return (
     <ChakraProvider theme={theme}  >
       <ErrorBoundary>{entry}</ErrorBoundary>

@@ -5,20 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/core/hostnames.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../build.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/connect.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/connect.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/config.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fed/diff.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/diff.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/invite.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/invite.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/pull.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/pull.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/push.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/push.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/export.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/export.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fed/sync.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/sync.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fed/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/types.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/project_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/project_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_linux" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,10 +82,10 @@
       <recent name="$PROJECT_DIR$/web" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/core" />
       <recent name="$PROJECT_DIR$/fed/exchanges" />
       <recent name="$PROJECT_DIR$/fed" />
       <recent name="$PROJECT_DIR$/attributes" />
-      <recent name="$PROJECT_DIR$/core" />
       <recent name="$PROJECT_DIR$/git" />
     </key>
   </component>

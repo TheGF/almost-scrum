@@ -15,7 +15,6 @@ import (
 	"time"
 )
 
-
 type MergeMatch string
 
 const (
@@ -28,8 +27,8 @@ const (
 type MergeStrategy string
 
 const (
-	Extract  MergeStrategy = "extract"
-	Ignore                 = "ignore"
+	Extract MergeStrategy = "extract"
+	Ignore                = "ignore"
 )
 
 type MergeItem struct {
@@ -58,7 +57,6 @@ func parseComment(comment string) (owner string, origin []byte) {
 	}
 }
 
-
 func readHeader(project *core.Project, source *zip.File) (Header, error) {
 	var header Header
 	var content []byte
@@ -79,9 +77,6 @@ func readHeader(project *core.Project, source *zip.File) (Header, error) {
 		return header, ErrFedCorrupted
 	}
 
-	if header.ProjectID != project.Config.UUID {
-		return header, ErrFedCorrupted
-	}
 	return header, nil
 }
 
@@ -118,15 +113,16 @@ func matchFile(project *core.Project, source *zip.File) (match MergeMatch, owner
 	}
 }
 
-func CreateDiff(project *core.Project, file string) (*Diff, error) {
+func CreateDiff(project *core.Project, base string, file string) (*Diff, error) {
 	r, err := zip.OpenReader(file)
 	if err != nil {
 		return nil, err
 	}
 	defer r.Close()
 
+	input, _ := filepath.Rel(base, file)
 	log := Diff{
-		Input:        filepath.Base(file),
+		Input:        input,
 		Header:       Header{},
 		CreationTime: time.Time{},
 		Items:        map[string]MergeItem{},
@@ -172,12 +168,19 @@ func GetDiffs(project *core.Project) ([]*Diff, error) {
 	defer state.inUse.Done()
 
 	err = filepath.Walk(state.local, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() && strings.HasPrefix(info.Name(), "exp-") {
-			log, err := CreateDiff(project, path)
-			if err == nil {
-				diffs = append(diffs, log)
-			} else {
-				logrus.Warnf("cannot create log for %s: %v", path, err)
+		if info.IsDir() {
+			return nil
+		}
+
+		for _, exportItem := range syncItems {
+			if strings.HasPrefix(info.Name(), exportItem.prefix) {
+				log, err := CreateDiff(project, state.local, path)
+				if err == nil {
+					diffs = append(diffs, log)
+				} else {
+					logrus.Warnf("cannot analyze %s: %v", path, err)
+				}
+				break
 			}
 		}
 		return nil
@@ -186,7 +189,5 @@ func GetDiffs(project *core.Project) ([]*Diff, error) {
 		return nil, err
 	}
 
-
 	return diffs, nil
 }
-

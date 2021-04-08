@@ -10,6 +10,7 @@ import Help from '../help/Help';
 import UserContext from '../UserContext';
 import Boards from './Boards';
 import Settings from './Settings';
+import Users from "./Users";
 
 
 function Header(props) {
@@ -17,9 +18,8 @@ function Header(props) {
 
     const [activeBoard, setActiveBoard] = useState(null);
     const [boardKey, setBoardKey] = useState(0);
-    const [showSettings, setShowSettings] = useState(false);
+    const [showUsers, setShowUsers] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
-    const [showFederation, setShowFederation] = useState(false);
 
     const { setShowGitIntegration, onExit, askBoardName } = props;
     const { colorMode, toggleColorMode } = useColorMode()
@@ -30,7 +30,7 @@ function Header(props) {
     }
 
     return <Stack spacing={4} direction="row" align="center">
-        <Settings isOpen={showSettings} onClose={_ => setShowSettings(false)} />
+        <Users isOpen={showUsers} onClose={_ => setShowUsers(false)} />
         <Help isOpen={showHelp} onClose={_ => setShowHelp(false)} />
         <Menu>
             <MenuButton as={Button} rightIcon={<BiChevronDown />}>
@@ -49,7 +49,8 @@ function Header(props) {
                     onClick={_ => setShowGitIntegration(true)}>
                     Git Integration
                     </MenuItem> : null}
-                <MenuItem onClick={_ => setShowSettings(true)}>
+                <Users/>
+                <MenuItem onClick={_ => setShowUsers(true)}>
                     Users
                 </MenuItem>
                 <MenuItem onClick={_ => setShowHelp(true)}>

@@ -39,10 +39,11 @@ function Federation(props) {
             }
 
             if (stat['new'] || stat['update'] || stat['conflict']) {
+                setUpdates(stat['new']+stat['update']+stat['conflict'])
                 toast({
                     title: `Update from ${log.header.user}@${log.header.hostname}`,
                     description: `${stat['new']} new files, ${stat['update']} updates and ${stat['conflict']} conflicts` +
-                        '; click on federation button to update',
+                        '; click on federation button to synchronize',
                     status: "success",
                     duration: 9000,
                     isClosable: true,
@@ -59,36 +60,52 @@ function Federation(props) {
         Server.postFedSync(project)
     }
 
-    function startMonitoring() {
-        Server.getFedStatus(project)
-            .then(status => {
-                let connectedExchanges = []
-                let exchangesNum = 0
-                for (const [name, connected] of Object.entries(status.exchanges)) {
-                    if (connected) connectedExchanges.push(name)
-                    exchangesNum++
-                }
-                setStrength(connectedExchanges.length)
-
-                if (exchangesNum) {
-                    if (connectedExchanges.length) {
-                        Server.postFedExport(project)
-                        getDiffs()
-                        monitorInterval = setInterval(getDiffs, 2 * 60000)
-                        toast({
-                            title: `Connected`,
-                            description: 'Successfully connected to ' + connectedExchanges,
-                            status: "warning",
-                            duration: 9000,
-                            isClosable: true,
-                        })
-                    } else {
-                        if (monitorInterval) clearInterval(monitorInterval);
-                        setTimeout(startMonitoring, 2 * 60000)
-                    }
+    function exportNewFiles() {
+        Server.postFedExport(project)
+            .then(files => {
+                if (files && files.length > 0) {
+                    toast({
+                        title: `Successful Export`,
+                        description: files.join(','),
+                        status: "success",
+                        duration: 9000,
+                        isClosable: true,
+                    })                    
                 }
             })
+    }
 
+
+    function onFedStatus(status) {
+        let connectedExchanges = []
+        let exchangesNum = 0
+        for (const [name, connected] of Object.entries(status.exchanges)) {
+            if (connected) connectedExchanges.push(name)
+            exchangesNum++
+        }
+        setStrength(connectedExchanges.length)
+
+        if (exchangesNum) {
+            if (connectedExchanges.length) {
+                exportNewFiles()
+
+                getDiffs()
+                monitorInterval = setInterval(getDiffs, 2 * 60000)
+            } else {
+                if (monitorInterval) clearInterval(monitorInterval);
+                setTimeout(startMonitoring, 5 * 60000)
+            }
+        }
+    }
+
+    function openModal() {
+        onOpen()
+        exportNewFiles()
+    }
+
+    function startMonitoring() {
+        Server.getFedStatus(project)
+            .then(onFedStatus)
     }
     useEffect(startMonitoring, [])
 
@@ -102,7 +119,7 @@ function Federation(props) {
     }
 
     return <>
-        <Button onClick={onOpen}>
+        <Button onClick={openModal}>
             {signalBar}
             <BiTransfer />
             {updates ? updates : null}
@@ -116,7 +133,7 @@ function Federation(props) {
                 <ModalBody>
                     <Tabs isLazy>
                         <TabList>
-                            <Tab isDisabled={strenght == 0}><T>sync</T></Tab>
+                            <Tab isDisabled={strenght == 0}><T>inbox</T></Tab>
                             <Tab><T>exchanges</T></Tab>
                             <Tab><T>join</T></Tab>
                             <Tab isDisabled={strenght == 0}><T>invite</T></Tab>
@@ -130,7 +147,7 @@ function Federation(props) {
                                 <Exchanges onClose={onClose} />
                             </TabPanel>
                             <TabPanel>
-                                <Join onClose={onClose} project={project}/>
+                                <Join onClose={onClose} project={project} />
                             </TabPanel>
                             <TabPanel>
                                 <Invite onClose={onClose} />

@@ -101,7 +101,12 @@ func syncExchange(connection *Connection, exchange transport.Exchange, since tim
 
 	diff := 3 * time.Duration(connection.config.Span) * 24 * time.Hour
 	before := time.Now().Add(-diff)
-	_ = exchange.Delete("dat", before)
+
+	for _, exportItem := range syncItems {
+		if !exportItem.neverDelete {
+			_ = exchange.Delete(exportItem.prefix, before)
+		}
+	}
 
 	r <- ok
 }

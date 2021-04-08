@@ -1,13 +1,13 @@
-import { Flex, useDisclosure, VStack } from '@chakra-ui/react';
-import { React, useContext, useEffect, useState } from "react";
+import { Center, Flex, Spacer, Text, useDisclosure, VStack } from '@chakra-ui/react';
+import { React, useEffect, useState } from "react";
 import Board from '../board/Board';
+import GitIntegration from '../git/GitIntegration';
 import Library from '../library/Library';
 import Server from '../server';
 import UserContext from '../UserContext';
-import Header from './Header';
-import GitIntegration from '../git/GitIntegration';
-import NoAccess from './NoAccess';
 import AskBoardName from './AskBoardName';
+import Header from './Header';
+import NoAccess from './NoAccess';
 
 
 function Desktop(props) {
@@ -20,6 +20,7 @@ function Desktop(props) {
     const [showGitIntegration, setShowGitIntegration] = useState(false);
     const [noAccess, setNoAccess] = useState(null)
     const askBoardName = useDisclosure(false)
+    const [refreshId, setRefreshId] = useState(false)
 
     function checkNoAccess(r) {
         if (r.response && r.response.status == 403 && r.response.data.users && r.response.data.message) {
@@ -70,31 +71,39 @@ function Desktop(props) {
     const content = showLibrary ? <Library /> : activeBoard ?
         <Board name={activeBoard} boards={boards} /> : null
 
+    const reload = () => setRefreshId(!refreshId);
     const username = info && info.systemUser
-    const userContext = { project, info, username }
+    const userContext = { project, info, username, reload }
     const body = info ? <UserContext.Provider value={userContext}>
-        <AskBoardName {...askBoardName} boards={boards} onCreate={createBoard} />
-        <GitIntegration isOpen={showGitIntegration}
-            onClose={_ => setShowGitIntegration(false)} />
+        <div key={refreshId}>
+            <AskBoardName {...askBoardName} boards={boards} onCreate={createBoard} />
+            <GitIntegration isOpen={showGitIntegration}
+                onClose={_ => setShowGitIntegration(false)} />
 
-        <Flex
-            direction="column"
-            align="center"
-            w={{ xl: "83%" }}
-            m="0 auto">
+            <Flex
+                direction="column"
+                align="center"
+                w={{ xl: "83%" }}
+                m="0 auto">
 
-            <VStack w="100%">
-                <Header boards={boards} setShowGitIntegration={setShowGitIntegration}
-                    onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
-                    onListBoards={listBoards} askBoardName={askBoardName}
-                    onExit={onExit} />
-                {content}
-            </VStack>
-        </Flex>
+                <VStack w="100%" h="100%">
+                    <Header boards={boards} setShowGitIntegration={setShowGitIntegration}
+                        onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
+                        onListBoards={listBoards} askBoardName={askBoardName}
+                        onExit={onExit} />
+                    {content}
+                </VStack>
+                <Center p="1em" style={{ position: "fixed", bottom: 0 }}>
+                    <Text size="sm" color="gray">
+                     {info && `${info.loginUser}@${project}.${info.host}`} 
+                     - Almost Scrum 0.5 - Open Source since 2020</Text>
+                </Center>
+            </Flex>
+        </div>
     </UserContext.Provider> : null
 
     return noAccess ? <NoAccess data={noAccess} onExit={exit} /> : body
-        
+
 }
 
 export default Desktop
