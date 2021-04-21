@@ -1,22 +1,21 @@
 import {
-    Button, IconButton, Menu, MenuButton, MenuDivider, MenuItem,
+    Button, Menu, MenuButton, MenuDivider, MenuItem,
     MenuList, Stack, useColorMode
 } from "@chakra-ui/react";
 import { React, useContext, useState } from "react";
-import { AiOutlineCloudSync, BiChevronDown, BiTransfer, GiMeshBall, GiMeshNetwork, GiSpiderWeb } from "react-icons/all";
+import { BiChevronDown } from "react-icons/all";
 import T from "../core/T";
 import Federation from "../federation/Federation";
 import Help from '../help/Help';
 import UserContext from '../UserContext';
 import Boards from './Boards';
-import Settings from './Settings';
 import Users from "./Users";
 
 
 function Header(props) {
     const { info } = useContext(UserContext)
 
-    const [activeBoard, setActiveBoard] = useState(null);
+    const [selectedPanel, setSelectedPanel] = useState(null);
     const [boardKey, setBoardKey] = useState(0);
     const [showUsers, setShowUsers] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
@@ -24,10 +23,21 @@ function Header(props) {
     const { setShowGitIntegration, onExit, askBoardName } = props;
     const { colorMode, toggleColorMode } = useColorMode()
 
-    function onSelectBoard(board) {
-        setActiveBoard(board);
-        props.setActiveBoard && props.setActiveBoard(board);
+    function selectPanel(panel) {
+        setSelectedPanel(panel);
+        props.selectPanel && props.selectPanel(panel);
     }
+
+    const gantt = <Button key="gantt" colorScheme="yellow"
+        isActive={selectedPanel == '#gantt'} onClick={_ => selectPanel('#gantt')} >
+        <T>gantt</T>
+    </Button>
+
+    const library = <Button key="library" colorScheme="yellow"
+        isActive={selectedPanel == '#library'} onClick={_ => selectPanel('#library')}>
+        <T>library</T>
+    </Button>
+
 
     return <Stack spacing={4} direction="row" align="center">
         <Users isOpen={showUsers} onClose={_ => setShowUsers(false)} />
@@ -49,7 +59,7 @@ function Header(props) {
                     onClick={_ => setShowGitIntegration(true)}>
                     Git Integration
                     </MenuItem> : null}
-                <Users/>
+                <Users />
                 <MenuItem onClick={_ => setShowUsers(true)}>
                     Users
                 </MenuItem>
@@ -63,9 +73,11 @@ function Header(props) {
             </MenuList>
         </Menu>
         <Boards key={boardKey}
-            active={activeBoard} setActiveBoard={setActiveBoard}
+            active={selectedPanel} setActiveBoard={setSelectedPanel}
             {...props} />
-        <Federation/>
+        {gantt}
+        {library}
+        <Federation />
     </Stack>
 }
 

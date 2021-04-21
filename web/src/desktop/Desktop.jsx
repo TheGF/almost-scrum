@@ -1,6 +1,7 @@
 import { Center, Flex, Spacer, Text, useDisclosure, VStack } from '@chakra-ui/react';
 import { React, useEffect, useState } from "react";
 import Board from '../board/Board';
+import Gantt from '../gantt/Gantt';
 import GitIntegration from '../git/GitIntegration';
 import Library from '../library/Library';
 import Server from '../server';
@@ -14,6 +15,7 @@ function Desktop(props) {
     const { project, onExit } = props;
 
     const [info, setInfo] = useState(null)
+    const [content, setContent] = useState(null)
     const [activeBoard, setActiveBoard] = useState(null)
     const [boards, setBoards] = useState([]);
     const [showLibrary, setShowLibrary] = useState(false);
@@ -63,13 +65,16 @@ function Desktop(props) {
         setShowLibrary(true);
     }
 
-    function onSelectBoard(board) {
-        setActiveBoard(board)
-        setShowLibrary(false);
+    function selectPanel(panel) {
+        switch(panel) {
+            case '#library': 
+                setContent(<Library/>); break
+            case '#gantt':
+                setContent(<Gantt/>); break
+            default:
+                setContent(<Board name={panel} boards={boards} />); break
+            }        
     }
-
-    const content = showLibrary ? <Library /> : activeBoard ?
-        <Board name={activeBoard} boards={boards} /> : null
 
     const reload = () => setRefreshId(!refreshId);
     const username = info && info.systemUser
@@ -88,7 +93,7 @@ function Desktop(props) {
 
                 <VStack w="100%" h="100%">
                     <Header boards={boards} setShowGitIntegration={setShowGitIntegration}
-                        onSelectBoard={onSelectBoard} onSelectLibrary={onSelectLibrary}
+                        selectPanel={selectPanel}
                         onListBoards={listBoards} askBoardName={askBoardName}
                         onExit={onExit} />
                     {content}

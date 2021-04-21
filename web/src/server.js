@@ -508,7 +508,21 @@ class Server {
 
     static postFedExport(project, since = null) {
         let url = `/api/v1/projects/${project}/fed/export`
-        if (since) url += `?${since}`
+        if (since) url += `?since=${since.toISOString()}`
+        return axios.post(url, null, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static postFedPull(project) {
+        let url = `/api/v1/projects/${project}/fed/pull`
+        return axios.post(url, null, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static postFedPush(project) {
+        let url = `/api/v1/projects/${project}/fed/push`
         return axios.post(url, null, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
@@ -546,6 +560,12 @@ class Server {
 
     static putGitSettings(project, settings) {
         return axios.put(`/api/v1/projects/${project}/git/settings`, settings, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static getGanttTasks(project) {
+        return axios.get(`/api/v1/projects/${project}/gantt`, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }

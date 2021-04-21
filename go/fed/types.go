@@ -4,6 +4,7 @@ import (
 	"almost-scrum/core"
 	"almost-scrum/fed/transport"
 	"errors"
+	"github.com/patrickmn/go-cache"
 	"sync"
 	"time"
 )
@@ -18,18 +19,25 @@ var (
 const HeaderFile = "ash-header.json"
 
 type Header struct {
-	Version        string    `json:"version"`
-	Host           string    `json:"host"`
-	Hostname       string    `json:"hostname"`
-	Time           time.Time `json:"time"`
-	User           string    `json:"user"`
+	Version  string    `json:"version"`
+	Host     string    `json:"host"`
+	Hostname string    `json:"hostname"`
+	Time     time.Time `json:"time"`
+	User     string    `json:"user"`
 }
 
-type Stat struct {
-	Upload   int64 `json:"upload"`
-	Download int64 `json:"download"`
-	Push     int   `json:"push"`
-	Pull     int   `json:"pull"`
+type Throughput struct {
+	Upload   int64   `json:"upload"`
+	Download int64   `json:"download"`
+}
+
+type Transfer struct {
+	Exchange string        `json:"exchange"`
+	Locs     []string      `json:"locs"`
+	Size     int64         `json:"size"`
+	Error    error         `json:"error"`
+	Issues   []error       `json:"issues"`
+	Elapsed  time.Duration `json:"elapsed"`
 }
 
 type Connection struct {
@@ -38,14 +46,15 @@ type Connection struct {
 	config     *Config
 	locs       sync.Map
 	exchanges  map[transport.Exchange]bool
-	stat       map[transport.Exchange]Stat
-	lastExport time.Time
+	throughput map[string]*Throughput
+	exports    map[string]time.Time
 	reconnect  *time.Ticker
-	inUse      sync.WaitGroup
+	mutex      sync.Mutex
+	checkTime  error
 }
 
 var (
-	states = map[string]*Connection{}
+	connections = cache.New(5*time.Minute, 10*time.Minute)
 )
 
 type syncItem struct {

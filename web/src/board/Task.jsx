@@ -82,7 +82,8 @@ function Task(props) {
     }
     useEffect(getTask, [])
 
-    function touchTask() {
+    function touchTask(e) {
+        e.stopPropagation()
         Server.touchTask(project, board, name)
             .then(_ => props.onBoardChanged && props.onBoardChanged())
     }
@@ -330,8 +331,7 @@ function Task(props) {
         return <Box h={height} ><HStack spacing={3} >
             <Tabs w="100%" index={tabIndex} onChange={handleTabsChange} isLazy>
                 <TabList>
-                    {/* <Tab key="view"><T>view</T></Tab> */}
-                    <Tab key="edit"><T>edit</T></Tab>
+                    <Tab key="edit"><T>{readOnly ? 'view' : 'edit'}</T></Tab>
                     <Tab key="progress"><T>progress</T></Tab>
                     <Tab key="files"><T>files</T></Tab>
                     <Spacer key="spacer" />
@@ -342,10 +342,6 @@ function Task(props) {
                 </TabList>
 
                 <TabPanels>
-                    {/* <TabPanel key="view" padding={0}>
-                        <TaskViewer height={height} task={task} saveTask={saveTask} searchKeys={searchKeys}
-                            readOnly={readOnly} startEdit={_=>handleTabsChange(1)}/>
-                    </TabPanel> */}
                     <TabPanel key="edit" padding={0}>
                         <TaskEditor task={task} saveTask={saveTask} users={users} height={height}
                             readOnly={readOnly} />

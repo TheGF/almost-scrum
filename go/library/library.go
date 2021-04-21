@@ -119,8 +119,9 @@ func MoveFile(project *core.Project, oldPath string, path string) error {
 	if err != nil {
 		return err
 	}
-	_ = fs.SetExtendedAttr(oldPath, xAttr)
-	_ = fs.SetExtendedAttr(path, nil)
+	xAttr.Modified = time.Now()
+	_ = fs.SetExtendedAttr(path, xAttr)
+	_ = fs.SetExtendedAttr(oldPath, xAttr )
 	return nil
 }
 
@@ -145,7 +146,7 @@ func DeleteFile(project *core.Project, path string) error {
 		return err
 	}
 	attr, _ := fs.GetExtendedAttr(path)
-	attr.Deleted = time.Now()
+	attr.Modified = time.Now()
 	_ = fs.SetExtendedAttr(path, attr)
 	return nil
 }
@@ -181,10 +182,10 @@ func SetFileInLibrary(project *core.Project, path string, reader io.ReadCloser,
 	logrus.Debugf("successfully set file %s in library", path)
 
 	if err := fs.SetExtendedAttr(path, &fs.ExtendedAttr{
-		Owner:   owner,
-		Origin:  nil,
-		Public:  public,
-		Deleted: time.Time{},
+		Owner:      owner,
+		ImportHash: nil,
+		Public:     public,
+		Modified:   time.Now(),
 	}); err != nil {
 		logrus.Warnf("Cannot set owner for file %s: %v", path, owner)
 	}

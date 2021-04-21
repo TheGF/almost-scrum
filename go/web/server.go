@@ -92,7 +92,7 @@ func setBye(r *gin.Engine) {
 			knownClients = append(knownClients[0:idx], knownClients[idx+1:]...)
 
 			if len(knownClients) == 0 && autoExit {
-				logrus.Info("All client disconnected. Time to shutdown. Try nicely... waiting 5 seconds")
+				logrus.Info("All client disconnected. ModTime to shutdown. Try nicely... waiting 5 seconds")
 				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
 
@@ -167,8 +167,9 @@ func StartServer(port string, logLevel string, autoExit_ bool, args []string) {
 	indexRoute(v1)
 	gitRoute(v1)
 	fedRoute(v1)
+	ganttRoute(v1)
 
 	ashUrl = fmt.Sprintf("http://127.0.0.1:%s", port)
-	open.Start(ashUrl)
+	if false {open.Start(ashUrl)}
 	runServer(r, fmt.Sprintf(":%s", port))
 }

@@ -15,8 +15,8 @@ function S3Exchange(props) {
     const { update, status } = props
 
     const connected = status && status.exchanges[exchange.name]
-    const upload = status && status.stat[exchange.name] && Utils.getFriendlySize(status.stat[exchange.name].upload)
-    const download = status && status.stat[exchange.name] && Utils.getFriendlySize(status.stat[exchange.name].download)
+    const upload = status && status.throughput[exchange.name] && Utils.getFriendlySize(status.throughput[exchange.name].upload)
+    const download = status && status.throughput[exchange.name] && Utils.getFriendlySize(status.throughput[exchange.name].download)
 
     function updateField(evt, field, value) {
         exchange[field] = value != undefined ? value : evt.target.value

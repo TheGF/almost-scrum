@@ -119,9 +119,21 @@ func postTaskAPI(c *gin.Context) {
 	}
 
 	board := c.Param("board")
+	name := c.Param("name")
 	title := c.DefaultQuery("title", "")
 	type_ := c.DefaultQuery("type", "")
 	move := c.DefaultQuery("move", "")
+	_, touch := c.GetQuery("touch")
+
+	if touch {
+		if err := core.TouchTask(project, board, name); err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		} else {
+			c.String(http.StatusOK, "")
+			return
+		}
+	}
 
 	if move == "" {
 		webUser := getWebUser(c)
@@ -147,7 +159,7 @@ func postTaskAPI(c *gin.Context) {
 	oldBoard := parts[0]
 	oldName := parts[1]
 	id, _ := core.ExtractTaskId(oldName)
-	name := oldName
+	name = oldName
 	if title != "" {
 		name = fmt.Sprintf("%d.%s", id, title)
 	}

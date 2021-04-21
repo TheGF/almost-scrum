@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"almost-scrum/core"
 	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
@@ -12,10 +11,11 @@ import (
 )
 
 type ExtendedAttr struct {
-	Owner   string    `json:"owner"`
-	Origin  []byte    `json:"origin"`
-	Public  bool      `json:"public_"`
-	Deleted time.Time `json:"deleted"`
+	Owner      string    `json:"owner"`
+	ImportHash []byte    `json:"importHash"`
+	ExportHash []byte    `json:"exportHash"`
+	Public     bool      `json:"public_"`
+	Modified   time.Time `json:"modified"`
 }
 
 type ExtendedAttrMap struct {
@@ -38,7 +38,7 @@ func cacheSync() {
 		if found {
 			extendedAttrMap.lock.RLock()
 			if atomic.SwapInt32(&extendedAttrMap.dirty, 0) == 1 {
-				err := core.WriteJSON(filepath.Join(path, AttrsFileName), extendedAttrMap)
+				err := WriteJSON(filepath.Join(path, AttrsFileName), extendedAttrMap)
 				if err != nil {
 					logrus.Errorf("Cannot save extended attrs to %s: %v", path, err)
 				}
@@ -73,7 +73,7 @@ func getExtendedAttrMap(path string) (*ExtendedAttrMap, error) {
 		return nil, err
 	}
 	extendedAttrMap = &ExtendedAttrMap{}
-	err := core.ReadJSON(p, extendedAttrMap)
+	err := ReadJSON(p, extendedAttrMap)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +97,10 @@ func GetExtendedAttr(path string) (*ExtendedAttr, error) {
 	extendedAttr, found := extendedAttrMap.Entries[name]
 	if found {
 		return extendedAttr, nil
+	}
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil, nil
 	}
 
 	owner, err := GetFileOwner(path)
@@ -124,7 +128,7 @@ func SetExtendedAttr(path string, extendedAttr *ExtendedAttr) error {
 	extendedAttrMap.lock.Lock()
 	if extendedAttr == nil {
 		delete(extendedAttrMap.Entries, name)
-		logrus.Infof("Deleted xAttrs for %s", path)
+		logrus.Infof("Modified xAttrs for %s", path)
 	} else {
 		extendedAttrMap.Entries[name] = extendedAttr
 		logrus.Infof("updated attr for %s: %#v", path, extendedAttr)

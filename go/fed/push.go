@@ -7,51 +7,74 @@ import (
 	"time"
 )
 
-func pushToExchange(signal *Connection, exchange transport.Exchange, r chan error) {
-	span := time.Duration(signal.config.Span) * time.Hour * 24
-	since := time.Now().Add(-span)
-	files, err := exchange.List(since)
+func pushExchange(connection *Connection, exchange transport.Exchange, r chan Transfer) {
+	logrus.Debugf("Federation push to exchange %s", exchange)
+	stat := Transfer{Exchange: exchange.Name()}
+	start := time.Now()
+
+	remotes, err := exchange.List(time.Time{})
 	if err != nil {
-		logrus.Errorf("error during list from transport %s: %v", exchange, err)
-		r <- err
+		stat.Error = err
+		r <- stat
+		return
 	}
 
-	signal.locs.Range(func(loc, _ interface{}) bool {
-		_, found := core.FindStringInSlice(files, loc.(string))
-		if !found {
-			_, err := exchange.Push(loc.(string))
-			r <- err
-			if err != nil {
-				logrus.Warnf("cannot push file %s to %s: %v", loc, exchange, err)
-				return false
+	connection.locs.Range(func(key, refs interface{}) bool {
+		loc := key.(string)
+		if _, found := core.FindStringInSlice(remotes, loc); !found {
+
+			logrus.Debugf("location %s is not present in %s", loc, exchange)
+			if sz, err := exchange.Push(loc); err == nil {
+				logrus.Infof("location %s uploaded to %s", loc, exchange)
+				connection.locs.Store(loc, refs.(int)+1)
+				stat.Locs = append(stat.Locs, loc)
+				stat.Size += sz
+			} else {
+				stat.Issues = append(stat.Issues, err)
+				logrus.Warnf("cannot push %s to %s: %v", loc, exchange, err)
 			}
+		} else {
+			logrus.Debugf("location %s is present in %s", loc, exchange)
 		}
 		return true
 	})
+	stat.Elapsed = time.Since(start)
+	r <- stat
+	return
 }
 
-func Push(project *core.Project) (int, error) {
-	signal, _ := Connect(project)
-	signal.inUse.Add(1)
-	defer signal.inUse.Done()
-
-	if err := loadLocs(signal); err != nil {
-		return 0, err
+func Push(project *core.Project) ([]Transfer, error) {
+	connection, err := Connect(project)
+	if err != nil {
+		return nil, err
 	}
 
-	r := make(chan error)
-	defer close(r)
-	connected := getConnectedExchanges(signal)
+	connection.mutex.Lock()
+	defer connection.mutex.Unlock()
+
+	logrus.Debugf("Push project %s with federation node %s", project.Config.Public.Name,
+		connection.config.UUID)
+
+	if err := loadLocs(connection); err != nil {
+		return nil, err
+	}
+
+	r := make(chan Transfer)
+	connected := getConnectedExchanges(connection)
 	for _, exchange := range connected {
-		go pushToExchange(signal, exchange, r)
+		go pushExchange(connection, exchange, r)
 	}
 
-	successful := 0
-	for range connected{
-		if <- r == nil {
-			successful++
+	var stats []Transfer
+	for range connected {
+		stat := <-r
+		stats = append(stats, stat)
+		if len(stat.Locs) > 0 {
+			connection.throughput[stat.Exchange].Upload = stat.Size / int64(len(stat.Locs))
 		}
 	}
 
-	return successful, nil
+	logrus.Debugf("Push completed for project %s on node %s: %v",
+		project.Config.Public.Name, connection.config.UUID, stats)
+	return stats, nil
 }

@@ -126,7 +126,7 @@ func (exchange *S3Exchange) List(since time.Time) ([]string, error) {
 		}
 	}
 
-	logrus.Infof("list from %s: %v", exchange, names)
+	logrus.Debugf("list from %s: %v", exchange, names)
 	return names, nil
 }
 
@@ -212,7 +212,7 @@ func (exchange *S3Exchange) Delete(pattern string, before time.Time) error {
 		}
 	}
 
-	logrus.Infof("list from %s: %v", exchange, names)
+	logrus.Infof("deleted items from %s: %v", exchange, names)
 	return nil
 }
 

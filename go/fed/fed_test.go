@@ -51,13 +51,13 @@ func TestImport(t *testing.T) {
 
 	print("pull from ", n)
 
-	diffs, _ := GetDiffs(project)
+	diffs, _ := getUpdates(project)
 	_, _ = Import(project, diffs)
 
 	Disconnect(project)
 }
 
-func TestSync(t *testing.T) {
+func TestPush(t *testing.T) {
 	project := getProject(t)
 
 	data := core.GenerateRandomString(1024 * 1024)
@@ -65,20 +65,19 @@ func TestSync(t *testing.T) {
 	ioutil.WriteFile(p, []byte(data), 0755)
 
 	fs.SetExtendedAttr(p, &fs.ExtendedAttr{
-		Owner:   "me",
-		Origin:  nil,
-		Public:  true,
-		Deleted: time.Time{},
+		Owner:      "me",
+		ImportHash: nil,
+		Public:     true,
+		Modified:   time.Time{},
 	})
 
 	_, err := Export(project, "marco", time.Time{})
 	assert.Nilf(t, err, "Cannot export: %v", err)
 
-	failed, err := Sync(project, time.Time{})
+	stats, err := Push(project)
 	assert.Nil(t, err)
-	assert.Equal(t, failed, 0)
 
-	logrus.Printf("status: %#v", GetStatus(project))
+	logrus.Printf("stats: %#v", stats)
 
 }
 
@@ -92,7 +91,7 @@ func TestInvite(t *testing.T) {
 
 	png, err := qrcode.Encode(token, qrcode.Medium, 256)
 	assert.Nil(t, err)
-	ioutil.WriteFile("/tmp/qr.png", png, 0755)
+	_ = ioutil.WriteFile("/tmp/qr.png", png, 0755)
 }
 
 func TestClaimInvite(t *testing.T) {

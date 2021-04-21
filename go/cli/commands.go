@@ -140,13 +140,13 @@ func ProcessArgs() {
 
 	flag.Parse()
 
-	if verbose {
-		logLevel = "INFO"
-	}
 	if verbose2 {
 		logLevel = "DEBUG"
+	} else if verbose {
+		logLevel = "INFO"
 	}
 	setLogLevel(logLevel)
+	logrus.Infof("Log level: %s", logLevel)
 
 	if username != "" {
 		core.SetSystemUser(username)

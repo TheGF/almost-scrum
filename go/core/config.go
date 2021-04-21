@@ -1,6 +1,7 @@
 package core
 
 import (
+	"almost-scrum/fs"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -77,7 +78,7 @@ func ReadConfig() *Config {
 	configPath := getConfigPath()
 
 	var config Config
-	err := ReadYaml(configPath, &config)
+	err := fs.ReadYaml(configPath, &config)
 	if err != nil {
 		logrus.Warnf("Cannot read global configuration %s: %v", configPath, err)
 
@@ -104,7 +105,7 @@ func ReadConfig() *Config {
 //WriteConfig saves the global configuration
 func WriteConfig(config *Config) {
 	configPath := getConfigPath()
-	err := WriteYaml(configPath, config)
+	err := fs.WriteYaml(configPath, config)
 	if err != nil {
 		logrus.Panicf("Cannot save global configuration in %s: %v", configPath, err)
 		panic(err)

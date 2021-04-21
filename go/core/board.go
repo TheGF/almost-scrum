@@ -1,6 +1,7 @@
 package core
 
 import (
+	"almost-scrum/fs"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -50,11 +51,11 @@ func GetBoardProperties(project *Project, name string) (BoardProperties, error) 
 	var boardProperties BoardProperties = BoardProperties{TaskTypes: make([]string, 0)}
 
 	p := filepath.Join(project.Path, "boards", name, ".board.yaml")
-	ReadYaml(p, &boardProperties)
+	fs.ReadYaml(p, &boardProperties)
 	return boardProperties, nil
 }
 
 func SetBoardProperties(project *Project, name string, boardProperties BoardProperties) error {
 	p := filepath.Join(project.Path, "boards", name, ".board.yaml")
-	return WriteYaml(p, &boardProperties)
+	return fs.WriteYaml(p, &boardProperties)
 }

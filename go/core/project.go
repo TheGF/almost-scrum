@@ -2,6 +2,7 @@ package core
 
 import (
 	"almost-scrum/assets"
+	"almost-scrum/fs"
 	"fmt"
 	uuid2 "github.com/google/uuid"
 	"io/ioutil"
@@ -9,11 +10,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
-
-
 
 // Project is the basic information about a scrum project.
 type Project struct {
@@ -22,18 +22,19 @@ type Project struct {
 	Models []Model
 	//	EncryptionSeed string
 	Index      *Index
+	IndexMutex sync.Mutex
 	TasksCount int
 }
 
 // LoadTheProjectConfig
 func ReadProjectConfig(path string) (ProjectConfig, error) {
 	var projectConfig ProjectConfig
-	err := ReadYaml(filepath.Join(path, ProjectConfigFile), &projectConfig)
+	err := fs.ReadYaml(filepath.Join(path, ProjectConfigFile), &projectConfig)
 	return projectConfig, err
 }
 
 func WriteProjectConfig(path string, config *ProjectConfig) error {
-	return WriteYaml(filepath.Join(path, ProjectConfigFile), config)
+	return fs.WriteYaml(filepath.Join(path, ProjectConfigFile), config)
 }
 
 // FindProject searches for a project inside path and its parents up to root.
@@ -278,4 +279,3 @@ func ShredProject(project *Project) error {
 //}
 //
 //
-

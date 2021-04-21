@@ -8,6 +8,7 @@ import UserContext from '../UserContext';
 import FTPExchange from './exchanges/FTPExchange';
 import S3Exchange from './exchanges/S3Exchange';
 import WebDAVExchange from './exchanges/WebDAVExchange';
+import USBExchange from './exchanges/USBExchange';
 
 
 function Exchanges(props) {
@@ -53,6 +54,8 @@ function Exchanges(props) {
             connected={status && status.exchanges[exchange.name]} />),
         ...config.ftp.map((exchange, i) => <FTPExchange exchange={exchange} update={v => updateExchange(config.ftp, i, v)}
             connected={status && status.exchanges[exchange.name]} />),
+        ...config.usb.map((exchange, i) => <USBExchange exchange={exchange} update={v => updateExchange(config.usb, i, v)}
+            connected={status && status.exchanges[exchange.name]} />),
     ] : []
 
     function addS3() {
@@ -76,6 +79,13 @@ function Exchanges(props) {
             password: '',
             secret: '',
             timeout: 10,
+        })
+        setConfig({ ...config })
+    }
+
+
+    function addUSBMedia() {
+        config.usb.push({
         })
         setConfig({ ...config })
     }
@@ -108,6 +118,7 @@ function Exchanges(props) {
             <Button onClick={_ => addS3()}><T>add S3</T></Button>
             <Button onClick={_ => addWebDAV()}><T>add WebDAV</T></Button>
             <Button onClick={_ => addFTP()}><T>add FTP</T></Button>
+            <Button onClick={_ => addUSBMedia()}><T>add USB Media</T></Button>
             <Spacer minW="2em" />
             <Button colorScheme="blue" onClick={saveConfig}>Save</Button>
             <Button onClick={onClose}>Close</Button>

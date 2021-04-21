@@ -5,20 +5,67 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/core/hostnames.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../build.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fed/transport/usb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fed/transport/usb_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gantt/gantt.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/web/gantt_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cli/commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/commands.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cli/fed.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/fed.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/board.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/board.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/diff.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/diff.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/git_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/git_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/fs/json.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/task.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/task.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/task_io.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/task_io.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/users.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/yaml.go" beforeDir="false" afterPath="$PROJECT_DIR$/fs/yaml.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/connect.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/connect.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/diff.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/status.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fed/export.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/export.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/fed_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/fed_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/import.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/import.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/invite.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/invite.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/pull.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/pull.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/push.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/push.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fed/sync.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/sync.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/transport/ftp.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/ftp.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/transport/s3.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/s3.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/transport/webdav.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/webdav.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/transport/webdav_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/webdav_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fed/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/types.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fs/attributes.go" beforeDir="false" afterPath="$PROJECT_DIR$/fs/attributes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/library.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/library.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/versions.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/versions.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test-data/test-template.zip" beforeDir="false" afterPath="$PROJECT_DIR$/test-data/test-template.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/fed_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/fed_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/project_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/project_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/tasks_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/tasks_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/users_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/users_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_linux" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/assets/templates/issue-tracker.zip" beforeDir="false" afterPath="$PROJECT_DIR$/../web/assets/templates/issue-tracker.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../web/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/ErrorBoundary.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/ErrorBoundary.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/board/Board.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Board.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/board/NewTask.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/NewTask.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/board/Task.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Task.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Users.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Users.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Exchanges.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Exchanges.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Invite.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Invite.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Sync.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/exchanges/S3Exchange.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/exchanges/S3Exchange.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +112,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/cli" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/web" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
@@ -75,21 +122,21 @@
       <recent name="$PROJECT_DIR$/core" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/cli" />
-      <recent name="$PROJECT_DIR$/fed/transport" />
-      <recent name="$PROJECT_DIR$/federation" />
-      <recent name="$PROJECT_DIR$/library" />
       <recent name="$PROJECT_DIR$/web" />
+      <recent name="$PROJECT_DIR$/fed" />
+      <recent name="$PROJECT_DIR$/fed/transport" />
+      <recent name="$PROJECT_DIR$/cli" />
+      <recent name="$PROJECT_DIR$/federation" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/fs" />
       <recent name="$PROJECT_DIR$/core" />
       <recent name="$PROJECT_DIR$/fed/exchanges" />
       <recent name="$PROJECT_DIR$/fed" />
       <recent name="$PROJECT_DIR$/attributes" />
-      <recent name="$PROJECT_DIR$/git" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.TestClaimInvite in almost-scrum/fed">
+  <component name="RunManager" selected="Go Test.TestPush in almost-scrum/fed">
     <configuration name="TestClaimInvite in almost-scrum/fed" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
       <working_directory value="$PROJECT_DIR$/fed" />
@@ -101,7 +148,7 @@
       <pattern value="^\QTestClaimInvite\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestExport in almost-scrum/fed" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestPush in almost-scrum/fed" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
       <working_directory value="$PROJECT_DIR$/fed" />
       <framework value="gotest" />
@@ -109,56 +156,56 @@
       <package value="almost-scrum/fed" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestExport\E$" />
+      <pattern value="^\QTestPush\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestExport in almost-scrum/library" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestUSBConnect in almost-scrum/fed/transport" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
-      <working_directory value="$PROJECT_DIR$/library" />
+      <working_directory value="$PROJECT_DIR$/fed/transport" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
-      <package value="almost-scrum/library" />
+      <package value="almost-scrum/fed/transport" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestExport\E$" />
+      <pattern value="^\QTestUSBConnect\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestInvite in almost-scrum/fed" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestUSBPull in almost-scrum/fed/transport" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
-      <working_directory value="$PROJECT_DIR$/fed" />
+      <working_directory value="$PROJECT_DIR$/fed/transport" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
-      <package value="almost-scrum/fed" />
+      <package value="almost-scrum/fed/transport" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestInvite\E$" />
+      <pattern value="^\QTestUSBPull\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestMergeConfig in almost-scrum/fed" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestUSBPush in almost-scrum/fed/transport" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
-      <working_directory value="$PROJECT_DIR$/fed" />
+      <working_directory value="$PROJECT_DIR$/fed/transport" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
-      <package value="almost-scrum/fed" />
+      <package value="almost-scrum/fed/transport" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <pattern value="^\QTestMergeConfig\E$" />
+      <pattern value="^\QTestUSBPush\E$" />
       <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Go Test.TestClaimInvite in almost-scrum/fed" />
-      <item itemvalue="Go Test.TestMergeConfig in almost-scrum/fed" />
-      <item itemvalue="Go Test.TestExport in almost-scrum/library" />
-      <item itemvalue="Go Test.TestExport in almost-scrum/fed" />
-      <item itemvalue="Go Test.TestInvite in almost-scrum/fed" />
+      <item itemvalue="Go Test.TestUSBConnect in almost-scrum/fed/transport" />
+      <item itemvalue="Go Test.TestUSBPush in almost-scrum/fed/transport" />
+      <item itemvalue="Go Test.TestUSBPull in almost-scrum/fed/transport" />
+      <item itemvalue="Go Test.TestPush in almost-scrum/fed" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestPush in almost-scrum/fed" />
+        <item itemvalue="Go Test.TestUSBPull in almost-scrum/fed/transport" />
+        <item itemvalue="Go Test.TestUSBConnect in almost-scrum/fed/transport" />
+        <item itemvalue="Go Test.TestUSBPush in almost-scrum/fed/transport" />
         <item itemvalue="Go Test.TestClaimInvite in almost-scrum/fed" />
-        <item itemvalue="Go Test.TestInvite in almost-scrum/fed" />
-        <item itemvalue="Go Test.TestExport in almost-scrum/fed" />
-        <item itemvalue="Go Test.TestExport in almost-scrum/library" />
-        <item itemvalue="Go Test.TestMergeConfig in almost-scrum/fed" />
       </list>
     </recent_temporary>
   </component>
@@ -201,7 +248,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/core/task.go</url>
-          <line>173</line>
+          <line>174</line>
           <option name="timeStamp" value="39" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -386,7 +433,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/transport/webdav.go</url>
-          <line>163</line>
+          <line>171</line>
           <option name="timeStamp" value="247" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -406,7 +453,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
-          <line>88</line>
+          <line>87</line>
           <option name="timeStamp" value="252" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -416,7 +463,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
-          <line>119</line>
+          <line>118</line>
           <option name="timeStamp" value="255" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
@@ -433,6 +480,46 @@
           <url>file://$USER_HOME$/go/pkg/mod/github.com/russross/blackfriday/v2@v2.1.0/markdown.go</url>
           <line>195</line>
           <option name="timeStamp" value="263" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/transport/usb_test.go</url>
+          <line>17</line>
+          <option name="timeStamp" value="264" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/transport/usb_test.go</url>
+          <line>29</line>
+          <option name="timeStamp" value="267" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/transport/usb.go</url>
+          <line>91</line>
+          <option name="timeStamp" value="268" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/transport/usb.go</url>
+          <line>119</line>
+          <option name="timeStamp" value="269" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/transport/usb_test.go</url>
+          <line>47</line>
+          <option name="timeStamp" value="270" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/fed_test.go</url>
+          <line>60</line>
+          <option name="timeStamp" value="272" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/transport/webdav.go</url>
+          <line>75</line>
+          <option name="timeStamp" value="274" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/fed/transport/webdav.go</url>
+          <line>67</line>
+          <option name="timeStamp" value="275" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

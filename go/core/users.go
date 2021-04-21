@@ -1,6 +1,7 @@
 package core
 
 import (
+	"almost-scrum/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,7 +38,7 @@ func GetUserList(project *Project) []string {
 func GetUserInfo(project *Project, user string) (userInfo UserInfo, err error) {
 	user = strings.ToLower(user)
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
-	if err = ReadYaml(path, &userInfo); err != nil {
+	if err = fs.ReadYaml(path, &userInfo); err != nil {
 		logrus.Warnf("Invalid file %s: %v", path, err)
 		return
 	}
@@ -60,6 +61,6 @@ func DelUserInfo(project *Project, user string) (err error) {
 func SetUserInfo(project *Project, user string, userInfo *UserInfo) (err error) {
 	user = strings.ToLower(user)
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
-	return WriteYaml(path, userInfo)
+	return fs.WriteYaml(path, userInfo)
 }
 

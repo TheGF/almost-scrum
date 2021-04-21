@@ -3,9 +3,12 @@ package fed
 import (
 	"almost-scrum/core"
 	"almost-scrum/fed/transport"
+	"errors"
 	"github.com/beevik/ntp"
+	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 	"math"
+	"net"
 	"os"
 	"path/filepath"
 	"sync"
@@ -17,6 +20,7 @@ func getExchanges(config *Config) []transport.Exchange {
 	exchanges = append(exchanges, transport.GetS3Exchanges(config.S3...)...)
 	exchanges = append(exchanges, transport.GetWebDAVExchanges(config.WebDAV...)...)
 	exchanges = append(exchanges, transport.GetFTPExchanges(config.Ftp...)...)
+	exchanges = append(exchanges, transport.GetUSBExchanges(config.USB...)...)
 	return exchanges
 }
 
@@ -37,16 +41,13 @@ func loadLocs(signal *Connection) error {
 	}
 
 	signal.locs = locs
-	logrus.Infof("loaded %d files in matching map", count)
 	return nil
 }
 
 func Connect(project *core.Project) (*Connection, error) {
-	if signal, found := states[project.Config.UUID]; found {
-		return signal, nil
-	}
-	if err := checkTime(); err != nil {
-		return nil, err
+
+	if connection, found := connections.Get(project.Config.UUID); found {
+		return connection.(*Connection), nil
 	}
 
 	localRoot := filepath.Join(project.Path, core.ProjectFedFilesFolder)
@@ -58,16 +59,19 @@ func Connect(project *core.Project) (*Connection, error) {
 	}
 
 	connection := &Connection{
-		local:     localRoot,
-		remote:    config.UUID,
-		locs:      sync.Map{},
-		exchanges: map[transport.Exchange]bool{},
-		config:    config,
-		stat:      map[transport.Exchange]Stat{},
+		local:      localRoot,
+		remote:     config.UUID,
+		locs:       sync.Map{},
+		exchanges:  map[transport.Exchange]bool{},
+		config:     config,
+		throughput: map[string]*Throughput{},
+		exports:    map[string]time.Time{},
+		checkTime:  checkTime(),
 	}
 
 	for _, exchange := range getExchanges(config) {
 		connection.exchanges[exchange] = false
+		connection.throughput[exchange.Name()] = &Throughput{}
 	}
 
 	if err := loadLocs(connection); err != nil {
@@ -84,7 +88,7 @@ func Connect(project *core.Project) (*Connection, error) {
 	}()
 
 	logrus.Infof("federation for project %s started successfully", project.Config.UUID)
-	states[project.Config.UUID] = connection
+	connections.Set(project.Config.UUID, connection, cache.DefaultExpiration)
 	return connection, nil
 }
 
@@ -105,6 +109,7 @@ func checkTime() error {
 	}
 
 	for i := 0; i < 10; i++ {
+		var networkError *net.UnknownNetworkError
 		if diff, err := GetTimeDiff(); err == nil {
 			if diff > 60 {
 				logrus.Errorf("computer time is not correct. Push is disabled")
@@ -113,6 +118,9 @@ func checkTime() error {
 				timeValid = true
 				return nil
 			}
+		} else if errors.As(err, &networkError) {
+			logrus.Warnf("No connection to ModTime server: %v", err)
+			return err
 		} else {
 			logrus.Warnf("cannot open to time server. Retry %d/10: %v", i, err)
 			time.Sleep(2 * time.Second)
@@ -132,21 +140,22 @@ func getConnectedExchanges(signal *Connection) []transport.Exchange {
 	return exchanges
 }
 
-func asyncUpdates(signal *Connection, exchange transport.Exchange, ch transport.UpdatesCh) {
+func asyncUpdates(connection *Connection, exchange transport.Exchange, ch transport.UpdatesCh) {
 	for {
 		locs, open := <-ch
 		if !open {
 			break
 		}
-		signal.inUse.Add(1)
+		connection.mutex.Lock()
+		defer connection.mutex.Unlock()
+
 		for _, loc := range locs {
-			if _, loaded := signal.locs.LoadOrStore(loc, true); !loaded {
+			if _, loaded := connection.locs.LoadOrStore(loc, true); !loaded {
 				if _, err := exchange.Pull(loc); err != nil {
-					signal.locs.Delete(loc)
+					connection.locs.Delete(loc)
 				}
 			}
 		}
-		signal.inUse.Done()
 	}
 }
 
@@ -188,13 +197,18 @@ func open(connection *Connection) int {
 }
 
 func Disconnect(project *core.Project) {
-	if state, found := states[project.Config.UUID]; found {
-		state.reconnect.Stop()
-		state.inUse.Wait()
-		for hub, connected := range state.exchanges {
+
+	if c, found := connections.Get(project.Config.UUID); found {
+		connection := c.(*Connection)
+		connection.reconnect.Stop()
+
+		connection.mutex.Lock()
+		defer connection.mutex.Unlock()
+
+		for hub, connected := range connection.exchanges {
 			if connected {
 				hub.Disconnect()
-				state.exchanges[hub] = false
+				connection.exchanges[hub] = false
 			}
 		}
 	}

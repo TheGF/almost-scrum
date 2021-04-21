@@ -4,7 +4,6 @@ import (
 	"almost-scrum/core"
 	"almost-scrum/fs"
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/alexmullins/zip"
@@ -18,14 +17,39 @@ import (
 
 const maxExportSizePerFile = 16 * 1024 * 1024
 
+func shouldBeExported(file string, includePrivate bool) (bool, error) {
+	attr, err := fs.GetExtendedAttr(file)
+	if err != nil {
+		return false, err
+	}
+	if !includePrivate && !attr.Public {
+		return false, err
+	}
+
+	hash, err := fs.GetHash(file)
+	if err != nil {
+		logrus.Warnf("cannot get hash of file %s for federated export: %v", file, err)
+		return false, err
+	}
+
+	logrus.Debugf("Compare hash %v = %v", hash, attr.ImportHash)
+
+	if bytes.Compare(hash, attr.ExportHash) == 0 {
+		logrus.Debugf("current hash and last export hash for file %s are the same. Skip export", file)
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func getFiles(path string, includePrivate bool, time time.Time) []string {
 	var files []string
 
 	_ = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if info != nil && !info.IsDir() && info.ModTime().After(time) && info.Name() != fs.AttrsFileName {
-			if includePrivate {
-				files = append(files, path)
-			} else if attr, _ := fs.GetExtendedAttr(path); attr.Public {
+			if ok, err := shouldBeExported(path, includePrivate); err != nil {
+				logrus.Warnf("issues with file %s: %v", path, err)
+			} else if ok {
 				files = append(files, path)
 			}
 		}
@@ -62,7 +86,7 @@ func addHeader(origin string, writer *zip.Writer, user string, time time.Time) e
 func addFileToPackage(base string, secret string, writer *zip.Writer, file string) (int64, error) {
 	stat, err := os.Stat(file)
 	if err != nil {
-		logrus.Warnf("cannot Stat file %s for federated export: %v", file, err)
+		logrus.Warnf("cannot Throughput file %s for federated export: %v", file, err)
 		return 0, err
 	}
 
@@ -77,9 +101,6 @@ func addFileToPackage(base string, secret string, writer *zip.Writer, file strin
 		logrus.Warnf("cannot get hash of file %s for federated export: %v", file, err)
 		return 0, err
 	}
-	if bytes.Compare(hash, attr.Origin) == 0 {
-		return 0, nil
-	}
 
 	r, err := os.Open(file)
 	if err != nil {
@@ -89,7 +110,7 @@ func addFileToPackage(base string, secret string, writer *zip.Writer, file strin
 	defer r.Close()
 
 	name, _ := filepath.Rel(base, file)
-	comment := fmt.Sprintf("%s,%s", attr.Owner, hex.EncodeToString(hash))
+	comment := fmt.Sprintf("%s,%v,%v", attr.Owner, attr.ImportHash, hash )
 
 	fh := &zip.FileHeader{
 		Name:               name,
@@ -111,7 +132,11 @@ func addFileToPackage(base string, secret string, writer *zip.Writer, file strin
 		return 0, err
 	}
 
-	logrus.Infof("file %s added to federated export", file)
+	attr.ExportHash = hash
+	fs.SetExtendedAttr(file, attr)
+
+	logrus.Infof("export file %s: owner %s, importHash %v, exportHash %v", file, attr.Owner, attr.ImportHash,
+		hash)
 	return size, nil
 }
 
@@ -197,6 +222,11 @@ func export(project *core.Project, item syncItem, user string,
 func Export(project *core.Project, user string, since time.Time) ([]string, error) {
 	var files []string
 
+	signal, err := Connect(project)
+	if err != nil {
+		return nil, err
+	}
+
 	config, err := ReadConfig(project, false)
 	if err != nil {
 		return nil, err
@@ -219,6 +249,12 @@ func Export(project *core.Project, user string, since time.Time) ([]string, erro
 	}
 
 	logrus.Infof("file changed since %s: %v", since, files)
+
+
+	for _, file := range files {
+		signal.exports[file] = time.Time{}
+	}
+
 	config.LastExport = time.Now()
 	_ = WriteConfig(project, config)
 

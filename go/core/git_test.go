@@ -81,7 +81,7 @@ And more changes
 - Points: 5
 - Status: #Start
 ### Progress
-### Files
+### Locs
 `
 
 	id := FindGitConflict(input)

@@ -167,7 +167,7 @@ func Join(project *core.Project, key string, token string) error {
 		WriteConfig(project, invite.FedConfig)
 	}
 
-	delete(states, project.Config.UUID)
+	connections.Delete(project.Config.UUID)
 
 	logrus.Infof("succesfully updated project with %s with invite from node %s",
 		project.Config.Public.Name, project.Config.UUID)

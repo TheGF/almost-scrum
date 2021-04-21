@@ -58,9 +58,14 @@ function MarkdownEditor(props) {
     }
 
     function onChange() {
-        const value = editorRef.current.getInstance().getMarkdown()
-        setValue(value)
-        props.onChange(value.replaceAll(projectPath, '~'));
+        const v = editorRef.current.getInstance().getMarkdown()
+        if (!v) return
+        
+        if (!value || v.trim() != value.trim()) {
+            console.log('SAVING')
+            setValue(v)
+            props.onChange(v.replaceAll(projectPath, '~'));
+        }
     }
 
     function addImageBlobHook(blob, callback) {

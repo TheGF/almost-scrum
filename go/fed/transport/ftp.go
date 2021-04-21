@@ -135,7 +135,7 @@ func (exchange *FTPExchange) List(since time.Time) ([]string, error) {
 
 	names, err := exchange.list("", since)
 	if err == nil {
-		logrus.Infof("list from %s: %v", exchange, names)
+		logrus.Debugf("list from %s: %v", exchange, names)
 	}
 	return names, err
 }

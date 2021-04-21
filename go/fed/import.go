@@ -11,8 +11,8 @@ import (
 )
 
 
-func extractItem(project *core.Project, source *zip.File) (string, error) {
-	owner, _ := parseComment(source.Comment)
+func importZipItem(project *core.Project, source *zip.File) (string, error) {
+	owner, _, exportHash := parseComment(source.Comment)
 
 	dest := filepath.Join(project.Path, source.Name)
 	_ = os.MkdirAll(filepath.Dir(dest), 0755)
@@ -38,45 +38,53 @@ func extractItem(project *core.Project, source *zip.File) (string, error) {
 		return "", err
 	}
 
-	origin, _ := fs.GetHash(dest)
 	_ = fs.SetExtendedAttr(dest, &fs.ExtendedAttr{
-		Owner:  owner,
-		Origin: origin,
+		Owner:      owner,
+		ImportHash: exportHash,
 	})
 
+	logrus.Debugf("import file %s: owner %s, hash %v", source.Name, owner, exportHash)
 	return source.Name, err
 }
 
 
-func ImportDiff(project *core.Project, diff *Diff) ([]string, error) {
-	file := filepath.Join(project.Path, core.ProjectFedFilesFolder, diff.Input)
+func importFromSource(project *core.Project, source string, updates []Update) ([]string, error) {
+	file := filepath.Join(project.Path, core.ProjectFedFilesFolder, source)
 	r, err := zip.OpenReader(file)
 	if err != nil {
 		return nil, err
 	}
 	defer r.Close()
 
-	var names []string
-	for _, f := range r.File {
-		if item, found := diff.Items[f.Name]; found && item.Strategy == Extract {
-			if name, err := extractItem(project, f); err != nil {
+	var locs []string
+	for _, zipItem := range r.File {
+		loc := zipItem.Name
+		update := findUpdateByLoc(updates, loc)
+		if update != nil && update.Source == source {
+			if name, err := importZipItem(project, zipItem); err != nil {
 				return nil, err
 			} else {
-				names = append(names, name)
+				locs = append(locs, name)
 			}
 		}
 	}
-	return names, nil
+	return locs, nil
 }
 
-func Import(project *core.Project, diffs []*Diff) ([]string, error) {
-	var names []string
-	for _, diff := range diffs {
-		if names_, err := ImportDiff(project, diff); err != nil {
+func Import(project *core.Project, updates []Update) ([]string, error) {
+	var locs []string
+	sources := map[string]bool{}
+
+	for _, update := range updates {
+		sources[update.Source] = true
+	}
+
+	for source := range sources {
+		if names_, err := importFromSource(project, source, updates); err != nil {
 			return nil, err
 		} else {
-			names = append(names, names_...)
+			locs = append(locs, names_...)
 		}
 	}
-	return names, nil
+	return locs, nil
 }

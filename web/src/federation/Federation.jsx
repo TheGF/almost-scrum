@@ -7,7 +7,7 @@ import { React, useEffect, useContext, useState } from "react";
 import { BiTransfer } from "react-icons/bi";
 import T from "../core/T";
 import Server from "../server";
-import Sync from "./Sync";
+import Updates from "./Updates";
 import UserContext from '../UserContext';
 import { MdSignalCellular0Bar, MdSignalCellular1Bar, MdSignalCellular2Bar, MdSignalCellular3Bar, MdSignalCellular4Bar } from "react-icons/md";
 import Exchanges from "./Exchanges";
@@ -39,7 +39,7 @@ function Federation(props) {
             }
 
             if (stat['new'] || stat['update'] || stat['conflict']) {
-                setUpdates(stat['new']+stat['update']+stat['conflict'])
+                setUpdates(stat['new'] + stat['update'] + stat['conflict'])
                 toast({
                     title: `Update from ${log.header.user}@${log.header.hostname}`,
                     description: `${stat['new']} new files, ${stat['update']} updates and ${stat['conflict']} conflicts` +
@@ -56,56 +56,60 @@ function Federation(props) {
             .then(notifyChanges)
     }
 
-    function sync() {
-        Server.postFedSync(project)
-    }
+    function exportSince(time) {
+        let d = new Date()
 
-    function exportNewFiles() {
-        Server.postFedExport(project)
+        switch (time) {
+            case 'today': d.setDate(d.getDate() - 1); break
+            case 'week': d.setDate(d.getDate() - 7); break
+            case 'month': d.setMonth(d.getMonth() - 1); break
+            case 'all': d.setYear(0); break
+            default: d = null; break
+        }
+
+        Server.postFedExport(project, d)
             .then(files => {
-                if (files && files.length > 0) {
-                    toast({
-                        title: `Successful Export`,
-                        description: files.join(','),
-                        status: "success",
-                        duration: 9000,
-                        isClosable: true,
-                    })                    
-                }
+                Server.postFedPush(project)
+                    .then(_ => {
+                        if (files) {
+                            toast({
+                                title: `Successful Export`,
+                                description: files.join(','),
+                                status: "success",
+                                duration: 9000,
+                                isClosable: true,
+                            })
+                        }
+                    })
             })
     }
 
-
     function onFedStatus(status) {
-        let connectedExchanges = []
-        let exchangesNum = 0
-        for (const [name, connected] of Object.entries(status.exchanges)) {
-            if (connected) connectedExchanges.push(name)
-            exchangesNum++
+        if (!status || !status.exchanges) {
+            setStrength(0)
+            return
         }
+
+        const connectedExchanges = Object.entries(status.exchanges)
+                                            .filter(([n, c]) => c)
+                                            .map(([n, c]) => n)
         setStrength(connectedExchanges.length)
-
-        if (exchangesNum) {
-            if (connectedExchanges.length) {
-                exportNewFiles()
-
-                getDiffs()
-                monitorInterval = setInterval(getDiffs, 2 * 60000)
-            } else {
-                if (monitorInterval) clearInterval(monitorInterval);
-                setTimeout(startMonitoring, 5 * 60000)
-            }
-        }
+        notifyChanges(status.inbox || [])
     }
 
-    function openModal() {
-        onOpen()
-        exportNewFiles()
+    function closeModal() {
+        exportSince()
+        onClose()
+    }
+
+    function check() {
+        Server.postFedPull(project)
+            .then(_ => Server.getFedStatus(project).then(onFedStatus))
     }
 
     function startMonitoring() {
-        Server.getFedStatus(project)
-            .then(onFedStatus)
+        check()
+        setInterval(check, 5 * 60000)
     }
     useEffect(startMonitoring, [])
 
@@ -119,13 +123,13 @@ function Federation(props) {
     }
 
     return <>
-        <Button onClick={openModal}>
+        <Button onClick={onOpen}>
             {signalBar}
             <BiTransfer />
             {updates ? updates : null}
         </Button>
-        <Modal isOpen={isOpen} onClose={onClose} size="6xl" top
-            scrollBehavior="inside" >
+        <Modal isOpen={isOpen} onClose={closeModal} size="6xl" top
+            scrollBehavior="inside" isLazy >
             <ModalOverlay />
             <ModalContent top maxW="70%">
                 <ModalHeader>Federation</ModalHeader>
@@ -133,7 +137,7 @@ function Federation(props) {
                 <ModalBody>
                     <Tabs isLazy>
                         <TabList>
-                            <Tab isDisabled={strenght == 0}><T>inbox</T></Tab>
+                            <Tab isDisabled={strenght == 0}><T>updates</T></Tab>
                             <Tab><T>exchanges</T></Tab>
                             <Tab><T>join</T></Tab>
                             <Tab isDisabled={strenght == 0}><T>invite</T></Tab>
@@ -141,16 +145,16 @@ function Federation(props) {
 
                         <TabPanels>
                             <TabPanel>
-                                <Sync key={isOpen} onClose={onClose} />
+                                <Updates key={isOpen} onClose={closeModal} exportSince={exportSince} />
                             </TabPanel>
                             <TabPanel>
-                                <Exchanges onClose={onClose} />
+                                <Exchanges onClose={closeModal}/>
                             </TabPanel>
                             <TabPanel>
-                                <Join onClose={onClose} project={project} />
+                                <Join onClose={closeModal} project={project} />
                             </TabPanel>
                             <TabPanel>
-                                <Invite onClose={onClose} />
+                                <Invite onClose={closeModal} />
                             </TabPanel>
                         </TabPanels>
                     </Tabs>

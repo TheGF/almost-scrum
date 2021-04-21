@@ -24,7 +24,7 @@ function NewTask(props) {
     const { board, onNewTask } = props
 
     const types = (config.boardTypes && config.boardTypes[board]) || models.map(m => m.name)
-    const typesList = types.map(t => <MenuItem onClick={_ => onNewTask(t)}>
+    const typesList = types.map(t => <MenuItem key={t} onClick={_ => onNewTask(t)}>
         {t}
     </MenuItem>)
 

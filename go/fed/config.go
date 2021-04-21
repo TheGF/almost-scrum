@@ -3,6 +3,7 @@ package fed
 import (
 	"almost-scrum/core"
 	"almost-scrum/fed/transport"
+	"almost-scrum/fs"
 	uuid2 "github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -23,12 +24,13 @@ type Config struct {
 	S3            []transport.S3Config     `json:"s3" yaml:"s3"`
 	WebDAV        []transport.WebDAVConfig `json:"webDAV" yaml:"webdav"`
 	Ftp           []transport.FTPConfig    `json:"ftp" yaml:"ftp"`
+	USB           []transport.USBConfig    `json:"usb" yaml:"usb"`
 }
 
 func ReadConfig(project *core.Project, removeSecret bool) (*Config, error) {
 	var config Config
 	path := filepath.Join(project.Path, core.ProjectFedFolder, configFile)
-	if err := core.ReadYaml(path, &config); err == nil {
+	if err := fs.ReadYaml(path, &config); err == nil {
 		if config.Span < 1 {
 			logrus.Warnf("invalid span value %d in %s; default to 10", config.Span, path)
 			config.Span = 10
@@ -46,6 +48,10 @@ func ReadConfig(project *core.Project, removeSecret bool) (*Config, error) {
 			PollTime:      time.Minute,
 			Span:          10,
 			LastExport:    time.Time{},
+			WebDAV: []transport.WebDAVConfig{},
+			USB: []transport.USBConfig{},
+			Ftp: []transport.FTPConfig{},
+			S3: []transport.S3Config{},
 		}
 
 		_ = os.MkdirAll(filepath.Dir(path), 0755)
@@ -70,5 +76,5 @@ func ReadConfig(project *core.Project, removeSecret bool) (*Config, error) {
 
 func WriteConfig(project *core.Project, config *Config) error {
 	path := filepath.Join(project.Path, core.ProjectFedFolder, configFile)
-	return core.WriteYaml(path, config)
+	return fs.WriteYaml(path, config)
 }

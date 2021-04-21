@@ -155,10 +155,10 @@ func IncreaseVersion(project *core.Project, path string, owner string, public bo
 
 	_, _ = archiveFile(project, path)
 	_ = fs.SetExtendedAttr(fullPath_, &fs.ExtendedAttr{
-		Owner:   owner,
-		Public:  public,
-		Origin:  nil,
-		Deleted: time.Time{},
+		Owner:      owner,
+		Public:     public,
+		ImportHash: nil,
+		Modified:   time.Time{},
 	})
 
 	archivePath := filepath.Join(project.Path, core.ProjectArchiveFolder, path)

@@ -1,11 +1,9 @@
 package cli
 
 import (
-	"almost-scrum/core"
 	"almost-scrum/fed"
 	"github.com/manifoldco/promptui"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -15,12 +13,12 @@ import (
 func syncCommand(projectPath string, args []string) {
 	project := getProject(projectPath)
 
-	since := time.Time{}
-	if len(args) > 1 {
-		if days, err := strconv.Atoi(args[1]); err != nil {
-			since = time.Now().Add(-time.Duration(days) * time.Hour * 24)
-		}
-	}
+	//since := time.ModTime{}
+	//if len(args) > 1 {
+	//	if days, err := strconv.Atoi(args[1]); err != nil {
+	//		since = time.Now().Add(-time.Duration(days) * time.Hour * 24)
+	//	}
+	//}
 
 	status := fed.GetStatus(project)
 	if len(status.Exchanges) == 0 {
@@ -29,29 +27,20 @@ func syncCommand(projectPath string, args []string) {
 	}
 
 	color.Green("Looking for files to export")
-	files, err := fed.Export(project, core.GetSystemUser(), time.Time{})
+	stats, err := fed.Pull(project, time.Time{})
 	abortIf(err, "")
-	color.Green("The following files will be exported: %s", strings.Join(files, ","))
 
-	if failedExchanges, err := fed.Sync(project, since); err != nil {
-		color.Red("cannot sync project with federation: %v", err)
-	} else {
-		color.Green("synchronization with federation completed, %d exchanges ok, %d failed",
-			len(status.Exchanges), failedExchanges)
+	for _, stat := range stats {
+		if stat.Error != nil {
+			color.Red("%s !Error: %v", stat.Error)
+			continue
+		}
+
+		color.Green("%s [%s] -> %s", strings.Join(stat.Locs, ","))
+		if len(stat.Issues) > 0 {
+			color.Red("%s [%s] !Issues: %v", stat.Issues)
+		}
 	}
-
-	diff, err := fed.GetDiffs(project)
-	abortIf(err, "")
-
-	print(diff)
-	//for _, d := range diff {
-	//	d.
-	//}
-	//
-	//color.Green("The following files will be imported:" strings.Join( ","))
-
-	//fed.ImportDiff(project, diff)
-
 }
 
 func joinCommand(projectPath string, args []string) {

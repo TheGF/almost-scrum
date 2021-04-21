@@ -22,8 +22,10 @@ func listProjectUsersAPI(c *gin.Context) {
 	if project = getProject(c); project == nil {
 		return
 	}
-
 	users := core.GetUserList(project)
+
+	projectLock.Lock()
+	defer projectLock.Unlock()
 	projectUsers[c.Param("project")] = users
 	c.JSON(http.StatusOK, users)
 }

@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 type ProjectMapping map[string]*core.Project
@@ -19,6 +20,7 @@ type ProjectUsers map[string][]string
 
 var projectMapping = make(ProjectMapping)
 var projectUsers = make(ProjectUsers)
+var projectLock = sync.Mutex{}
 
 type NoAccess struct {
 	Message string   `json:"message"`
@@ -28,6 +30,8 @@ type NoAccess struct {
 // getProject resolves the URL parameters
 func getProject(c *gin.Context) *core.Project {
 	name := c.Param("project")
+	projectLock.Lock()
+	defer projectLock.Unlock()
 
 	project, found := projectMapping[name]
 	if !found {
@@ -37,6 +41,7 @@ func getProject(c *gin.Context) *core.Project {
 	}
 
 	user := getWebUser(c)
+
 	users := projectUsers[name]
 	if _, found := core.FindStringInSlice(users, user); !found {
 		users = core.GetUserList(project)
@@ -64,6 +69,9 @@ func openProject(name string, path string) (*core.Project, error) {
 
 	_ = core.ReIndex(project)
 	users := core.GetUserList(project)
+
+	projectLock.Lock()
+	defer projectLock.Unlock()
 
 	projectMapping[name] = project
 	projectUsers[name] = users
@@ -137,6 +145,9 @@ func serverRoute(group *gin.RouterGroup, repoPath string) {
 
 func listProjectsAPI(c *gin.Context) {
 	var names = make([]string, 0)
+	projectLock.Lock()
+	defer projectLock.Unlock()
+
 	for key := range projectMapping {
 		names = append(names, key)
 	}
@@ -177,6 +188,9 @@ func createProjectInFolder(c *gin.Context, name string, path string, templates [
 		return
 	}
 	logrus.Debugf("User %s added to project %s", user, name)
+
+	projectLock.Lock()
+	defer projectLock.Unlock()
 	projectMapping[name] = project
 	projectUsers[name] = []string{user}
 

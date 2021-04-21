@@ -8,57 +8,75 @@ import (
 )
 
 
-func pullFromExchange(signal *Connection, exchange transport.Exchange, since time.Time, r chan error)  {
-	go func() {
-		logrus.Infof("start pull from transport %s for locs newer than %s", exchange, since)
-		locs, err := exchange.List(since)
-		if err != nil {
-			logrus.Errorf("error during list from transport %s: %v", exchange, err)
-			r <- err
-		}
-		if len(locs) == 0{
-			logrus.Infof("no locs from transport %s", exchange)
-			r <- err
-		}
+func pullExchange(connection *Connection, exchange transport.Exchange, since time.Time, r chan Transfer) {
+	logrus.Infof("Federation pull from exchange %s", exchange)
+	stat := Transfer{Exchange: exchange.Name()}
+	start := time.Now()
 
-		var imported []string
-		for _, loc := range locs {
-			if _, loaded := signal.locs.LoadOrStore(loc, true); !loaded {
-				if _, err := exchange.Pull(loc); err == nil {
-					logrus.Debugf("import %s from transport %s", loc, exchange)
-					imported = append(imported, loc)
-				} else {
-					signal.locs.Delete(loc)
-				}
+	list, err := exchange.List(since)
+	if err != nil {
+		stat.Error = err
+		r <- stat
+		return
+	}
+	for _, loc := range list {
+		refs, found := connection.locs.LoadOrStore(loc, 1)
+		if found {
+			connection.locs.Store(loc, refs.(int)+1)
+		} else {
+			if sz, err := exchange.Pull(loc); err == nil {
+				stat.Locs = append(stat.Locs, loc)
+				stat.Size += sz
+				logrus.Infof("pulled loc %s from %s", loc, exchange)
+			} else {
+				stat.Issues = append(stat.Issues, err)
+				logrus.Warnf("cannot pull %s from %s: %v", loc, exchange, err)
 			}
 		}
-		logrus.Infof("end import from transport %s, imported locs: %#v", exchange, imported)
-		r <- nil
-	}()
+	}
+	stat.Elapsed = time.Since(start)
+	r <- stat
+	return
 }
 
-
-func Pull(project *core.Project, since time.Time) (int, error) {
-	signal, err := Connect(project)
+func Pull(project *core.Project, since time.Time) ([]Transfer, error) {
+	connection, err := Connect(project)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	signal.inUse.Add(1)
-	defer signal.inUse.Done()
 
-	r := make(chan error, 8)
-	defer close(r)
-	connected := getConnectedExchanges(signal)
+	connection.mutex.Lock()
+	defer connection.mutex.Unlock()
+
+	if since.IsZero() {
+		diff := time.Duration(connection.config.Span) * 24 * time.Hour
+		since = time.Now().Add(-diff)
+	}
+
+	logrus.Infof("Pull project %s with federation node %s starting from %s", project.Config.Public.Name,
+		connection.config.UUID, since)
+
+	if err := loadLocs(connection); err != nil {
+		return nil, err
+	}
+
+	r := make(chan Transfer)
+	connected := getConnectedExchanges(connection)
 	for _, exchange := range connected {
-		go pullFromExchange(signal, exchange, since, r)
+		go pullExchange(connection, exchange, since, r)
 	}
 
-	successful := 0
-	for range connected{
-		if <- r == nil {
-			successful++
+	var stats []Transfer
+	for range connected {
+		stat := <-r
+		stats = append(stats, stat)
+		if len(stat.Locs) > 0 {
+			connection.throughput[stat.Exchange].Download = stat.Size / int64(len(stat.Locs))
 		}
 	}
 
-	return successful, nil
+
+	logrus.Infof("Pull completed for project %s on node %s: %v",
+		project.Config.Public.Name, connection.config.UUID, stats)
+	return stats, nil
 }

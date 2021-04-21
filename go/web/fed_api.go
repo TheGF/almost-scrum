@@ -14,11 +14,12 @@ import (
 func fedRoute(group *gin.RouterGroup) {
 	group.GET("/projects/:project/fed/config", getConfigAPI)
 	group.GET("/projects/:project/fed/status", getStatusAPI)
-	group.GET("/projects/:project/fed/diffs", getDiffsAPI)
+//	group.GET("/projects/:project/fed/diffs", getDiffsAPI)
 	group.POST("/projects/:project/fed/config", setConfigAPI)
 	group.POST("/projects/:project/fed/import", postImportAPI)
 	group.POST("/projects/:project/fed/export", postExportAPI)
-	group.POST("/projects/:project/fed/sync", postSyncAPI)
+	group.POST("/projects/:project/fed/pull", postPullAPI)
+	group.POST("/projects/:project/fed/push", postPushAPI)
 	group.POST("/projects/:project/fed/share", postCreateInviteAPI)
 	group.POST("/projects/:project/fed/join", postJoinAPI)
 }
@@ -56,6 +57,7 @@ func setConfigAPI(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Cannot read federation config: %v", err)
 		return
 	}
+	fed.Disconnect(project)
 	c.JSON(http.StatusOK, "")
 }
 
@@ -70,36 +72,6 @@ func getStatusAPI(c *gin.Context) {
 	c.JSON(http.StatusOK, s)
 }
 
-func getDiffsAPI(c *gin.Context) {
-	var project *core.Project
-	if project = getProject(c); project == nil {
-		return
-	}
-
-	_, sync := c.GetQuery("sync")
-
-	if sync {
-		_, err := fed.Sync(project, time.Time{})
-		if err != nil {
-			_ = c.Error(err)
-			c.String(http.StatusInternalServerError, "Cannot sync with federation: %v", err)
-			return
-		}
-	}
-	diffs, err := fed.GetDiffs(project)
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot get fed diffs: %v", err)
-		return
-	}
-	if diffs == nil {
-		diffs = []*fed.Diff{}
-	}
-
-	logrus.Debugf("Fed diffs in project: %v", diffs)
-	c.JSON(http.StatusOK, diffs)
-}
-
 func postImportAPI(c *gin.Context) {
 
 	var project *core.Project
@@ -107,19 +79,19 @@ func postImportAPI(c *gin.Context) {
 		return
 	}
 
-	var diffs []*fed.Diff
-	if err := c.BindJSON(&diffs); core.IsErr(err, "Invalid JSON") {
+	var updates []fed.Update
+	if err := c.BindJSON(&updates); core.IsErr(err, "Invalid JSON") {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	files, err := fed.Import(project, diffs)
+	locs, err := fed.Import(project, updates)
 	if err != nil {
 		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot merge fed files: %v", err)
+		c.String(http.StatusInternalServerError, "Cannot merge fed locs: %v", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, files)
+	c.JSON(http.StatusOK, locs)
 }
 
 func postExportAPI(c *gin.Context) {
@@ -152,20 +124,37 @@ func postExportAPI(c *gin.Context) {
 
 }
 
-func postSyncAPI(c *gin.Context) {
+func postPushAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	_, err := fed.Sync(project, time.Time{})
+	stats, err := fed.Push(project)
 	if err != nil {
 		_ = c.Error(err)
 		c.String(http.StatusInternalServerError, "Cannot export fed files: %v", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, fed.GetStatus(project))
+	c.JSON(http.StatusOK, stats)
+
+}
+
+func postPullAPI(c *gin.Context) {
+	var project *core.Project
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	stats, err := fed.Pull(project, time.Time{})
+	if err != nil {
+		_ = c.Error(err)
+		c.String(http.StatusInternalServerError, "Cannot export fed files: %v", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, stats)
 
 }
 

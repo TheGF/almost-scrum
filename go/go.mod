@@ -10,6 +10,7 @@ require (
 	github.com/beevik/ntp v0.3.0
 	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1
 	github.com/cratonica/trayhost v0.0.0-20150112162955-98495206fd96
+	github.com/deepakjois/gousbdrivedetector v0.0.0-20161027045320-4d29e4d6f1b7
 	github.com/ecies/go v1.0.1
 	github.com/fatih/color v1.10.0
 	github.com/gabriel-vasile/mimetype v1.1.2
@@ -37,7 +38,7 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/npat-efault/crc16 v0.0.0-20161013170008-4128ccbe47c3
 	github.com/orcaman/concurrent-map v0.0.0-20210106121528-16402b402231 // indirect
-	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prprprus/scheduler v0.5.0
 	github.com/ricardopadilha/gowebdav v0.0.0-20191209050204-4b0933605566
 	github.com/rlmcpherson/s3gof3r v0.5.0

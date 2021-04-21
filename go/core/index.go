@@ -1,6 +1,7 @@
 package core
 
 import (
+	"almost-scrum/fs"
 	"github.com/monirz/gotri"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/text/unicode/norm"
@@ -171,7 +172,7 @@ func showIndexChanges(project *Project) {
 		Ids:        make(map[string]Ids),
 		searchTree: new(gotri.Trie),
 	}
-	_ = ReadJSON(filepath.Join(project.Path, IndexFile), &oldIndex)
+	_ = fs.ReadJSON(filepath.Join(project.Path, IndexFile), &oldIndex)
 
 	for key, value := range project.Index.Ids {
 		oldValue, found := oldIndex.Ids[key]
@@ -197,6 +198,9 @@ func showIndexChanges(project *Project) {
 
 func ReIndex(project *Project) error {
 	logrus.Debugf("Reindex project %s", project.Path)
+
+	project.IndexMutex.Lock()
+	defer project.IndexMutex.Unlock()
 
 	if project.Index == nil {
 		if err := ReadIndex(project); err != nil {
@@ -367,7 +371,7 @@ func ReadIndex(project *Project) error {
 		searchTree: new(gotri.Trie),
 		modTime:    info.ModTime(),
 	}
-	if err = ReadJSON(p, project.Index); err != nil {
+	if err = fs.ReadJSON(p, project.Index); err != nil {
 		return err
 	}
 
@@ -378,5 +382,5 @@ func ReadIndex(project *Project) error {
 func WriteIndex(project *Project) error {
 	p := filepath.Join(project.Path, IndexFile)
 
-	return WriteJSON(p, project.Index)
+	return fs.WriteJSON(p, project.Index)
 }

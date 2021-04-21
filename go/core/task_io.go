@@ -80,7 +80,7 @@ func parseList(input []byte, title string, task *Task) {
 					parseProperties(text, task)
 				case "Progress":
 					parseParts(text, task)
-				case "Files":
+				case "Locs":
 					parseFiles(text, task)
 				}
 			}
@@ -125,7 +125,7 @@ func renderFiles(task *Task, output *bytes.Buffer) {
 	if task.Files == nil {
 		return
 	}
-	output.WriteString("### Files\n")
+	output.WriteString("### Locs\n")
 
 	for _, file := range task.Files {
 		base := filepath.Base(file)
@@ -223,7 +223,7 @@ func ParseTask(input []byte, task *Task) error {
 	paragraphs := splitInParagraph(input)
 	for _, paragraph := range paragraphs {
 		switch paragraph.title {
-		case "Properties", "Progress", "Files":
+		case "Properties", "Progress", "Locs":
 			parseList([]byte(paragraph.body), paragraph.title, task)
 		default:
 			description.WriteString(paragraph.header)

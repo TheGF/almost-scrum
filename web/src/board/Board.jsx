@@ -66,7 +66,7 @@ function Board(props) {
     useEffect(loadUserList, []);
 
     const tasks = infos && infos.map(info =>
-        <Task key={info.id} info={info} compact={compact}
+        <Task key={`${info.id}.${info.name}`} info={info} compact={compact}
             boards={boards} onBoardChanged={loadTaskList}
             users={users} searchKeys={searchKeys} />
     );

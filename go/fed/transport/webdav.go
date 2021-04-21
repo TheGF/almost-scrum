@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -26,6 +27,7 @@ type WebDAVExchange struct {
 	local  string
 	remote string
 	conn   *gowebdav.Client
+	lock   sync.Mutex
 }
 
 func GetWebDAVExchanges(configs ...WebDAVConfig) []Exchange {
@@ -117,9 +119,12 @@ func (exchange *WebDAVExchange) List(since time.Time) ([]string, error) {
 		return nil, os.ErrClosed
 	}
 
+	exchange.lock.Lock()
+	defer exchange.lock.Unlock()
+
 	names, err := exchange.list("", since)
 	if err == nil {
-		logrus.Infof("list from %s: %v", exchange, names)
+		logrus.Debugf("list from %s: %v", exchange, names)
 	}
 	return names, err
 }
@@ -129,6 +134,9 @@ func (exchange *WebDAVExchange) Push(loc string) (int64, error) {
 		logrus.Warn("trying to list without FTP connection. Call Connect first")
 		return 0, os.ErrClosed
 	}
+
+	exchange.lock.Lock()
+	defer exchange.lock.Unlock()
 
 	c := exchange.conn
 	file := filepath.Join(exchange.local, strings.ReplaceAll(loc, "/", string(os.PathSeparator)))
@@ -165,6 +173,9 @@ func (exchange *WebDAVExchange) Pull(loc string) (int64, error) {
 		logrus.Warn("trying to list without WebDAV connection. Call Connect first")
 		return 0, os.ErrClosed
 	}
+
+	exchange.lock.Lock()
+	defer exchange.lock.Unlock()
 
 	remote := fmt.Sprintf("%s/%s", exchange.remote, loc)
 	r, err := exchange.conn.ReadStream(remote)
@@ -224,7 +235,7 @@ func (exchange *WebDAVExchange) delete(folder string, pattern string, before tim
 			if match && file.ModTime().Before(before) {
 				if err := exchange.conn.Remove(path.Join(exchange.remote, folder,
 					file.Name())); err != nil {
-					logrus.Error("cannot remove file %s from %s: %v", file.Name(),
+					logrus.Errorf("cannot remove file %s from %s: %v", file.Name(),
 						exchange, err)
 				} else {
 					logrus.Infof("removed %s from %s", file.Name(), exchange)
@@ -243,6 +254,9 @@ func (exchange *WebDAVExchange) Delete(pattern string, before time.Time) error {
 		logrus.Warn("trying to list without WebDAV connection. Call Connect first")
 		return os.ErrClosed
 	}
+
+	exchange.lock.Lock()
+	defer exchange.lock.Unlock()
 
 	_, err := exchange.delete("", pattern, before)
 	return err

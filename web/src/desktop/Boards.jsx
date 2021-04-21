@@ -84,17 +84,14 @@ function Boards(props) {
             </MenuList>
         </Menu> : null;
 
-    const library = <Button key="library" colorScheme="yellow"
-        isActive={activeButton == 'library'} onClick={clickLibrary}>
-        <T>library</T>
-    </Button>
+
+
 
     return <>
-        <EditBoard name={editBoard} onClose={ closeEditBoard } onListBoards={onListBoards}/>
+        <EditBoard name={editBoard} onClose={closeEditBoard} onListBoards={onListBoards} />
         {buttons}
         {moreButtons}
         {all}
-        {library}
     </>
 }
 export default Boards

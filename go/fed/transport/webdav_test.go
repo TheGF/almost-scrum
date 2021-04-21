@@ -42,10 +42,10 @@ func TestPush(t *testing.T) {
 	err = ioutil.WriteFile(filepath.Join(dir, "test1"), []byte("test content"), 0755)
 	assert.Nil(t, err)
 
-	err = exchange.Push("test1")
+	_, err = exchange.Push("test1")
 	assert.Nil(t, err)
 
-	os.RemoveAll(dir)
+	_ = os.RemoveAll(dir)
 }
 
 func TestPull(t *testing.T) {
@@ -55,11 +55,11 @@ func TestPull(t *testing.T) {
 	_, err := exchange.Connect("test", dir)
 	assert.Nil(t, err)
 
-	err = exchange.Pull("test1")
+	_, err = exchange.Pull("test1")
 	assert.Nil(t, err)
 
 	_, err = os.Stat(filepath.Join(dir, "test1"))
 	assert.Nil(t, err)
 
-	os.RemoveAll(dir)
+	_ = os.RemoveAll(dir)
 }

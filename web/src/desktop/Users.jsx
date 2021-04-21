@@ -100,7 +100,7 @@ function Users(props) {
         </>
     }
 
-    const userList = users.sort().map(u => <AccordionItem>
+    const userList = users.sort().map(u => <AccordionItem key={u} >
         {({ isExpanded }) => <UserProfile key={u} user={u} isExpanded={isExpanded} />}
     </AccordionItem>)
 

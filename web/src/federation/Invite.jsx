@@ -3,6 +3,7 @@ import {
     Td, Text, Th, Thead, Tr, useToast, VStack
 } from '@chakra-ui/react';
 import { React, useContext, useEffect, useState } from "react";
+import { BiCopy } from 'react-icons/bi';
 import Server from '../server';
 import UserContext from '../UserContext';
 
@@ -30,7 +31,7 @@ function Invite(props) {
     function getInvite() {
         const first = Math.floor(Math.random() * images.length)
         let second = Math.floor(Math.random() * images.length)
-        while (second == first ) second = Math.floor(Math.random() * images.length)
+        while (second == first) second = Math.floor(Math.random() * images.length)
 
         const keys = [images[first], images[second]].sort()
         Server.postFedShare(project, keys.join(','), selection, removeCredentials)
@@ -74,8 +75,8 @@ function Invite(props) {
     }
 
     function inviteUI() {
-        function copy() {
-            const copyText = document.getElementById("inviteMessage");
+        function copy(id, description) {
+            const copyText = document.getElementById(id);
             const range = document.createRange();
             range.selectNode(copyText);
             window.getSelection().addRange(range);
@@ -86,7 +87,7 @@ function Invite(props) {
             //navigator.clipboard.writeText(copyText)
             toast({
                 title: `Copied`,
-                description: 'Now paste in your favorite e-mail client and send',
+                description: description,
                 status: "info",
                 duration: 9000,
                 isClosable: true,
@@ -113,12 +114,21 @@ function Invite(props) {
                 <a href={`http://localhost:8375?invite=${invite}`}>
                     <font color="blue">Click here</font>
                 </a>&nbsp;or copy and paste the following token in the invite dialog<br />
-                <pre id="inviteToken">{multiline(invite)}</pre>
-                <br /><HStack><Text>When requested about Gopher's dinner, choose </Text>{keysUI}</HStack>
+                <pre id="inviteToken" style={{display: 'inline'}}>{multiline(invite)}</pre>
+                <BiCopy onClick={_ => copy('inviteToken', '')} style={{display: 'inline'}} />
+                <br />
+                <HStack>
+                    <Text>When requested about Gopher's dinner, choose </Text>
+                    {keysUI}
+                </HStack>
                 <br />
             </Box>
             <ButtonGroup>
-                <Button colorScheme="blue" onClick={copy}>Copy</Button>
+                <Button colorScheme="blue" onClick={
+                    _ => copy('inviteMessage', 'Now paste in your favorite e-mail client and send')
+                }>
+                    Copy
+                </Button>
                 <Button colorScheme="blue" onClick={sendByEmail}>E-mail (text)</Button>
                 <Button onClick={_ => setInvite(null)}>Back</Button>
                 <Button onClick={onClose}>Close</Button>
@@ -146,7 +156,7 @@ function Invite(props) {
             </Table>
             <Spacer minHeight="1em" />
             <ButtonGroup>
-                <Button colorScheme="blue" disabled={selection.length==0} onClick={getInvite}>Get Invite</Button>
+                <Button colorScheme="blue" disabled={selection.length == 0} onClick={getInvite}>Get Invite</Button>
                 <Button onClick={onClose}>Close</Button>
             </ButtonGroup>
         </VStack>

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"almost-scrum/fs"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"path/filepath"
@@ -64,7 +65,7 @@ func ReadModels(path string) ([]Model, error) {
 		case ".yaml":
 			{
 				var properties []PropertyDef
-				if err := ReadYaml(filePath, &properties); err == nil {
+				if err := fs.ReadYaml(filePath, &properties); err == nil {
 					if model, found := modelsMap[name]; found {
 						model.Properties = properties
 						modelsMap[name] = model
