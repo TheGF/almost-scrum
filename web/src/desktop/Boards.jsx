@@ -11,8 +11,7 @@ import EditBoard from './EditBoard';
 const visibleBoards = 5
 
 function Boards(props) {
-    const { activeBoard, boards, onSelectBoard, onSelectLibrary, onListBoards } = props;
-    const [activeButton, setActiveButton] = useState(activeBoard)
+    const { boards, panel, setPanel, onListBoards } = props;
     const [recentBoards, setRecentBoards] = useState([]);
     const [more, setMore] = useState([]);
     const [editBoard, setEditBoard] = useState(null);
@@ -33,10 +32,9 @@ function Boards(props) {
     }
     useEffect(splitBoards, [boards])
 
-    function clickBoard(board) {
-        setActiveButton(board)
-        localStorage.setItem(`ash-board-${board}`, `${Date.now()}`)
-        onSelectBoard && onSelectBoard(board)
+    function clickBoard(panel) {
+        localStorage.setItem(`ash-board-${panel}`, `${Date.now()}`)
+        setPanel(panel)
         splitBoards(recentBoards)
     }
 
@@ -45,22 +43,17 @@ function Boards(props) {
         onSelectBoard && onSelectBoard("~")
     }
 
-    function clickLibrary() {
-        setActiveButton('library')
-        onSelectLibrary && onSelectLibrary()
-    }
-
     function closeEditBoard() {
         setEditBoard(null)
     }
 
-    const all = <Button key="all" colorScheme="blue"
-        isActive={activeButton == 'library'} onClick={clickAll}>
+    const all = <Button key="~" 
+        isActive={panel == '~'} onClick={_=>clickBoard('~')}>
         <T>all</T>
     </Button>
 
     const buttons = recentBoards.map(
-        b => <Button key={b} colorScheme="blue" isActive={b == activeButton}
+        b => <Button key={b} isActive={b == panel}
             onClick={_ => clickBoard(b)} >
             <T>{b}</T>
             <Box w="1em" />
@@ -70,7 +63,7 @@ function Boards(props) {
 
     const moreButtons = more.length ?
         <Menu>
-            <MenuButton as={Button} colorScheme="blue">
+            <MenuButton as={Button}>
                 ...
             </MenuButton>
             <MenuList>
@@ -83,8 +76,6 @@ function Boards(props) {
                 }
             </MenuList>
         </Menu> : null;
-
-
 
 
     return <>

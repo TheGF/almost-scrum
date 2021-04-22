@@ -1,10 +1,9 @@
-import { Box, Center, HStack } from "@chakra-ui/react";
+import { Box, Center, HStack, Stack } from "@chakra-ui/react";
 import { React, useContext, useState } from "react";
 import MarkdownEditor from '../core/MarkdownEditor';
 import Server from '../server';
 import UserContext from '../UserContext';
 import Properties from './Properties';
-
 
 
 function TaskEditor(props) {
@@ -36,30 +35,31 @@ function TaskEditor(props) {
     setValue(value);
     if (task) {
       task.description = value;
-      saveTask(task);
+      saveTask(task, true);
     }
   }
   const editMessage = readOnly ? <Center h="3em">
     Change owner if you want to edit the content
-</Center> : null
+    </Center> : null
 
-  return readOnly ? editMessage : <Box>
+  return <Box direction="vertical"  className="panel2">
+    {editMessage}
     <HStack>
-      <Box w="90%" h={height}>
-      <MarkdownEditor
-        value={value}
-        height={height}
-        readOnly={readOnly}
-        onChange={onChange}
-        disablePreview={true}
-        loadSuggestions={loadSuggestions}
-        suggestionTriggerCharacters={['@', '#']}
-        imageFolder="/.inline-images"
-      />
+      <Box w="100%" h={height}>
+        <MarkdownEditor
+          value={value}
+          height={height}
+          readOnly={readOnly}
+          onChange={onChange}
+          disablePreview={true}
+          loadSuggestions={loadSuggestions}
+          suggestionTriggerCharacters={['@', '#']}
+          imageFolder="/.inline-images"
+        />
       </Box>
-      <Box minW="240px" h={height-20}>
-      <Properties task={task} saveTask={saveTask} users={users} height={height}
-        height={height} readOnly={readOnly} />
+      <Box m={0} h={height - 20}>
+        <Properties task={task} saveTask={saveTask} users={users} height={height}
+          height={height} readOnly={readOnly} />
       </Box>
     </HStack>
   </Box>;

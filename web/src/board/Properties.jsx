@@ -3,6 +3,10 @@ import {
     Td, Tr, Box,
 } from '@chakra-ui/react';
 import { React, useContext, useState } from "react";
+import ReactDatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import "./datePicker.css"
+
 import T from '../core/T';
 import UserContext from '../UserContext';
 
@@ -21,8 +25,10 @@ function Properties(props) {
 
         function onChange(evt) {
             const value = evt && evt.target && evt.target.value;
-            if (value == undefined) return
+            if (value != undefined) changeValue(value)
+        }
 
+        function changeValue(value) {
             properties[name] = value
             setValue(value)
             saveTask(task)
@@ -30,6 +36,12 @@ function Properties(props) {
 
         function renderString() {
             return <Input value={value} onChange={onChange} size="sm" />
+        }
+
+        function renderDate() {
+            const startDate = Date.parse(value)
+            return  <ReactDatePicker selected={startDate} 
+                onChange={date=>changeValue(date && date.toISOString())} />
         }
 
         function renderEnum() {
@@ -80,6 +92,7 @@ function Properties(props) {
             case 'Bool': input = renderBool(); break
             case 'User': input = renderUser(); break
             case 'Tag': input = renderTag(); break
+            case 'Date': input = renderDate(); break
         }
 
         return <Tr key={name}>
@@ -97,7 +110,7 @@ function Properties(props) {
     }
 
     return <Box maxH={height - 50} style={{ overflowY: 'auto' }}>
-        <Table variant="striped" colorScheme="teal" size="sm">
+        <Table size="sm">
             <Tbody>
                 {rows}
             </Tbody>

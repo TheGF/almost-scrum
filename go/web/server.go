@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/getlantern/systray"
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/skratchdot/open-golang/open"
 	"mime"
 	"net/http"
@@ -16,10 +17,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-
-	"github.com/gin-gonic/gin"
-
-	"github.com/sirupsen/logrus"
 )
 
 func loadStaticContent(router *gin.Engine) {
@@ -99,7 +96,6 @@ func setBye(r *gin.Engine) {
 				if err := srv.Shutdown(ctx); err != nil {
 					logrus.Fatal("Server forced to shutdown:", err)
 				}
-				systray.Quit()
 			}
 		}
 		c.String(http.StatusOK, "Have a good day")

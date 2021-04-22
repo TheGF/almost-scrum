@@ -5,67 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/fed/transport/usb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fed/transport/usb_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gantt/gantt.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/gantt_api.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/web/systray_arm.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli/commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/commands.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cli/fed.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/fed.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/board.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/board.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/git_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/git_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/index.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/fs/json.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/project.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/task.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/task.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/task_io.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/task_io.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/users.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/yaml.go" beforeDir="false" afterPath="$PROJECT_DIR$/fs/yaml.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/connect.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/connect.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/diff.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/status.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/export.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/export.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/fed_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/fed_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/import.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/import.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/invite.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/invite.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/pull.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/pull.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/push.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/push.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/sync.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/sync.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/transport/ftp.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/ftp.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/transport/s3.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/s3.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/transport/webdav.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/webdav.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/transport/webdav_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/transport/webdav_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fed/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/types.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fs/attributes.go" beforeDir="false" afterPath="$PROJECT_DIR$/fs/attributes.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/library/library.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/library.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/library/versions.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/versions.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test-data/test-template.zip" beforeDir="false" afterPath="$PROJECT_DIR$/test-data/test-template.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/fed_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/fed_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/project_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/project_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gantt/gantt.go" beforeDir="false" afterPath="$PROJECT_DIR$/gantt/gantt.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/tasks_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/tasks_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/users_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/users_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/systray.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/systray_amd.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_linux" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/assets/templates/issue-tracker.zip" beforeDir="false" afterPath="$PROJECT_DIR$/../web/assets/templates/issue-tracker.zip" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../web/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/ErrorBoundary.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/ErrorBoundary.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/board/Board.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Board.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/board/NewTask.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/NewTask.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/board/Properties.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Properties.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/src/board/Task.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Task.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Users.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Users.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/federation/Exchanges.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Exchanges.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/federation/Invite.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Invite.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/federation/Sync.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/federation/exchanges/S3Exchange.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/exchanges/S3Exchange.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/board/TaskEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/TaskEditor.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Boards.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Boards.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Desktop.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Desktop.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/gantt/Gantt.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/library/Bar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/Bar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/library/Library.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/Library.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/portal/Portal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/portal/Portal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/theme.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/theme.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

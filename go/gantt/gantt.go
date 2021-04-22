@@ -22,28 +22,22 @@ type State struct {
 }
 
 func hasValidType(project *core.Project, task core.Task) bool {
+	var hasStart, hasEnd bool
 	type_ := task.Properties["Type"]
 	for _, model := range project.Models {
 		if model.Name == type_ {
-			var hasStart, hasEnd, hasStatus, hasDeps, hasProgress bool
 			for _, property := range model.Properties {
 				switch property.Name {
 				case "Start":
 					hasStart = true
 				case "End":
 					hasEnd = true
-				case "Status":
-					hasStatus = true
-				case "Deps":
-					hasDeps = true
-				case "Progress":
-					hasDeps = true
 				}
 			}
-			return hasStart && hasEnd && hasStatus && hasDeps && hasProgress
+			break
 		}
 	}
-	return false
+	return hasStart && hasEnd
 }
 
 func DeriveTask(project *core.Project, info core.TaskInfo) (*Task, error) {

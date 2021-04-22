@@ -163,7 +163,7 @@ function Bar(props) {
 
     let hiddenInput = null
 
-    return <HStack w="90%" borderWidth="2" borderColor="gray">
+    return <HStack w="90%" borderWidth="2" borderColor="gray" p={2}>
         <ConfirmUpload file={confirmFileUpload}
             uploadFileToLibrary={uploadFileToLibrary}
             getNextVersion={getNextVersion} />

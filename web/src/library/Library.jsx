@@ -94,11 +94,11 @@ function Library(props) {
         {breadcrumbs}
     </Breadcrumb>
 
-    return <VStack id="test-pdf" w="100%" align="left" >
+    return <VStack className="panel1" id="test-pdf" w="100%" align="left" >
         <PageEditor page={page} setPage={setPage} />
         <Bar path={path} changePath={changePath} getNextVersion={getNextVersion}
             favorites={favorites} files={files} listFolder={listFolder} />
-        <Flex overflowY="auto"
+        <Flex overflowY="auto" className="panel2"
             h={height && height - 160}>
             <Files path={path} changePath={changePath}
                 files={files} listFolder={listFolder}

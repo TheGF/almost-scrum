@@ -1,9 +1,9 @@
 import {
-    Button, Menu, MenuButton, MenuDivider, MenuItem,
-    MenuList, Stack, useColorMode
+    Box, Button, Icon, IconButton, Menu, MenuButton, MenuDivider, MenuItem,
+    MenuItemOption, MenuList, MenuOptionGroup, Spacer, Stack, useColorMode
 } from "@chakra-ui/react";
 import { React, useContext, useState } from "react";
-import { BiChevronDown } from "react-icons/all";
+import { BiChevronDown, GoTools } from "react-icons/all";
 import T from "../core/T";
 import Federation from "../federation/Federation";
 import Help from '../help/Help';
@@ -13,72 +13,95 @@ import Users from "./Users";
 
 
 function Header(props) {
-    const { info } = useContext(UserContext)
+    const { info, project, reload } = useContext(UserContext)
+    const { colorMode, toggleColorMode } = useColorMode()
 
-    const [selectedPanel, setSelectedPanel] = useState(null);
     const [boardKey, setBoardKey] = useState(0);
     const [showUsers, setShowUsers] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
 
-    const { setShowGitIntegration, onExit, askBoardName } = props;
-    const { colorMode, toggleColorMode } = useColorMode()
+    const lae = localStorage.getItem(`ash-options`)
+    const [options, setOptions] = useState(
+        lae && lae.split(',') || ['ui-effects', colorMode]
+    );
 
-    function selectPanel(panel) {
-        setSelectedPanel(panel);
-        props.selectPanel && props.selectPanel(panel);
+    const { panel, setPanel, setShowGitIntegration, onExit, askBoardName } = props;
+
+    function optionsChange(value) {
+        localStorage.setItem(`ash-options`, value.join(','))
+        setOptions(value)
     }
 
-    const gantt = <Button key="gantt" colorScheme="yellow"
-        isActive={selectedPanel == '#gantt'} onClick={_ => selectPanel('#gantt')} >
-        <T>gantt</T>
-    </Button>
-
     const library = <Button key="library" colorScheme="yellow"
-        isActive={selectedPanel == '#library'} onClick={_ => selectPanel('#library')}>
+        isActive={panel == '#library'} onClick={_ => setPanel('#library')}>
         <T>library</T>
     </Button>
 
+    const ActionsMenu = <Menu>
+        <MenuButton as={Button} colorScheme="blue" rightIcon={<BiChevronDown />}>
+            Actions
+        </MenuButton>
+        <MenuList>
+            <MenuItem onClick={_ => askBoardName.onOpen()}>
+                New Board
+        </MenuItem>
+            <MenuDivider />
+            <MenuOptionGroup title="Options" type="checkbox"
+                value={options} onChange={optionsChange}>
+                <MenuItemOption value="ui-effects" onClick={reload}>
+                    UI Effects
+                </MenuItemOption>
+                <MenuItemOption value="dark" onClick={toggleColorMode}>
+                    Dark Mode
+                </MenuItemOption>
+            </MenuOptionGroup>
 
-    return <Stack spacing={4} direction="row" align="center">
-        <Users isOpen={showUsers} onClose={_ => setShowUsers(false)} />
-        <Help isOpen={showHelp} onClose={_ => setShowHelp(false)} />
-        <Menu>
-            <MenuButton as={Button} rightIcon={<BiChevronDown />}>
-                Actions
-                </MenuButton>
-            <MenuList>
-                <MenuItem onClick={_ => askBoardName.onOpen()}>
-                    New Board
-                </MenuItem>
+            <MenuDivider />
+            {info && info.gitProject ? <MenuItem
+                onClick={_ => setShowGitIntegration(true)}>
+                Git Integration
+            </MenuItem> : null}
+            <Users />
+            <MenuItem onClick={_ => setShowUsers(true)}>
+                Users
+        </MenuItem>
+            <MenuItem onClick={_ => setShowHelp(true)}>
+                Help
+        </MenuItem>
+            {onExit ? <>
                 <MenuDivider />
-                <MenuItem onClick={toggleColorMode}>
-                    Toggle {colorMode === "light" ? "Dark" : "Light"}
-                </MenuItem>
-                <MenuDivider />
-                {info && info.gitProject ? <MenuItem
-                    onClick={_ => setShowGitIntegration(true)}>
-                    Git Integration
-                    </MenuItem> : null}
-                <Users />
-                <MenuItem onClick={_ => setShowUsers(true)}>
-                    Users
-                </MenuItem>
-                <MenuItem onClick={_ => setShowHelp(true)}>
-                    Help
-                </MenuItem>
-                {onExit ? <>
-                    <MenuDivider />
-                    <MenuItem onClick={onExit}><T>back to portal</T></MenuItem>
-                </> : null}
-            </MenuList>
-        </Menu>
-        <Boards key={boardKey}
-            active={selectedPanel} setActiveBoard={setSelectedPanel}
-            {...props} />
-        {gantt}
-        {library}
-        <Federation />
-    </Stack>
+                <MenuItem onClick={onExit}><T>back to portal</T></MenuItem>
+            </> : null}
+        </MenuList>
+    </Menu>
+
+    const toolsMenu = <Menu>
+        <MenuButton as={Button} colorScheme="yellow">
+            <GoTools />
+        </MenuButton>
+        <MenuList>
+            <MenuItem onClick={_ => setPanel('#gantt')}>
+                Gantt
+            </MenuItem>
+            <MenuItem onClick={_ => setPanel('#kanban')}>
+                Kanban
+            </MenuItem>
+        </MenuList>
+    </Menu>
+
+    return <Box id="header" w="90%">
+        <Stack spacing={4} m={1} direction="row" align="center">
+            <Users isOpen={showUsers} onClose={_ => setShowUsers(false)} />
+            <Help isOpen={showHelp} onClose={_ => setShowHelp(false)} />
+            {ActionsMenu}
+            <Boards key={boardKey} panel={panel} setPanel={setPanel}
+                {...props} />
+            {library}
+            {toolsMenu}
+            <Spacer />
+            <Federation />
+        </Stack>
+    </Box>
 }
 
 export default Header;

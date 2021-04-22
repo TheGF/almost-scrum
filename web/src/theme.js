@@ -1,12 +1,8 @@
 
 
 import theme, { Theme } from "@chakra-ui/theme";
-import { mode } from "@chakra-ui/theme-tools";
+import color from "./color"
 
-const backgroundLight = "blue.100"
-const backgroundDark = "gray.800"
-const colorLight = "blue.900"
-const colorDark = "gray.500"
 
 const styles = {
     ...theme.styles,
@@ -15,32 +11,49 @@ const styles = {
         fontFamily: "body",
         fontWeight: "light",
         "html, body": {
-            background: props.colorMode === "dark" ? backgroundDark : backgroundLight,
-            color: props.colorMode === "dark" ?  colorDark : colorLight,
+            background: color(props.colorMode, 'background'),
+            color: color(props.colorMode, 'color'),
             lineHeight: "tall",
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+        },
+        ".react-tags": {
+            background: color(props.colorMode, 'input'),
+        },
+        ".panel1": {
+            background: color(props.colorMode, 'panel1bg'),
+            marginTop: "4px",
+            borderRadius: '5px',
+        },
+        ".panel2": {
+            background: color(props.colorMode, 'panel2bg'),
+            borderRadius: '2px',
+        },
+        ".te-editor": {
+            background: color(props.colorMode, 'input'),
+        },
+        ".te-mode-switch-section": {
+            background: color(props.colorMode, 'input'),
+        },
+        ".tui-editor-defaultUI-toolbar": {
+            background: color(props.colorMode, 'panel2bg'),
         },
         ".react-tags__search-input": {
-            backgroundColor: props.colorMode === "dark" ? backgroundDark : backgroundLight,
+            backgroundColor: color(props.colorMode, 'input'),
+            ".te-editor": {
+                backgroundColor: color(props.colorMode, 'input'),
+                color: color(props.colorMode, 'color'),
+            },
+            ".image-input": {
+                backgroundColor: props.colorMode === "dark" ? "gray.400" : "gray.100",
+            },
         },
-        ".mde-text": {
-//            minHeight: "12em",
-            backgroundColor: props.colorMode === "dark" ? "gray.700" : "white",
-            color: props.colorMode === "dark" ? "yellow.200" : "black",
+        "react-datepicker__input-container": {
+            background: 'transparent',
         },
-        ".mde-preview-content": {
-//            minHeight: "14em",
-            backgroundColor: props.colorMode === "dark" ? "gray.700" : "white",
-            color: props.colorMode === "dark" ? "yellow.200" : "black",
-        },
-        ".mde-header": {
-            backgroundColor: props.colorMode === "dark" ? "gray.400" : "gray.100",
-        },
-        ".image-input": {
-            backgroundColor: props.colorMode === "dark" ? "gray.400" : "gray.100",
-        },
-        ".task-viewer": {
-//            maxHeight: "20em",
-            overflow: "auto",
+        "react-datepicker-ignore-onclickoutside": {
+            background: 'transparent',
         }
     }),
 };
@@ -59,10 +72,10 @@ const customTheme = {
             ...theme.components.Popover,
             variants: {
                 responsive: {
-                  popper: {
-                    maxWidth: 'unset',
-                    width: 'unset'
-                  }
+                    popper: {
+                        maxWidth: 'unset',
+                        width: 'unset'
+                    }
                 }
             }
         }

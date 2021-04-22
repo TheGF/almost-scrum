@@ -158,11 +158,16 @@ function Portal(props) {
 
     }
 
+
+
     document.title = activeProject ? `Almost Scrum: ${activeProject}` : 'Almost Scrum';
-    return <>
+    return <Flex 
+        direction="column"
+        height="100%"
+    >
         <Login isOpen={!token} systemUser={systemUser} onAuthenticated={authenticated} />
         {getContent()}
-    </>
+    </Flex>
 
 
 

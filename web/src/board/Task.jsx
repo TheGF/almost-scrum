@@ -88,10 +88,15 @@ function Task(props) {
             .then(_ => props.onBoardChanged && props.onBoardChanged())
     }
 
-    function saveTask(task) {
+    function saveTask(task, async = false) {
         setSaving(true)
-        Server.setTaskLater(project, board, name, task)
+        if (async) {
+            Server.setTaskLater(project, board, name, task)
             .then(_ => setSaving(false))
+        } else {
+            Server.setTask(project, board, name, task)
+            .then(_ => setSaving(false))
+        }
     }
 
     function renameTask(title) {
@@ -154,7 +159,7 @@ function Task(props) {
 
     function getHeader() {
 
-        const label = <label>{id}.</label>
+        const label = <label><pre>{id.padStart(3)}.</pre></label>
         const name = <Editable defaultValue={title} borderWidth="1px" minW="300px"
             borderColor="blue" onSubmit={title => renameTask(title)}>
             <EditablePreview />
@@ -205,7 +210,7 @@ function Task(props) {
                 {deleteButton}
                 {confirmDelete}
             </HStack>
-        return header
+        return <Box pr="0.3em">{header}</Box>
     }
 
 
@@ -328,45 +333,46 @@ function Task(props) {
         }
 
 
-        return <Box h={height} ><HStack spacing={3} >
-            <Tabs w="100%" index={tabIndex} onChange={handleTabsChange} isLazy>
-                <TabList>
-                    <Tab key="edit"><T>{readOnly ? 'view' : 'edit'}</T></Tab>
-                    <Tab key="progress"><T>progress</T></Tab>
-                    <Tab key="files"><T>files</T></Tab>
-                    <Spacer key="spacer" />
-                    <HStack h="2em" spacing={2} key="tags">{tags}</HStack>
-                    <div width="2em" />
-                    <Spacer maxWidth="2em" />
-                    {heightSelector}
-                </TabList>
+        return <Box h={height} >
+            <HStack spacing={3} >
+                <Tabs w="100%" index={tabIndex} onChange={handleTabsChange} isLazy>
+                    <TabList>
+                        <Tab key="edit"><T>{readOnly ? 'view' : 'edit'}</T></Tab>
+                        <Tab key="progress"><T>progress</T></Tab>
+                        <Tab key="files"><T>files</T></Tab>
+                        <Spacer key="spacer" />
+                        <HStack h="2em" spacing={2} key="tags">{tags}</HStack>
+                        <div width="2em" />
+                        <Spacer maxWidth="2em" />
+                        {heightSelector}
+                    </TabList>
 
-                <TabPanels>
-                    <TabPanel key="edit" padding={0}>
-                        <TaskEditor task={task} saveTask={saveTask} users={users} height={height}
-                            readOnly={readOnly} />
-                    </TabPanel>
-                    <TabPanel key="progress" >
-                        <Progress task={task} readOnly={readOnly} height={height} 
-                            saveTask={task => {
-                                saveTask(task);
-                                updateProgress(task);
-                            }} />
-                    </TabPanel>
-                    <TabPanel>
-                        <Files task={task} saveTask={saveTask} readOnly={readOnly}
-                            height={height} />
-                    </TabPanel>
-                </TabPanels>
-            </Tabs>
-        </HStack> </Box>
+                    <TabPanels className="panel2">
+                        <TabPanel key="edit" padding={0}>
+                            <TaskEditor task={task} saveTask={saveTask} users={users} height={height}
+                                readOnly={readOnly} />
+                        </TabPanel>
+                        <TabPanel key="progress">
+                            <Progress task={task} readOnly={readOnly} height={height}
+                                saveTask={task => {
+                                    saveTask(task);
+                                    updateProgress(task);
+                                }} />
+                        </TabPanel>
+                        <TabPanel>
+                            <Files task={task} saveTask={saveTask} readOnly={readOnly}
+                                height={height} />
+                        </TabPanel>
+                    </TabPanels>
+                </Tabs>
+            </HStack> </Box>
     }
 
 
     if (!task) {
         return null
     }
-    return <Box p={1} w="100%" borderWidth="3px" overflow="hidden">
+    return <Box className="panel1" w="100%" pt="3px" overflow="hidden">
         {getHeader()}
         {getBody()}
     </Box>
