@@ -1,0 +1,19 @@
+body {
+    counter-reset: h1num figurenum;
+    font-family: Georgia, "Times New Roman", Times, serif;
+    line-height: 1.5;
+    font-size: 12pt;
+    background: #fff !important;
+    color: #000;
+}
+
+.leftImage {
+    display: block;
+    margin-left: auto
+}
+
+.centerImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto
+}

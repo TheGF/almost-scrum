@@ -21,7 +21,10 @@ function Exchanges(props) {
 
     function getConfig() {
         Server.getFedConfig(project)
-            .then(setConfig)
+            .then(config => {
+                const sked = {s3:[], webDAV:[], ftp:[], usb:[]}
+                setConfig({...sked, ...config})
+            })
         Server.getFedStatus(project)
             .then(setStatus)
     }
@@ -29,13 +32,13 @@ function Exchanges(props) {
 
     function saveConfig() {
         Server.postFedConfig(project, config)
-        .then(_=> toast({
-            title: `Config Saved`,
-            description: 'The federation configuration has been saved',
-            status: "success",
-            duration: 9000,
-            isClosable: true,
-        }))
+            .then(_ => toast({
+                title: `Config Saved`,
+                description: 'The federation configuration has been saved',
+                status: "success",
+                duration: 9000,
+                isClosable: true,
+            }))
     }
 
     function updateExchange(l, idx, value) {
@@ -48,14 +51,18 @@ function Exchanges(props) {
     }
 
     let exchangesUI = config ? [
-        ...config.s3.map((exchange, i) => <S3Exchange exchange={exchange} update={v => updateExchange(config.s3, i, v)}
-            status={status}/>),
-        ...config.webDAV.map((exchange, i) => <WebDAVExchange exchange={exchange} update={v => updateExchange(config.webDAV, i, v)}
-            connected={status && status.exchanges[exchange.name]} />),
-        ...config.ftp.map((exchange, i) => <FTPExchange exchange={exchange} update={v => updateExchange(config.ftp, i, v)}
-            connected={status && status.exchanges[exchange.name]} />),
-        ...config.usb.map((exchange, i) => <USBExchange exchange={exchange} update={v => updateExchange(config.usb, i, v)}
-            connected={status && status.exchanges[exchange.name]} />),
+        ...config.s3.map(
+            (exchange, i) => <S3Exchange exchange={exchange} update={v => updateExchange(config.s3, i, v)}
+                status={status} />),
+        ...config.webDAV.map(
+            (exchange, i) => <WebDAVExchange exchange={exchange} update={v => updateExchange(config.webDAV, i, v)}
+                connected={status && status.exchanges[exchange.name]} />),
+        ...config.ftp.map(
+            (exchange, i) => <FTPExchange exchange={exchange} update={v => updateExchange(config.ftp, i, v)}
+                connected={status && status.exchanges[exchange.name]} />),
+        ...config.usb.map(
+            (exchange, i) => <USBExchange exchange={exchange} update={v => updateExchange(config.usb, i, v)}
+                connected={status && status.exchanges[exchange.name]} />),
     ] : []
 
     function addS3() {

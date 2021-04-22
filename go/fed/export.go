@@ -216,7 +216,13 @@ func export(project *core.Project, item syncItem, user string,
 	}
 	logrus.Infof("created export files %v", zipFiles)
 
-	return files, nil
+	var locs []string
+	for _, file := range files {
+		loc, _ := filepath.Rel(project.Path, file)
+		locs = append(locs, loc)
+	}
+
+	return locs, nil
 }
 
 func Export(project *core.Project, user string, since time.Time) ([]string, error) {

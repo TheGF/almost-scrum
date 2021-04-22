@@ -72,9 +72,14 @@ function Federation(props) {
                 Server.postFedPush(project)
                     .then(_ => {
                         if (files) {
+                            let description = files.join(',')
+                            if (description.length > 256) {
+                                description = `${description.substr(0, 253)}...`
+                            }
+
                             toast({
                                 title: `Successful Export`,
-                                description: files.join(','),
+                                description: description,
                                 status: "success",
                                 duration: 9000,
                                 isClosable: true,

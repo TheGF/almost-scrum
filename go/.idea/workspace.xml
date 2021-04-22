@@ -5,26 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/web/systray_arm.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../build.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-0.5.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gantt/gantt.go" beforeDir="false" afterPath="$PROJECT_DIR$/gantt/gantt.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/server.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/systray.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/systray_amd.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/bin/ash_linux" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/assets/bindata.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fed/export.go" beforeDir="false" afterPath="$PROJECT_DIR$/fed/export.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fs/windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/fs/windows.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../sdist/bin/ash_linux" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../web/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/board/Properties.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Properties.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/board/Task.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/Task.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/board/TaskEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/board/TaskEditor.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Boards.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Boards.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Desktop.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Desktop.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Header.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/gantt/Gantt.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/library/Bar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/Bar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/library/Library.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/Library.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/portal/Portal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/portal/Portal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/theme.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/theme.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

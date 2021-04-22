@@ -24,6 +24,7 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20210208175418-bda154fe17d8
 	github.com/google/uuid v1.2.0
 	github.com/hashicorp/go-version v1.2.1
+	github.com/hectane/go-acl v0.0.0-20190604041725-da78bae5fc95
 	github.com/jlaffaye/ftp v0.0.0-20210302195756-c3c8c7ac6590
 	github.com/joaojeronimo/go-crc16 v0.0.0-20140729130949-59bd0194935e
 	github.com/json-iterator/go v1.1.10
@@ -53,7 +54,7 @@ require (
 	github.com/ugorji/go v1.2.0 // indirect
 	github.com/yuin/goldmark v1.3.0
 	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392
-	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
+	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
 	golang.org/x/text v0.3.3
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
