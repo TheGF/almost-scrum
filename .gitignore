@@ -42,6 +42,8 @@ web/build
 
 #binary 
 ash
+go/assets/bindata.go
+web/.eslintcache
 
 #ash
 .ash/no-git-index.json
