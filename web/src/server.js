@@ -7,6 +7,9 @@ function getConfig() {
     return token ? {
         headers: {
             Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+            'Expires': '0',
         }
     } : {}
 }
@@ -246,15 +249,15 @@ class Server {
             .catch(errorHandler);
     }
 
-    static setTaskLater(project, board, name, content) {
-        return new Promise(function (resolve, reject) {
-            const k = `setTask:${project}/${board}/${name}`
-            pendingSet[k] = [Date.now() + setDelay, [resolve, reject], Server.setTask, project, board, name, content]
-            if (pendingInterval == null) {
-                pendingInterval = setInterval(Server.sendPendingTasks, setDelay)
-            }
-        })
-    }
+    // static setTaskLater(project, board, name, content) {
+    //     return new Promise(function (resolve, reject) {
+    //         const k = `setTask:${project}/${board}/${name}`
+    //         pendingSet[k] = [Date.now() + setDelay, [resolve, reject], Server.setTask, project, board, name, content]
+    //         if (pendingInterval == null) {
+    //             pendingInterval = setInterval(Server.sendPendingTasks, setDelay)
+    //         }
+    //     })
+    // }
 
     static setTask(project, board, name, content) {
         name = encodeURIComponent(name)

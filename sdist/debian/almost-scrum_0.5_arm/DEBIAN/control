@@ -1,7 +1,7 @@
 Package: almost-scrum
 Version: 0.5
 Priority: optional
-Architecture: amd64
+Architecture: arm
 Essential: no
 Installed-Size: 30MB
 Maintainer: Francesco <almost-scrum@protonmail.com>

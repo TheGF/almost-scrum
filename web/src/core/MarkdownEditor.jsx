@@ -56,15 +56,30 @@ function MarkdownEditor(props) {
         editor.getUI().el.addEventListener('paste', uploadFile)
     }
 
-    function onChange() {
-        const v = editorRef.current.getInstance().getMarkdown()
-        if (!v) return
-        
-        if (!value || v.trim() != value.trim()) {
-            console.log('SAVING')
-            setValue(v)
-            props.onChange(v.replaceAll(projectPath, '~'));
+    function updateContent(async) {
+        const editor = editorRef.current.getInstance()
+        const content = editor.getMarkdown()
+        if (editor.pendingSave) {
+            clearTimeout(editor.pendingSave)
         }
+
+        if (content && value && content.trim() != value.trim()) {
+            setValue(content)
+            const toSave = content.replaceAll(projectPath, '~')
+            if (async) {
+                editor.pendingSave = setTimeout(() => props.onChange(toSave), 10*1000)
+            } else {
+                props.onChange(toSave)
+            }
+        }
+    }
+
+    function onChange() {
+        updateContent(true)
+    }
+
+    function onBlur() {
+        updateContent(false)
     }
 
     function addImageBlobHook(blob, callback) {
@@ -134,6 +149,7 @@ function MarkdownEditor(props) {
             events={{
                 load: onLoad,
                 change: onChange,
+                blur: onBlur,
             }}
             customHTMLRenderer={{
                 image: renderImage,

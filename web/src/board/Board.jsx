@@ -23,12 +23,18 @@ function Board(props) {
     const [searchKeys, setSearchKeys] = useState([])
     const [infos, setInfos] = useState([])
     const [users, setUsers] = useState([])
-    const [compact, setCompact] = useState(false)
+    const [compact, setCompact] = useState(
+        localStorage.getItem(`ash-${project}-${name}-compact`) == 'true')
     const spacerRef = useRef(null)
 
     function onNewTask(type) {
         Server.createTask(project, name, 'Click_and_Rename', type)
             .then(_ => loadTaskList())
+    }
+
+    function toggleCompact() {
+        setCompact(!compact)
+        localStorage.setItem(`ash-${project}-${name}-compact`, !compact)
     }
 
     function loadMore() {
@@ -74,7 +80,7 @@ function Board(props) {
         align="stretch"
         w="100%"
     >
-        <FilterPanel board={name} compact={compact} setCompact={setCompact} setSearchKeys={setSearchKeys}
+        <FilterPanel board={name} compact={compact} toggleCompact={toggleCompact} setSearchKeys={setSearchKeys}
             onNewTask={onNewTask} users={users}/>
         <InfiniteScroll
             dataLength={infos.length}

@@ -1,28 +1,20 @@
-import { Button, HStack, Spacer, IconButton } from "@chakra-ui/react";
 import {
-    Popover,
-    PopoverTrigger,
-    PopoverContent,
-    PopoverHeader,
-    PopoverBody,
-    PopoverFooter,
-    PopoverArrow,
-    PopoverCloseButton,
-} from "@chakra-ui/react"
+    Button, HStack, Popover,
+
+    PopoverContent, PopoverTrigger, Spacer
+} from "@chakra-ui/react";
 import { React, useContext, useEffect, useRef, useState } from "react";
-import { BsViewStacked, MdViewHeadline, RiChatNewLine, RiFilterLine } from 'react-icons/all';
+import { BsViewStacked, MdViewHeadline, RiFilterLine } from 'react-icons/all';
 import ReactTags from 'react-tag-autocomplete';
-import './reactTags.css'
 import Server from '../server';
 import UserContext from '../UserContext';
 import Filter from "./Filter";
-import Portal from '../portal/Portal';
 import NewTask from "./NewTask";
+import './reactTags.css';
 
 function FilterPanel(props) {
     const { project, info } = useContext(UserContext);
-    const { propertyModel } = info || {}
-    const { compact, setCompact, setSearchKeys, onNewTask, users, board } = props;
+    const { compact, toggleCompact, setSearchKeys, onNewTask, users, board } = props;
     const [tags, setTags] = useState([])
     const [suggestions, setSuggestions] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
@@ -61,11 +53,11 @@ function FilterPanel(props) {
     }
 
     const compactButton = compact ?
-        <Button onClick={_ => setCompact(false)} isActive={!compact}
+        <Button onClick={toggleCompact} isActive={!compact}
             title="Show all task content">
             <BsViewStacked />
         </Button> :
-        <Button onClick={_ => setCompact(true)} isActive={compact}
+        <Button onClick={toggleCompact} isActive={compact}
             title="Show only tasks header">
             <MdViewHeadline />
         </Button>
@@ -83,7 +75,6 @@ function FilterPanel(props) {
     </Popover>
 
     return <HStack spacing={3}>
-        {/* <IconButton title="New Task" icon={<RiChatNewLine />} onClick={onNewTask} /> */}
         <NewTask board={board} onNewTask={onNewTask}/>
         <ReactTags
             ref={reactTags}
@@ -99,11 +90,6 @@ function FilterPanel(props) {
         {filterButton}
     </HStack >
 
-
-    // return <>
-    //     {bar}
-    //     {filter}
-    // </>
 }
 
 export default FilterPanel

@@ -152,7 +152,7 @@ function Book(props) {
         onChange={s => setStyle(kinds, s)} >
         <Stack spacing={4} direction="row">
             <Stack spacing={4} direction="row">{
-                kinds.map(v => <Radio value={v}><T>{v}</T></Radio>)
+                kinds.map(v => <Radio key={v} value={v}><T>{v}</T></Radio>)
             }</Stack>
         </Stack>
     </RadioGroup>
@@ -161,14 +161,14 @@ function Book(props) {
     const orientationUI = <RadioGroup value={getStyle(orientations)} colorScheme="blue"
         onChange={s => setStyle(orientations, s)} >
         <Stack spacing={4} direction="row">{
-            orientations.map(v => <Radio value={v}><T>{v}</T></Radio>)
+            orientations.map(v => <Radio key={v} value={v}><T>{v}</T></Radio>)
         }</Stack>
     </RadioGroup>
 
     const papers = ['A4', 'letter', 'A5', 'A3', 'B5', 'B4']
     const paperUI = <Select placeholder="Select option" value={getStyle(papers)}
         size="sm" onChange={e => setStyle(papers, e.target.value)} >{
-            papers.map(v => <option value={v}>{v}</option>)
+            papers.map(v => <option key={v} value={v}>{v}</option>)
         }</Select>
 
     const titleUI = <Input size="sm" value={title}
@@ -185,7 +185,7 @@ function Book(props) {
     const formatUI = <RadioGroup value={getStyle(formats)} colorScheme="blue"
         onChange={s => setStyle(formats, s)} >
         <Stack spacing={4} direction="row">{
-            formats.map(v => <Radio value={v}><T>{v}</T></Radio>)
+            formats.map(v => <Radio key={v} value={v}><T>{v}</T></Radio>)
         }</Stack>
     </RadioGroup>
 

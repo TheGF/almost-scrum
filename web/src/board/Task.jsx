@@ -80,13 +80,13 @@ function Task(props) {
 
     function saveTask(task, async = false) {
         setSaving(true)
-        if (async) {
-            Server.setTaskLater(project, board, name, task)
-            .then(_ => setSaving(false))
-        } else {
+        // if (async) {
+        //     Server.setTaskLater(project, board, name, task)
+        //     .then(_ => setSaving(false))
+        // } else {
             Server.setTask(project, board, name, task)
             .then(_ => setSaving(false))
-        }
+        // }
     }
 
     function renameTask(title) {

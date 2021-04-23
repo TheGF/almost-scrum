@@ -45,6 +45,6 @@ ash
 
 #ash
 .ash/no-git-index.json
-go/assets/bindata.go
-web/.eslintcache
+bindata.go
+.eslintcache
 

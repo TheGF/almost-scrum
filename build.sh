@@ -21,7 +21,7 @@ mv debian/almost-scrum_0.5_amd64.deb ../dist
 
 #Debian Package arm
 chmod 0644 debian/almost-scrum_0.5_arm/usr/share/doc/almost-scrum/*
-strip -s -o debian/almost-scrum_0.5_arm/usr/bin/ash bin/ash_linux_arm
+arm-linux-gnueabi-strip -s -o debian/almost-scrum_0.5_arm/usr/bin/ash bin/ash_linux_arm
 fakeroot dpkg-deb --build debian/almost-scrum_0.5_arm
 mv debian/almost-scrum_0.5_arm.deb ../dist
 

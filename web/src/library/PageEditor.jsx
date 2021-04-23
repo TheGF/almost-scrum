@@ -49,7 +49,7 @@ function PageEditor(props) {
 
         console.log('Write update', value)
 
-        Server.uploadFileToLibraryLater(project, folder, new Blob([value]), name)
+        Server.uploadFileToLibrary(project, folder, new Blob([value]), name)
     }
 
     function Image(props) {

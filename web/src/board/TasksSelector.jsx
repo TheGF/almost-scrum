@@ -80,7 +80,7 @@ function TasksSelector(props) {
                         placeholderText="type and add tasks"
                         tags={tags}
                         minQueryLength={1}
-                        maxSuggestionsLength="16"
+                        maxSuggestionsLength={16}
                         suggestions={suggestions}
                         suggestionsTransform={suggestionsTransform}
                         onDelete={deleteTag}
