@@ -28,8 +28,6 @@
     "react-dom": "^17.0.2",
     "react-icons": "^3.11.0",
     "react-infinite-scroll-component": "^5.1.0",
-    "react-markdown": "^5.0.3",
-    "react-mde": "^11.0.6",
     "react-scripts": "4.0.1",
     "react-tag-autocomplete": "^6.1.0",
     "remark-gfm": "^1.0.0",

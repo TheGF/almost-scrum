@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Almost Scrum
+Comment=A way to organize your work
+GenericName=Productive Tool
+Exec=ash -x web ~/Desktop
+Icon=anki
+Categories=Productivity
+Terminal=false
+Type=Application
+Version=1.0
+

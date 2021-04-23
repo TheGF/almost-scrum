@@ -4,7 +4,6 @@ import {
     ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, Spacer, Switch, VStack
 } from "@chakra-ui/react";
 import { React, useContext, useEffect, useState } from "react";
-import "react-mde/lib/styles/css/react-mde-all.css";
 import Server from '../server';
 import UserContext from '../UserContext';
 

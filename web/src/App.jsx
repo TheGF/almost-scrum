@@ -1,10 +1,11 @@
 import { ChakraProvider } from '@chakra-ui/react';
 import { React, useEffect, useState } from 'react';
-import Desktop from './desktop/Desktop';
 import ErrorBoundary from './ErrorBoundary';
 import Portal from './portal/Portal';
 import Server from './server';
 import theme from './theme';
+import "react-datepicker/dist/react-datepicker.css";
+//import './datepicker';
 
 function uuidv4() {
   return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>

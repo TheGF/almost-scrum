@@ -16,6 +16,7 @@ const images = ['banana', 'beer', 'burger', 'chocolate', 'coke', 'cornflakes',
 
 
 function Join(props) {
+    const { reload } = useContext(UserContext)
     const { onClose, project } = props
     const [token, setToken] = useState(props.token || null)
     const [selected, setSelected] = useState([])

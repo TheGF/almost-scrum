@@ -23,7 +23,7 @@ type ExtendedAttrMap struct {
 	Entries    map[string]*ExtendedAttr `json:"entries"`
 	lastAccess time.Time
 	dirty      int32
-	lock       sync.RWMutex
+	mutex      sync.RWMutex
 }
 
 const AttrsFileName = ".ash-xAttrs.json"
@@ -36,14 +36,14 @@ func cacheSync() {
 	for path := range cacheC {
 		extendedAttrMap, found := cache[path]
 		if found {
-			extendedAttrMap.lock.RLock()
+			extendedAttrMap.mutex.RLock()
 			if atomic.SwapInt32(&extendedAttrMap.dirty, 0) == 1 {
 				err := WriteJSON(filepath.Join(path, AttrsFileName), extendedAttrMap)
 				if err != nil {
 					logrus.Errorf("Cannot save extended attrs to %s: %v", path, err)
 				}
 			}
-			extendedAttrMap.lock.RUnlock()
+			extendedAttrMap.mutex.RUnlock()
 		}
 		cacheWg.Done()
 	}
@@ -94,10 +94,15 @@ func GetExtendedAttr(path string) (*ExtendedAttr, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	extendedAttrMap.mutex.Lock()
 	extendedAttr, found := extendedAttrMap.Entries[name]
+	extendedAttrMap.mutex.Unlock()
+
 	if found {
 		return extendedAttr, nil
 	}
+
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil, nil
@@ -111,9 +116,9 @@ func GetExtendedAttr(path string) (*ExtendedAttr, error) {
 	extendedAttr = &ExtendedAttr{
 		Owner: owner,
 	}
-	extendedAttrMap.lock.Lock()
+	extendedAttrMap.mutex.Lock()
 	extendedAttrMap.Entries[name] = extendedAttr
-	extendedAttrMap.lock.Unlock()
+	extendedAttrMap.mutex.Unlock()
 
 	saveExtendedAttrMapLater(dir, extendedAttrMap)
 	return extendedAttr, nil
@@ -125,7 +130,7 @@ func SetExtendedAttr(path string, extendedAttr *ExtendedAttr) error {
 	if err != nil {
 		return err
 	}
-	extendedAttrMap.lock.Lock()
+	extendedAttrMap.mutex.Lock()
 	if extendedAttr == nil {
 		delete(extendedAttrMap.Entries, name)
 		logrus.Infof("Modified xAttrs for %s", path)
@@ -133,7 +138,7 @@ func SetExtendedAttr(path string, extendedAttr *ExtendedAttr) error {
 		extendedAttrMap.Entries[name] = extendedAttr
 		logrus.Infof("updated attr for %s: %#v", path, extendedAttr)
 	}
-	extendedAttrMap.lock.Unlock()
+	extendedAttrMap.mutex.Unlock()
 	saveExtendedAttrMapLater(dir, extendedAttrMap)
 	return nil
 }

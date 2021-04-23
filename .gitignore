@@ -38,9 +38,11 @@ go/.idea
 # nodejs components
 web/node_modules
 web/package-lock.json
+web/build
 
 #binary 
 ash
 
 #ash
 .ash/no-git-index.json
+

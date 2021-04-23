@@ -7,9 +7,6 @@ import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <StrictMode>
-    {/* <link rel="stylesheet" href="./reactTags.css" type="text/css"/>
-    <link rel="stylesheet" href="./react-mde-all.css" type="text/css"/> */}
-
     <ColorModeScript />
     <App />
   </StrictMode>,

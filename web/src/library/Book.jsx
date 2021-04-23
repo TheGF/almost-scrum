@@ -4,10 +4,8 @@ import {
     ModalContent, ModalFooter, ModalHeader, ModalOverlay, Radio, RadioGroup,
     Select, Stack, Switch, Table, Tbody, Td, Tr, useDisclosure, useToast, VStack
 } from "@chakra-ui/react";
-//import html2pdf from 'html2pdf.js';
 import { React, useContext, useState } from "react";
 import { GiBlackBook } from 'react-icons/gi';
-import "react-mde/lib/styles/css/react-mde-all.css";
 import T from "../core/T";
 import Server from '../server';
 import UserContext from '../UserContext';

@@ -1,14 +1,14 @@
 import {
-    Center, Input, Select, Switch, Table, TableCaption, Tbody,
-    Td, Tr, Box,
+    Box, FormLabel, HStack, Input, Select,
+    Slider, SliderFilledTrack, SliderThumb, SliderTrack, Spacer, Switch, Table, Tbody,
+    Td, Tr
 } from '@chakra-ui/react';
 import { React, useContext, useState } from "react";
 import ReactDatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
-import "./datePicker.css"
-
 import T from '../core/T';
 import UserContext from '../UserContext';
+import TasksSelector from './TasksSelector';
+
 
 function Properties(props) {
     const { task, saveTask, readOnly, users, height } = props;
@@ -16,7 +16,7 @@ function Properties(props) {
     const { properties } = task;
     const type = properties && properties['Type'] || null
 
-    const model = info && info.models && 
+    const model = info && info.models &&
         info.models.filter(m => m.name == type).shift() || []
 
     function renderProperty(propertyDef) {
@@ -28,20 +28,49 @@ function Properties(props) {
             if (value != undefined) changeValue(value)
         }
 
-        function changeValue(value) {
-            properties[name] = value
-            setValue(value)
-            saveTask(task)
+        function changeValue(v) {
+            v = `${v}`
+            if (v != value) {
+                properties[name] = v
+                setValue(v)
+                saveTask(task)
+            }
         }
 
         function renderString() {
-            return <Input value={value} onChange={onChange} size="sm" />
+            return <Input readOnly={readOnly} value={value}
+                onChange={onChange} size="xs" />
+        }
+
+        function renderPercentage() {
+            let p = parseInt(value, 10)
+            if ((p >= 0 && p <= 100) == false) {
+                p = 0
+            }
+
+            return <HStack spacing={2}>
+                <label>{p}%</label>
+                {readOnly ? null :
+                    <Slider min={0} max={100} onChangeEnd={changeValue}
+                        defaultValue={p} maxW="80%" >
+                        <SliderTrack>
+                            <SliderFilledTrack />
+                        </SliderTrack>
+                        <SliderThumb />
+                    </Slider>
+                }
+            </HStack>
+        }
+
+        function renderTasks(maxSize) {
+            return <TasksSelector value={value} onChange={changeValue}
+                maxSize={maxSize} />
         }
 
         function renderDate() {
             const startDate = Date.parse(value)
-            return  <ReactDatePicker selected={startDate} 
-                onChange={date=>changeValue(date && date.toISOString())} />
+            return <ReactDatePicker selected={startDate} readOnly={readOnly}
+                onChange={date => changeValue(date && date.toISOString())} />
         }
 
         function renderEnum() {
@@ -93,6 +122,9 @@ function Properties(props) {
             case 'User': input = renderUser(); break
             case 'Tag': input = renderTag(); break
             case 'Date': input = renderDate(); break
+            case 'Percentage': input = renderPercentage(); break
+            case 'Tasks': input = renderTasks(16); break
+            case 'Task': input = renderTasks(1); break
         }
 
         return <Tr key={name}>
@@ -104,7 +136,7 @@ function Properties(props) {
     const rows = model.properties.map(propertyDef => renderProperty(propertyDef))
     if (type == null) {
         return <font size="md">Corrupted task: no Type found</font>
-    } 
+    }
     if (model.length == 0) {
         return <font size="md">Corrupted task: invalid Type {type}</font>
     }

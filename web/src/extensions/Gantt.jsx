@@ -3,6 +3,7 @@ import { React, useContext, useEffect, useState } from 'react';
 import Server from '../server';
 import UserContext from '../UserContext';
 import { Box, Button, ButtonGroup, Text, Stack, HStack, Spacer, Select } from '@chakra-ui/react';
+import { useToast } from '@chakra-ui/react';
 
 const viewModes = ['Half Day', 'Day', 'Week', 'Month']
 
@@ -12,6 +13,8 @@ function Gantt(props) {
     const [viewMode, setViewMode] = useState('Week')
     const [statusFilter, setStatusFilter] = useState([])
     const [boardFilter, setBoardFilter] = useState('')
+    const [ownerFilter, setOwnerFilter] = useState('')
+    const toast = useToast()
 
     function ganttRef(r) {
         if (r) {
@@ -31,6 +34,12 @@ function Gantt(props) {
         return p['Status'] || null
     }
 
+    function getOwner(t) {
+        const p = t.task.properties
+        return p['Owner'] || null
+    }
+
+
     function findByName(name) {
         return tasks.filter(t => t.name == name)[0]
     }
@@ -48,13 +57,25 @@ function Gantt(props) {
         }
     }
 
+    function changeProgress(t, progress) {
+        t = findByName(t.name)
+        if (t) {
+            t.task.properties['Progress'] = `${progress}`
+            saveTask(t)
+        }
+    }
+
     function chooseBoard(e) {
         setBoardFilter(e && e.target && e.target.value || '')
     }
 
+    function chooseOwner(e) {
+        setOwnerFilter(e && e.target && e.target.value || '')
+    }
+
     function toggleStatusFilter(status) {
         if (statusFilter.includes(status)) {
-            setStatusFilter(statusFilter.filter(s=>s != status))
+            setStatusFilter(statusFilter.filter(s => s != status))
         } else {
             setStatusFilter([...statusFilter, status])
         }
@@ -71,6 +92,9 @@ function Gantt(props) {
         if (boardFilter != '' && boardFilter != t.board) {
             return null
         }
+        if (ownerFilter != '' && ownerFilter != p['Owner']) {
+            return null
+        }
 
         let start = new Date(p['Start'])
         let end = new Date(p['End'])
@@ -84,8 +108,45 @@ function Gantt(props) {
             start: start,
             end: end,
             progress: progress,
+            dependencies: p['Deps'] && p['Deps'].split(',') || [],
         }
     }
+
+    function detectLoops(ganttTasks) {
+        deps = {}
+        for (const t of ganttTasks) {
+            deps[t.id] = t.dependencies
+        }
+
+    }
+
+    function sortByDependency(a, b) {
+        const aDependsOnB = a.dependencies.includes(b.id)
+        const bDependsOnA = b.dependencies.includes(a.id)
+
+        if (a.dependencies.includes(a.id)) {
+            a.dependencies = a.dependencies.filter(d => d.id != a.id)
+            toast({
+                title: 'Circular Dependency',
+                description: `Invalid internal loop in ${a.name}`,
+                status: "error",
+                isClosable: true,
+            })
+        }
+        if (aDependsOnB && bDependsOnA) {
+            b.dependencies = b.dependencies.filter(d => d != a.id)
+            toast({
+                title: 'Circular Dependency',
+                description: `Invalid loop between ${a.name} and ${b.name}`,
+                status: "error",
+                isClosable: true,
+            })
+            return 1
+        }
+
+        return aDependsOnB ? 1 : -1
+    }
+
 
     const viewModesUI = viewModes.map(
         s => <Button key={s} isActive={s == viewMode}
@@ -99,6 +160,10 @@ function Gantt(props) {
     const boards = tasks && tasks.length &&
         [...new Set(tasks.map(t => t.board))]
 
+    const owners = tasks && tasks.length &&
+        [...new Set(tasks.map(getOwner).filter(s => s))]
+
+
     const statusUI = statusOptions && statusOptions.map(
         s => <Button key={s} isActive={statusFilter.includes(s)}
             onClick={_ => toggleStatusFilter(s)}>
@@ -109,8 +174,15 @@ function Gantt(props) {
         {b}
     </option>)
 
+    const ownersUI = owners && owners.map(o => <option key={o} value={o}>
+        {o}
+    </option>)
 
-    const ganttTasks = tasks && tasks.length && tasks.map(getGanttTask).filter(t => t)
+
+    const ganttTasks = tasks && tasks.length &&
+        tasks.map(getGanttTask)
+            .filter(t => t)
+            .sort(sortByDependency)
     return ganttTasks ?
         <Stack className="panel1" w="100%" direction="column" spacing={2} p={2}>
             <HStack>
@@ -118,9 +190,15 @@ function Gantt(props) {
                     {viewModesUI}
                 </ButtonGroup>
                 <Spacer />
-                <Select maxW="12em" isRequired={false} onChange={chooseBoard}>
+                <Select maxW="10em" isRequired={false}
+                    onChange={chooseBoard} size="sm">
                     <option key="" value={null}></option>
                     {boardsUI}
+                </Select>
+                <Select maxW="10em" isRequired={false}
+                    onChange={chooseOwner} size="sm">
+                    <option key="" value={null}></option>
+                    {ownersUI}
                 </Select>
                 <ButtonGroup size="sm" >
                     {statusUI}
@@ -134,8 +212,7 @@ function Gantt(props) {
                         ref={ganttRef}
                         // onClick={task => console.log(task)}
                         onDateChange={changeDates}
-                        onProgressChange={(task, progress) => console.log(task, progress)}
-                        onTasksChange={tasks => console.log(tasks)}
+                        onProgressChange={changeProgress}
                     /> : null
                 }
             </Box>

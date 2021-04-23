@@ -1,12 +1,11 @@
 import { Button, Center, Spacer, Spinner, StackDivider, VStack } from '@chakra-ui/react';
 import { React, useContext, useEffect, useState, useRef } from "react";
-import "react-mde/lib/styles/css/react-mde-all.css";
 import Server from '../server';
 import UserContext from '../UserContext';
 import Task from './Task';
 import FilterPanel from './FilterPanel';
 import InfiniteScroll from 'react-infinite-scroll-component';
-
+import './datePicker.css'
 
 function getTop(elem) {
     let top = 0

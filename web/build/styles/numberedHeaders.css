@@ -1,9 +1,0 @@
-h1:before {
-    content: counter(h1num) ". ";
-    counter-increment: h1num;
-}
-
-h2:before {
-    content: counter(h1num) "." counter(h2num) " ";
-    counter-increment: h2num;
-}

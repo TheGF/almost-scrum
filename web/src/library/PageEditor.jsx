@@ -4,7 +4,6 @@ import {
     ModalFooter, ModalHeader
 } from "@chakra-ui/react";
 import { React, useContext, useEffect, useState, useRef } from "react";
-import "react-mde/lib/styles/css/react-mde-all.css";
 import MarkdownEditor from '../core/MarkdownEditor';
 import Utils from "../core/utils";
 import Server from '../server';
@@ -37,6 +36,7 @@ function PageEditor(props) {
     useEffect(getFromServer, [page])
 
     function onClose() {
+        Server.sendPendingTasks()
         setPage(null)
         setContent(null)
     }
@@ -62,9 +62,9 @@ function PageEditor(props) {
         }
     }
 
-    return <Modal isOpen={content != null} onClose={onClose} size="full">
-        <ModalContent m={0} >
-            <ModalHeader>
+    return <Modal isOpen={content != null} onClose={onClose} size="6xl" >
+        <ModalContent m={0} h="90%" background="#eaeaea">
+            <ModalHeader >
                 <Button colorScheme="blue" mr={3} onClick={onClose}>
                     Close
             </Button>
@@ -76,7 +76,7 @@ function PageEditor(props) {
                     value={content}
                     onChange={onChange}
                     imageFolder="/.inline-images"
-                    height={height}
+                    height={height+100}
                 />
             </ModalBody>
             <ModalFooter>

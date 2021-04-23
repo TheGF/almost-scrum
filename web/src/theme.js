@@ -49,12 +49,6 @@ const styles = {
                 backgroundColor: props.colorMode === "dark" ? "gray.400" : "gray.100",
             },
         },
-        "react-datepicker__input-container": {
-            background: 'transparent',
-        },
-        "react-datepicker-ignore-onclickoutside": {
-            background: 'transparent',
-        }
     }),
 };
 

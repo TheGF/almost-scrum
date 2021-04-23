@@ -3,7 +3,7 @@ import {
     MenuItemOption, MenuList, MenuOptionGroup, Spacer, Stack, useColorMode
 } from "@chakra-ui/react";
 import { React, useContext, useState } from "react";
-import { BiChevronDown, GoTools } from "react-icons/all";
+import { BiChevronDown, BiUserVoice, BsChatSquareDots, GoTools } from "react-icons/all";
 import T from "../core/T";
 import Federation from "../federation/Federation";
 import Help from '../help/Help';
@@ -80,10 +80,10 @@ function Header(props) {
             <GoTools />
         </MenuButton>
         <MenuList>
-            <MenuItem onClick={_ => setPanel('#gantt')}>
+            <MenuItem onClick={_ => setPanel('#gantt')} command="⌘G">
                 Gantt
             </MenuItem>
-            <MenuItem onClick={_ => setPanel('#kanban')}>
+            <MenuItem onClick={_ => setPanel('#kanban')} command="⌘K">
                 Kanban
             </MenuItem>
         </MenuList>
@@ -99,6 +99,7 @@ function Header(props) {
             {library}
             {toolsMenu}
             <Spacer />
+            <IconButton><BiUserVoice/></IconButton>
             <Federation />
         </Stack>
     </Box>

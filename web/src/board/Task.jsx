@@ -1,17 +1,11 @@
 import {
-    Badge,
-    Box, Button, Editable, EditableInput, EditablePreview,
-    HStack,
-    IconButton, Select, Slider,
-    Text, Textarea,
-    SliderFilledTrack,
-    SliderThumb, SliderTrack, Spacer, Tab, TabList, TabPanel, TabPanels,
-    Tabs,
-    VStack,
-    ButtonGroup
+    Badge, Box, Button, ButtonGroup, Editable, EditableInput, EditablePreview,
+    HStack, IconButton, Select, Slider, SliderFilledTrack, SliderThumb, SliderTrack,
+    Spacer, Tab, TabList, TabPanel, TabPanels, Tabs, Text, VStack
 } from "@chakra-ui/react";
 import { React, useContext, useEffect, useState } from "react";
-import { BsTrash, FiSave, GiRadioactive, MdVerticalAlignTop, GrCompliance } from "react-icons/all";
+import { BsTrash, FiSave, GiRadioactive, MdVerticalAlignTop } from "react-icons/all";
+import MarkdownEditor from '../core/MarkdownEditor';
 import T from "../core/T";
 import Utils from '../core/utils';
 import Server from '../server';
@@ -20,11 +14,7 @@ import ConfirmChangeOwner from './ConfirmChangeOwner';
 import ConfirmDelete from './ConfirmDelete';
 import Files from './Files';
 import Progress from './Progress';
-import Properties from './Properties';
 import TaskEditor from './TaskEditor';
-import TaskViewer from './TaskViewer';
-import MarkdownEditor from '../core/MarkdownEditor';
-import { getDefaultToolbarCommands } from 'react-mde'
 
 
 
@@ -170,15 +160,17 @@ function Task(props) {
         const tagsGroup = compact ? <HStack h="2em" spacing={2}>{tags}</HStack> : null
         const touchButton = <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
         const taskProgress = <span title="Task Progress" style={{ width: '3em', textAlign: 'center' }}>{progress}</span>
-        const assignBoard = <Select value={board} title="Assign the Board" w="10em" onChange={onBoardChanged}>
+        const assignBoard = <Select value={board} title="Assign the Board" w="10em" 
+                size="sm" onChange={onBoardChanged}>
             {boardList}
         </Select>
-        const assignOwner = <Select value={owner} title="Assign the Owner" w="10em" onChange={changeOwner}>
+        const assignOwner = <Select value={owner} title="Assign the Owner" w="10em" 
+                size="sm" onChange={changeOwner}>
             {userList}
         </Select>
         const deleteButton = saving ?
-            <IconButton title="Saving..." icon={<FiSave />} /> :
-            <IconButton title="Delete the task" icon={<BsTrash />}
+            <IconButton title="Saving..." icon={<FiSave />} size="sm"/> :
+            <IconButton title="Delete the task" icon={<BsTrash />}  size="sm"
                 onClick={_ => setOpenConfirmDelete(true)} />
 
         const confirmChangeOwner = <ConfirmChangeOwner owner={owner} candidateOwner={candidateOwner}
@@ -285,8 +277,6 @@ function Task(props) {
                 execute: markAndSave
             };
 
-            const toolbarCommands = [...getDefaultToolbarCommands(), ["save-resolve"]]
-
             return <Box h={height} >
                 <Tabs w="100%" index={tabIndex} onChange={handleTabsChange} isLazy>
                     <TabList>
@@ -319,7 +309,6 @@ function Task(props) {
                                 commands={{
                                     "save-resolve": saveCommand
                                 }}
-                                toolbarCommands={toolbarCommands}
                                 value={task.description}
                                 height={height + 20}
                                 onChange={setDescription}

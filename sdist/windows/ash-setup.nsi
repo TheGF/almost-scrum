@@ -12,7 +12,7 @@
 
   ;Name and file
   Name "Almost Scrum"
-  OutFile "..\..\dist\almost-scrum-setup-0.5.exe"
+  OutFile "..\..\dist\almost-scrum-setup_0.5.exe"
   Unicode True
 
   ;Default installation folder
@@ -68,7 +68,7 @@ Section "Almost Scrum" AlmostScrum
   SetOutPath "$INSTDIR"
   
   ;ADD YOUR OWN FILES HERE...
-  File /oname=ash.exe ..\bin\ash_windows.exe 
+  File /oname=ash.exe ..\bin\ash_windows_amd64.exe 
   File License.txt 
 
   ;Store installation folder
