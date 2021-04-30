@@ -3,18 +3,18 @@ const uiEffects = !ashOptions || ashOptions.includes('ui-effect')
 
 const colors = { 
     dark: {
-        background: 'linear-gradient(#404e50, #101010)',   
+        background: 'linear-gradient(to right bottom, #404e50, #101010)',   
         color: 'gray.800',    
         input: 'gray.200',
-        panel1bg: 'linear-gradient(#88ceca, #689e9a)',
-        panel2bg: 'linear-gradient(#a1a1a1, #919191)'
+        panel1bg: 'linear-gradient(to right bottom, #88ceca, #689e9a)',
+        panel2bg: 'linear-gradient(to right bottom, #a1a1a1, #919191)'
     },
     light: {
-        background: 'linear-gradient(to right bottom, #a0aeb0, #606070)',
+        background: 'linear-gradient(to right bottom, #909ea0, #606070, #303040)',
         color: 'gray.900',    
         input: 'white',
-        panel1bg: 'linear-gradient(#e8ceca, #b89e9a)',
-        panel2bg: 'linear-gradient(#f1f1f1, #c1c1c1)',
+        panel1bg: 'linear-gradient(to right bottom, #e8ceca, #b89e9a)',
+        panel2bg: 'linear-gradient(to right bottom, #f1f1f1, #c1c1c1)',
     }
 }
 

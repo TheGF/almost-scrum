@@ -21,8 +21,7 @@ import TaskEditor from './TaskEditor';
 function Task(props) {
     const { project, info } = useContext(UserContext);
     const { board, name, modTime } = props.info;
-    const { boards, users, searchKeys } = props;
-    const [compact, setCompact] = useState(props.compact)
+    const { boards, users, searchKeys, compact, toggleCompact } = props;
     const [saving, setSaving] = useState(false)
     const [task, setTask] = useState(null)
     const [progress, setProgress] = useState('')
@@ -30,9 +29,6 @@ function Task(props) {
     const [candidateOwner, setCandidateOwner] = useState(null)
     const [height, setHeight] = useState(400)
     const [tabIndex, setTabIndex] = useState(0)
-
-
-    useEffect(_ => setCompact(props.compact), [props.compact])
 
     function getTags(task) {
         function extractTags(text) {
@@ -80,13 +76,8 @@ function Task(props) {
 
     function saveTask(task, async = false) {
         setSaving(true)
-        // if (async) {
-        //     Server.setTaskLater(project, board, name, task)
-        //     .then(_ => setSaving(false))
-        // } else {
-            Server.setTask(project, board, name, task)
-            .then(_ => setSaving(false))
-        // }
+        Server.setTask(project, board, name, task)
+        .then(_ => setSaving(false))
     }
 
     function renameTask(title) {
@@ -155,7 +146,7 @@ function Task(props) {
             <EditablePreview />
             <EditableInput />
         </Editable>
-        const compactSwitch = <Spacer onClick={_ => setCompact(!compact)}
+        const compactSwitch = <Spacer onClick={toggleCompact}
             minW="1em" style={{ cursor: 'pointer' }} />
         const tagsGroup = compact ? <HStack h="2em" spacing={2}>{tags}</HStack> : null
         const touchButton = <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>

@@ -23,8 +23,13 @@ function Board(props) {
     const [searchKeys, setSearchKeys] = useState([])
     const [infos, setInfos] = useState([])
     const [users, setUsers] = useState([])
+
+    const compactHistory = localStorage.getItem(`ash-${project}-${name}-compact`)
     const [compact, setCompact] = useState(
-        localStorage.getItem(`ash-${project}-${name}-compact`) == 'true')
+        compactHistory && 
+        compactHistory.split(',')
+                      .map(s=>parseInt(s,10)) || []
+    )
     const spacerRef = useRef(null)
 
     function onNewTask(type) {
@@ -33,8 +38,17 @@ function Board(props) {
     }
 
     function toggleCompact() {
-        setCompact(!compact)
-        localStorage.setItem(`ash-${project}-${name}-compact`, !compact)
+        const c = compact.length < infos.length ? infos.map(i => i.id) : []
+        setCompact(c)
+        localStorage.setItem(`ash-${project}-${name}-compact`, c.join(','))
+    }
+
+    function toggleCompactItem(id) {
+        const c = compact.includes(id) ?
+            compact.filter(i => i != id) :
+            [...compact, id]
+        setCompact(c)
+        localStorage.setItem(`ash-${project}-${name}-compact`, c.join(','))        
     }
 
     function loadMore() {
@@ -70,18 +84,24 @@ function Board(props) {
     }
     useEffect(loadUserList, []);
 
-    const tasks = infos && infos.map(info =>
-        <Task key={`${info.id}.${info.name}`} info={info} compact={compact}
+    const tasks = infos && infos.map(info => {
+        const id = info.id
+        const c = compact.includes(id)
+
+        return <Task key={`${id}.${info.name}`} info={info}
+            compact={c}
+            toggleCompact={_=>toggleCompactItem(id)}
             boards={boards} onBoardChanged={loadTaskList}
             users={users} searchKeys={searchKeys} />
-    );
+    });
     return infos ? <VStack
         spacing={4}
         align="stretch"
         w="100%"
     >
-        <FilterPanel board={name} compact={compact} toggleCompact={toggleCompact} setSearchKeys={setSearchKeys}
-            onNewTask={onNewTask} users={users}/>
+        <FilterPanel board={name} compact={compact.length == infos.length} 
+            toggleCompact={toggleCompact} setSearchKeys={setSearchKeys}
+            onNewTask={onNewTask} users={users} />
         <InfiniteScroll
             dataLength={infos.length}
             next={loadMore}

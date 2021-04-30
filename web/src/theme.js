@@ -10,13 +10,16 @@ const styles = {
         ...theme.styles.global,
         fontFamily: "body",
         fontWeight: "light",
-        "html, body": {
-            background: color(props.colorMode, 'background'),
+        "html": {
             color: color(props.colorMode, 'color'),
             lineHeight: "tall",
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
+        },
+        "body": {
+            background: color(props.colorMode, 'background'),
+            backgroundAttachment: 'fixed',
         },
         ".react-tags": {
             background: color(props.colorMode, 'input'),
