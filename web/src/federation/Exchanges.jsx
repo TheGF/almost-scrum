@@ -14,24 +14,21 @@ import USBExchange from './exchanges/USBExchange';
 function Exchanges(props) {
     const { project } = useContext(UserContext)
     const { onClose } = props
-    const [config, setConfig] = useState(null)
+    const [transport, setTransport] = useState(null)
     const [status, setStatus] = useState(null)
     const toast = useToast()
 
 
     function getConfig() {
-        Server.getFedConfig(project)
-            .then(config => {
-                const sked = {s3:[], webDAV:[], ftp:[], usb:[]}
-                setConfig({...sked, ...config})
-            })
-        Server.getFedStatus(project)
+        Server.getFedTransport(project)
+            .then(setTransport)
+        Server.getFedState(project)
             .then(setStatus)
     }
     useEffect(getConfig, [])
 
-    function saveConfig() {
-        Server.postFedConfig(project, config)
+    function saveTransport() {
+        Server.postFedTransport(project, transport)
             .then(_ => toast({
                 title: `Config Saved`,
                 description: 'The federation configuration has been saved',
@@ -50,23 +47,23 @@ function Exchanges(props) {
         }
     }
 
-    let exchangesUI = config ? [
-        ...config.s3.map(
-            (exchange, i) => <S3Exchange exchange={exchange} update={v => updateExchange(config.s3, i, v)}
+    let exchangesUI = transport ? [
+        ...transport.s3.map(
+            (exchange, i) => <S3Exchange exchange={exchange} update={v => updateExchange(transport.s3, i, v)}
                 status={status} />),
-        ...config.webDAV.map(
-            (exchange, i) => <WebDAVExchange exchange={exchange} update={v => updateExchange(config.webDAV, i, v)}
-                connected={status && status.exchanges[exchange.name]} />),
-        ...config.ftp.map(
-            (exchange, i) => <FTPExchange exchange={exchange} update={v => updateExchange(config.ftp, i, v)}
-                connected={status && status.exchanges[exchange.name]} />),
-        ...config.usb.map(
-            (exchange, i) => <USBExchange exchange={exchange} update={v => updateExchange(config.usb, i, v)}
-                connected={status && status.exchanges[exchange.name]} />),
+        ...transport.webDAV.map(
+            (exchange, i) => <WebDAVExchange exchange={exchange} update={v => updateExchange(transport.webDAV, i, v)}
+                connected={status && status.netStats[exchange.name]} />),
+        ...transport.ftp.map(
+            (exchange, i) => <FTPExchange exchange={exchange} update={v => updateExchange(transport.ftp, i, v)}
+                connected={status && status.netStats[exchange.name]} />),
+        ...transport.usb.map(
+            (exchange, i) => <USBExchange exchange={exchange} update={v => updateExchange(transport.usb, i, v)}
+                connected={status && status.netStats[exchange.name]} />),
     ] : []
 
     function addS3() {
-        config.s3.push({
+        transport.s3.push({
             name: '',
             endpoint: '',
             bucket: '',
@@ -75,11 +72,11 @@ function Exchanges(props) {
             useSSL: false,
             location: '',
         })
-        setConfig({ ...config })
+        setTransport({ ...transport })
     }
 
     function addFTP() {
-        config.ftp.push({
+        transport.ftp.push({
             name: '',
             url: '',
             username: '',
@@ -87,18 +84,18 @@ function Exchanges(props) {
             secret: '',
             timeout: 10,
         })
-        setConfig({ ...config })
+        setTransport({ ...transport })
     }
 
 
     function addUSBMedia() {
-        config.usb.push({
+        transport.usb.push({
         })
-        setConfig({ ...config })
+        setTransport({ ...transport })
     }
 
     function addWebDAV() {
-        config.webDAV.push({
+        transport.webDAV.push({
             name: '',
             url: '',
             username: '',
@@ -106,16 +103,16 @@ function Exchanges(props) {
             secret: '',
             timeout: 10,
         })
-        setConfig({ ...config })
+        setTransport({ ...transport })
     }
 
-    return config ? <VStack>
+    return transport ? <VStack>
         <Table size="sm" padding="0" spacing="0">
             <Tr>
                 <Td><FormLabel><T>Federation ID</T></FormLabel></Td>
-                <Td><Input value={config.uuid} /></Td>
+                <Td><Input value={transport.fedId} /></Td>
                 <Td><FormLabel><T>span (days)</T></FormLabel></Td>
-                <Td><Input type="number" value={config.span} /></Td>
+                <Td><Input type="number" value={transport.span} /></Td>
             </Tr>
             <Tr>
             </Tr>
@@ -127,7 +124,7 @@ function Exchanges(props) {
             <Button onClick={_ => addFTP()}><T>add FTP</T></Button>
             <Button onClick={_ => addUSBMedia()}><T>add USB Media</T></Button>
             <Spacer minW="2em" />
-            <Button colorScheme="blue" onClick={saveConfig}>Save</Button>
+            <Button colorScheme="blue" onClick={saveTransport}>Save</Button>
             <Button onClick={onClose}>Close</Button>
         </ButtonGroup>
         <Accordion w="100%" allowToggle>

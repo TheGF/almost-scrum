@@ -2,160 +2,93 @@ package web
 
 import (
 	"almost-scrum/core"
-	"almost-scrum/fed"
+	"github.com/code-to-go/fed"
+	"github.com/code-to-go/fed/transport"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strconv"
 	"time"
 )
 
 //fedRoute add fed related api routes
 func fedRoute(group *gin.RouterGroup) {
-	group.GET("/projects/:project/fed/config", getConfigAPI)
-	group.GET("/projects/:project/fed/status", getStatusAPI)
-//	group.GET("/projects/:project/fed/diffs", getDiffsAPI)
-	group.POST("/projects/:project/fed/config", setConfigAPI)
-	group.POST("/projects/:project/fed/import", postImportAPI)
-	group.POST("/projects/:project/fed/export", postExportAPI)
-	group.POST("/projects/:project/fed/pull", postPullAPI)
-	group.POST("/projects/:project/fed/push", postPushAPI)
-	group.POST("/projects/:project/fed/share", postCreateInviteAPI)
+	group.GET("/projects/:project/fed/transport", getTransportAPI)
+	group.POST("/projects/:project/fed/transport", setTransportAPI)
+	group.GET("/projects/:project/fed/state", getStateAPI)
+	group.POST("/projects/:project/fed/merge", postMergeAPI)
+	group.POST("/projects/:project/fed/sync", postAutoSyncAPI)
+	group.POST("/projects/:project/fed/invite", postCreateInviteAPI)
 	group.POST("/projects/:project/fed/join", postJoinAPI)
 }
 
-func getConfigAPI(c *gin.Context) {
+func getTransportAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	config, err := fed.ReadConfig(project, false)
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot read federation config: %v", err)
-		return
-	}
+	config := project.Fed.GetTransport()
 	c.JSON(http.StatusOK, config)
 }
 
-func setConfigAPI(c *gin.Context) {
+func setTransportAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	var config fed.Config
+	var config transport.Config
 	if err := c.BindJSON(&config); core.IsErr(err, "Invalid JSON") {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
+	project.Fed.SetTransport(&config)
 
-	err := fed.WriteConfig(project, &config)
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot read federation config: %v", err)
-		return
-	}
-	fed.Disconnect(project)
 	c.JSON(http.StatusOK, "")
 }
 
-func getStatusAPI(c *gin.Context) {
+func getStateAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	s := fed.GetStatus(project)
+	s := project.Fed.GetState()
 	logrus.Debugf("Fed status in project: %v", s)
 	c.JSON(http.StatusOK, s)
 }
 
-func postImportAPI(c *gin.Context) {
-
+func postMergeAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	var updates []fed.Update
-	if err := c.BindJSON(&updates); core.IsErr(err, "Invalid JSON") {
+	var actions []fed.Action
+	stateId,_ := strconv.Atoi(c.Query("id"))
+
+	if err := c.BindJSON(&actions); core.IsErr(err, "Invalid JSON") {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	locs, err := fed.Import(project, updates)
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot merge fed locs: %v", err)
-		return
-	}
-
-	c.JSON(http.StatusOK, locs)
+	ok := project.Fed.Merge(int64(stateId), actions)
+	c.JSON(http.StatusOK, ok)
 }
 
-func postExportAPI(c *gin.Context) {
+func postAutoSyncAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	since, found := c.GetQuery("since")
+	p, _ := strconv.Atoi(c.Query("period"))
+	period := time.Duration(p) * time.Minute
+	project.Fed.AutoSync(period, getWebUser(c))
 
-	var files []string
-	var err error
-	if found {
-		tm, err := time.Parse(time.RFC3339, since)
-		if err != nil {
-			c.String(http.StatusBadRequest, "wrong format for parameter since: %s", since)
-			return
-		}
-		files, err = fed.Export(project, getWebUser(c), tm)
-	} else {
-		files, err = fed.ExportLast(project, getWebUser(c))
-	}
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot export fed files: %v", err)
-		return
-	}
-
-	c.JSON(http.StatusOK, files)
-
-}
-
-func postPushAPI(c *gin.Context) {
-	var project *core.Project
-	if project = getProject(c); project == nil {
-		return
-	}
-
-	stats, err := fed.Push(project)
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot export fed files: %v", err)
-		return
-	}
-
-	c.JSON(http.StatusOK, stats)
-
-}
-
-func postPullAPI(c *gin.Context) {
-	var project *core.Project
-	if project = getProject(c); project == nil {
-		return
-	}
-
-	stats, err := fed.Pull(project, time.Time{})
-	if err != nil {
-		_ = c.Error(err)
-		c.String(http.StatusInternalServerError, "Cannot export fed files: %v", err)
-		return
-	}
-
-	c.JSON(http.StatusOK, stats)
-
+	c.JSON(http.StatusOK, "")
 }
 
 type ShareRequest struct {
@@ -176,7 +109,7 @@ func postCreateInviteAPI(c *gin.Context) {
 		return
 	}
 
-	invite, err := fed.CreateInviteForExchanges(project, request.Key, request.Exchanges, request.RemoveCredentials)
+	invite, err := project.Fed.Invite(request.Key, request.Exchanges, request.RemoveCredentials)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -201,11 +134,12 @@ func postJoinAPI(c *gin.Context) {
 		return
 	}
 
-	if err := fed.Join(project, request.Key, request.Token); err == os.ErrInvalid {
+	if err := fed.Join(request.Key, request.Token, filepath.Join(project.Path, "fed")); err == os.ErrInvalid {
 		c.String(http.StatusBadRequest, "Invalid token or key")
 	} else if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, "")
 }

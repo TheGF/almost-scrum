@@ -9,7 +9,7 @@ import (
 var gitClient = GoGit{} //GitNative{}
 
 func TestStatus(t *testing.T) {
-	project, err := OpenProject("../../.ash")
+	project, err := OpenProject("../../.scrum-to-go")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	gitStatus, err := gitClient.GetStatus(project)
@@ -24,7 +24,7 @@ func TestClone(t *testing.T) {
 }
 
 func TestCommit(t *testing.T) {
-	project, err := OpenProject("../../.ash")
+	project, err := OpenProject("../../.scrum-to-go")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	status, err := gitClient.GetStatus(project)
@@ -45,14 +45,14 @@ func TestCommit(t *testing.T) {
 }
 
 func TestPush(t *testing.T) {
-	project, err := OpenProject("../../.ash")
+	project, err := OpenProject("../../.scrum-to-go")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	gitClient.Push(project, GetSystemUser())
 }
 
 func TestSetGitCredentials(t *testing.T) {
-	project, err := OpenProject("../../.ash")
+	project, err := OpenProject("../../.scrum-to-go")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	gitCredentials := GitSettings{

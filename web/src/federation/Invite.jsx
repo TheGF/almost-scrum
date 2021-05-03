@@ -23,7 +23,7 @@ function Invite(props) {
     const toast = useToast()
 
     function getConfig() {
-        Server.getFedConfig(project)
+        Server.getFedTransport(project)
             .then(setConfig)
     }
     useEffect(getConfig, [])

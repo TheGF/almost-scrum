@@ -14,8 +14,8 @@ import (
 var config *core.Config
 
 func usage() {
-	fmt.Printf("usage: ash [-p <project-path>] [-u <user>] [-v] [-a] <command> [<args>]\n\n" +
-		"These are the common Ash commands used in various situations.\n" +
+	fmt.Printf("usage: scrum [-p <project-path>] [-u <user>] [-v] [-a] <command> [<args>]\n\n" +
+		"These are the common Scrum commands used in various situations.\n" +
 		"\tinit              Initialize a project in the project path\n" +
 		"\ttop [n]           Show top stories in current store\n" +
 		"\tnew [title]       Create a task\n" +

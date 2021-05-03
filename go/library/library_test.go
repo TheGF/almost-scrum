@@ -13,7 +13,7 @@ func init() {
 }
 
 func TestGetLibraryItems(t *testing.T) {
-	project, err := core.OpenProject("../../.ash")
+	project, err := core.OpenProject("../../.scrum-to-go")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	files := []string{"Richiesta ricongiungimento.pdf"}

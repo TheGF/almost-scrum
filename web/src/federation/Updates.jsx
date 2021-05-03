@@ -19,7 +19,7 @@ function Updates(props) {
     const toast = useToast()
 
     function getStatus() {
-        Server.getFedStatus(project, true)
+        Server.getFedState(project, true)
             .then(status => setUpdates(status.updates || []))
     }
     useEffect(getStatus, [])
@@ -57,9 +57,10 @@ function Updates(props) {
 
 
 
-    const rows = updates && updates.filter(update => update.state != 'older')
-        .sort((a, b) => a.loc.localeCompare(b.loc))
-        .map(update => <Row key={update.loc} item={update} />)
+    const rows = []
+    // updates && updates.filter(update => update.state != 'older')
+    //     .sort((a, b) => a.loc.localeCompare(b.loc))
+    //     .map(update => <Row key={update.loc} item={update} />)
 
 
     const exportSinceButton = <Menu>

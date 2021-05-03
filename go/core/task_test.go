@@ -55,7 +55,7 @@ func BenchmarkGet(b *testing.B) {
 
 func TestMarkdown(t *testing.T) {
 	filename := "test.md"
-	filename = "../../.ash/boards/backlog/7.New Test for Ash file.md"
+	filename = "../../.scrum-to-go/boards/backlog/7.New Test for Scrum file.md"
 	data, err := ioutil.ReadFile(filename)
 	assert.Nilf(t, err, "Cannot open markdown file: %w", err)
 

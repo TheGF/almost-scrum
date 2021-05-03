@@ -8,11 +8,11 @@ const AshVersion = "0.5.0"
 // GitFolder is the default folder where git info is stored
 const GitFolder = ".git"
 
-// ProjectFolder is the default folder name when the Ash is used inside a Git repository
-const ProjectFolder = ".ash"
+// ProjectFolder is the default folder name when the Scrum is used inside a Git repository
+const ProjectFolder = ".scrum-to-go"
 
 // ProjectConfigFile is a configuration file for the project
-const ProjectConfigFile = "ash.yaml"
+const ProjectConfigFile = "scrum-to-go.yaml"
 
 // ProjectUsersFolder the folder containing users
 const ProjectUsersFolder = "users"

@@ -449,15 +449,15 @@ class Server {
             .catch(errorHandler);
     }
 
-    static getFedConfig(project) {
-        let url = `/api/v1/projects/${project}/fed/config`
+    static getFedTransport(project) {
+        let url = `/api/v1/projects/${project}/fed/transport`
         return axios.get(url, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
 
-    static postFedConfig(project, config) {
-        let url = `/api/v1/projects/${project}/fed/config`
+    static postFedTransport(project, config) {
+        let url = `/api/v1/projects/${project}/fed/transport`
         return axios.post(url, config, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
@@ -487,17 +487,16 @@ class Server {
     }
 
 
-    static getFedStatus(project) {
-        let url = `/api/v1/projects/${project}/fed/status`
+    static getFedState(project) {
+        let url = `/api/v1/projects/${project}/fed/state`
         return axios.get(url, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
 
-    static getFedDiffs(project, sync) {
-        let url = `/api/v1/projects/${project}/fed/diffs`
-        if (sync) url += '?sync'
-        return axios.get(url, getConfig())
+    static postFedSync(project, period=1) {
+        let url = `/api/v1/projects/${project}/fed/sync?period=${period}`
+        return axios.post(url, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }

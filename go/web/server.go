@@ -116,7 +116,7 @@ func runServer(router *gin.Engine, addr string) {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logrus.Fatalf("listen: %s\n", err)
 		} else {
-			logrus.Infof("Ash server started on %s, autoExit %t", addr, autoExit)
+			logrus.Infof("Scrum-to-go server started on %s, autoExit %t", addr, autoExit)
 		}
 	}()
 

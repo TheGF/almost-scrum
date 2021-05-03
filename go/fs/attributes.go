@@ -26,7 +26,7 @@ type ExtendedAttrMap struct {
 	mutex      sync.RWMutex
 }
 
-const AttrsFileName = ".ash-xAttrs.json"
+const AttrsFileName = ".scrum-to-go-xAttrs.json"
 
 var cache = make(map[string]*ExtendedAttrMap)
 var cacheC = make(chan string)

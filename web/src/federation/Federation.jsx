@@ -25,6 +25,7 @@ function Federation(props) {
 
 
     function notifyChanges(diffs) {
+        return
         const lastChange = new Date(localStorage.getItem('ash-fed-newest-fed-log'))
 
         for (const log of diffs) {
@@ -89,17 +90,14 @@ function Federation(props) {
             })
     }
 
-    function onFedStatus(status) {
-        if (!status || !status.exchanges) {
+    function onFedState(status) {
+        if (!status || !status.netStats) {
             setStrength(0)
             return
         }
 
-        const connectedExchanges = Object.entries(status.exchanges)
-                                            .filter(([n, c]) => c)
-                                            .map(([n, c]) => n)
-        setStrength(connectedExchanges.length)
-        notifyChanges(status.inbox || [])
+        setStrength(Object.keys(status.netStats).length)
+        notifyChanges(status.updates || [])
     }
 
     function closeModal() {
@@ -108,8 +106,10 @@ function Federation(props) {
     }
 
     function check() {
-        Server.postFedPull(project)
-            .then(_ => Server.getFedStatus(project).then(onFedStatus))
+        Server.postFedSync(project)
+        Server.getFedState(project).then(onFedState)
+        // Server.postFedPull(project)
+        //     .then(_ => Server.getFedState(project).then(onFedState))
     }
 
     function startMonitoring() {

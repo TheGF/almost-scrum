@@ -8,7 +8,7 @@ import (
 
 
 func TestReindex(t *testing.T) {
-	project, err := OpenProject("../../.ash")
+	project, err := OpenProject("../../.scrum-to-go")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	err = ReIndex(project)
@@ -25,7 +25,7 @@ func TestReindexTask(t *testing.T) {
 
 
 func TestSuggestKeys(t *testing.T) {
-	project, err := OpenProject("../../.ash")
+	project, err := OpenProject("../../.scrum-to-go")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	ReIndex(project)

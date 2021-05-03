@@ -31,7 +31,7 @@ func TestInitProject(t *testing.T) {
 }
 
 func TestEncryption(t *testing.T) {
-	project, err := OpenProject("../../.ash")
+	project, err := OpenProject("../../.scrum-to-go")
 	assert.NotNilf(t, err, "Cannot open project: %w", err)
 
 	s := "Hello World"

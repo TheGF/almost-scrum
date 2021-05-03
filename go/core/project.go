@@ -4,6 +4,7 @@ import (
 	"almost-scrum/assets"
 	"almost-scrum/fs"
 	"fmt"
+	"github.com/code-to-go/fed"
 	uuid2 "github.com/google/uuid"
 	"io/ioutil"
 	"os"
@@ -24,6 +25,7 @@ type Project struct {
 	Index      *Index
 	IndexMutex sync.Mutex
 	TasksCount int
+	Fed        fed.Connection
 }
 
 // LoadTheProjectConfig
@@ -67,11 +69,17 @@ func OpenProject(path string) (*Project, error) {
 		return nil, err
 	}
 
+	f, err := fed.Open(filepath.Join(path, "fed"))
+	if err != nil {
+		return nil, err
+	}
+
 	project := &Project{
 		Path:       path,
 		Config:     projectConfig,
 		TasksCount: 0,
 		Models:     models,
+		Fed:        f,
 	}
 
 	infos, err := ListTasks(project, "", "")
@@ -265,6 +273,21 @@ func ShredProject(project *Project) error {
 	// Remove a reference to the project from the global configuration
 	DeleteProjFromConfig(project.Config.UUID)
 
+	return nil
+}
+
+func JoinFed(project *Project, key string, token string) error{
+	folder := filepath.Join(project.Path, "fed")
+	if err := fed.Join(key, token, folder); err != nil {
+		return err
+	}
+
+	project.Fed.Close()
+	f, err := fed.Open(folder)
+	if err != nil {
+		return err
+	}
+	project.Fed = f
 	return nil
 }
 

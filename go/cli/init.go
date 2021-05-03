@@ -36,7 +36,7 @@ func processInit(projectPath string, _ []string) {
 
 	_, err = os.Stat(filepath.Join(projectPath, core.GitFolder))
 	if err == nil {
-		if confirmAction("Found a Git repository in %s. Do you want to connect Ash to Git?", projectPath) {
+		if confirmAction("Found a Git repository in %s. Do you want to connect Scrum to Git?", projectPath) {
 			projectPath = filepath.Join(projectPath, core.ProjectFolder)
 		}
 	}

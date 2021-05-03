@@ -103,7 +103,7 @@ func printStatus(status core.GitStatus) {
 		}
 	}
 	color.Green("\nUntracked files: %s", strings.Join(untrackedFiles, " "))
-	color.Green("\nAsh files: %s", strings.Join(status.AshFiles, " "))
+	color.Green("\nScrum files: %s", strings.Join(status.AshFiles, " "))
 }
 
 func processCommit(projectPath string, global bool) {
