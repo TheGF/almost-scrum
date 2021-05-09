@@ -6,11 +6,17 @@ import {
 } from '@chakra-ui/react';
 import { React, useState } from "react";
 import T from '../../core/T';
+import Utils from '../../core/utils';
 
 
 
 function FTPExchange(props) {
     const [exchange, setExchange] = useState(props.exchange)
+    const { status } = props
+    const connectErr = status && status.connectErr    
+    
+    const upload = status && Utils.getFriendlySize(status.throughputUp)
+    const download = status && Utils.getFriendlySize(status.throughputDown)
 
     function updateField(evt, field, value) {
         exchange[field] = value != undefined ? value : evt.target.value
@@ -25,9 +31,9 @@ function FTPExchange(props) {
                 <Box flex="1" textAlign="left">
                     FTP - {exchange.name}
                 </Box>
-                {props.connected ?
-                    <Tag colorScheme="green"><T>connected</T></Tag> :
-                    <Tag colorScheme="red"><T>disconnected</T></Tag>}
+                {connectErr == null ?
+                    <Tag colorScheme="green" title={`U:${upload}-D:${download}`}><T>connected</T></Tag> :
+                    <Tag colorScheme="red">{connectErr && connectErr.Msg ? connectErr.Msg : <T>disconnected</T> }</Tag>}
                 <AccordionIcon />
             </AccordionButton>
         </h2>

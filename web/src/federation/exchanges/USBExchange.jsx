@@ -11,6 +11,10 @@ import T from '../../core/T';
 
 function USBExchange(props) {
     const [exchange, setExchange] = useState(props.exchange)
+    const { update, status } = props
+    const connectErr = status && status.connectErr    
+    const upload = status && Utils.getFriendlySize(status.throughputUp)
+    const download = status && Utils.getFriendlySize(status.throughputDown)
 
     function updateField(evt, field, value) {
         exchange[field] = value != undefined ? value : evt.target.value
@@ -25,9 +29,9 @@ function USBExchange(props) {
                 <Box flex="1" textAlign="left">
                     USB Media 
                 </Box>
-                {props.connected ?
-                    <Tag colorScheme="green"><T>connected</T></Tag> :
-                    <Tag colorScheme="red"><T>disconnected</T></Tag>}
+                {connectErr == null ?
+                    <Tag colorScheme="green" title={`U:${upload}-D:${download}`}><T>connected</T></Tag> :
+                    <Tag colorScheme="red">{connectErr && connectErr.Msg ? connectErr.Msg : <T>disconnected</T> }</Tag>}
                 <AccordionIcon />
             </AccordionButton>
         </h2>

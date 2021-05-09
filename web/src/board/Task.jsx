@@ -142,14 +142,14 @@ function Task(props) {
 
         const label = <label><pre>{id.padStart(3)}.</pre></label>
         const name = <Editable defaultValue={title} borderWidth="1px" minW="300px"
-            borderColor="blue" onSubmit={title => renameTask(title)}>
+            borderColor="blue"  onSubmit={title => renameTask(title)}>
             <EditablePreview />
-            <EditableInput />
+            <EditableInput autofocus />
         </Editable>
         const compactSwitch = <Spacer onClick={toggleCompact}
             minW="1em" style={{ cursor: 'pointer' }} />
         const tagsGroup = compact ? <HStack h="2em" spacing={2}>{tags}</HStack> : null
-        const touchButton = <Button size="sm" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
+        const touchButton = <Button size="sm" colorScheme="blue" title={mtime}><MdVerticalAlignTop onClick={touchTask} /></Button>
         const taskProgress = <span title="Task Progress" style={{ width: '3em', textAlign: 'center' }}>{progress}</span>
         const assignBoard = <Select value={board} title="Assign the Board" w="10em" 
                 size="sm" onChange={onBoardChanged}>
@@ -160,8 +160,8 @@ function Task(props) {
             {userList}
         </Select>
         const deleteButton = saving ?
-            <IconButton title="Saving..." icon={<FiSave />} size="sm"/> :
-            <IconButton title="Delete the task" icon={<BsTrash />}  size="sm"
+            <IconButton colorScheme="blue" title="Saving..." icon={<FiSave />} size="sm"/> :
+            <IconButton colorScheme="blue" title="Delete the task" icon={<BsTrash />}  size="sm"
                 onClick={_ => setOpenConfirmDelete(true)} />
 
         const confirmChangeOwner = <ConfirmChangeOwner owner={owner} candidateOwner={candidateOwner}
@@ -193,7 +193,7 @@ function Task(props) {
                 {deleteButton}
                 {confirmDelete}
             </HStack>
-        return <Box pr="0.3em">{header}</Box>
+        return <Box pr="0.3em" mt="2px" mb="2px">{header}</Box>
     }
 
 
@@ -313,7 +313,7 @@ function Task(props) {
         }
 
 
-        return <Box h={height} >
+        return <Box h={height} className="panel2" >
             <HStack spacing={3} >
                 <Tabs w="100%" index={tabIndex} onChange={handleTabsChange} isLazy>
                     <TabList>

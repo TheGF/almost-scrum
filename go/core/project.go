@@ -57,6 +57,18 @@ func FindProject(path string) (*Project, error) {
 	return nil, os.ErrNotExist
 }
 
+func getFedConnection(path string) (fed.Connection, error) {
+	f, err := fed.Open(filepath.Join(path, "fed"))
+	if err != nil {
+		return nil, err
+	}
+
+	f.Mount(filepath.Join(path, ProjectBoardsFolder), fed.TrackByDefault)
+	f.Mount(filepath.Join(path, ProjectModelsFolder), fed.TrackByDefault)
+	f.Mount(filepath.Join(path, ProjectLibraryFolder))
+	return f, nil
+}
+
 // OpenProject checks if the given path contains a project and creates an instance of Project.
 func OpenProject(path string) (*Project, error) {
 	projectConfig, err := ReadProjectConfig(path)
@@ -69,7 +81,7 @@ func OpenProject(path string) (*Project, error) {
 		return nil, err
 	}
 
-	f, err := fed.Open(filepath.Join(path, "fed"))
+	fedConnection, err := getFedConnection(path)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +91,7 @@ func OpenProject(path string) (*Project, error) {
 		Config:     projectConfig,
 		TasksCount: 0,
 		Models:     models,
-		Fed:        f,
+		Fed:        fedConnection,
 	}
 
 	infos, err := ListTasks(project, "", "")

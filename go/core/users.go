@@ -5,9 +5,17 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
+
+type Todo struct {
+	Id     int       `json:"id"`
+	Action string    `json:"action"`
+	Eta    time.Time `json:"eta"`
+	Done   bool      `json:"done"`
+}
 
 // UserInfo contains information about a user.
 type UserInfo struct {
@@ -15,6 +23,7 @@ type UserInfo struct {
 	Email       string            `json:"email"`
 	Office      string            `json:"office"`
 	Icon        []byte            `json:"icon"`
+	Todo        []Todo            `json:"todo"`
 	Credentials map[string]string `json:"credentials"`
 }
 
@@ -63,4 +72,3 @@ func SetUserInfo(project *Project, user string, userInfo *UserInfo) (err error) 
 	path := filepath.Join(project.Path, ProjectUsersFolder, user+".yaml")
 	return fs.WriteYaml(path, userInfo)
 }
-

@@ -203,16 +203,10 @@ func SetVisibility(project *core.Project, path string, public bool) error {
 			}
 		}
 	}
-	attr, _ := fs.GetExtendedAttr(fullPath)
-	if attr.Public != public {
-		attr.Public = public
-		if err = fs.SetExtendedAttr(fullPath, attr); err == nil {
-			tm := time.Now()
-			_ = os.Chtimes(fullPath, tm, tm)
-		}
-		logrus.Infof("set visibility of file %s tp %t", path, public)
-	}
-	return nil
+
+	err = project.Fed.SetTracked(fullPath, public)
+	logrus.Infof("set visibility of file %s tp %t", path, public)
+	return err
 }
 
 

@@ -13,8 +13,11 @@ const colors = {
         background: 'linear-gradient(to right bottom, #909ea0, #606070, #303040)',
         color: 'gray.900',    
         input: 'white',
-        panel1bg: 'linear-gradient(to right bottom, #e8ceca, #b89e9a)',
-        panel2bg: 'linear-gradient(to right bottom, #f1f1f1, #c1c1c1)',
+        panel1bg: 'linear-gradient(to right bottom, #51a2fe, #4192ee)',
+        panel1color: 'white',
+//        panel1bg: 'linear-gradient(to right bottom, #f8deda, #b89e9a)',
+        panel2bg: '#fafafa', //'linear-gradient(to right bottom, #f1f1f1, #c1c1c1)',
+        panel2color: '#505050',
     }
 }
 

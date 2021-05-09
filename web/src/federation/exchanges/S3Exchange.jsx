@@ -13,10 +13,11 @@ import Utils from '../../core/utils';
 function S3Exchange(props) {
     const [exchange, setExchange] = useState(props.exchange)
     const { update, status } = props
+    const connectErr = status && status.connectErr    
 
-    const connected = status && status.exchanges[exchange.name]
-    const upload = status && status.throughput[exchange.name] && Utils.getFriendlySize(status.throughput[exchange.name].upload)
-    const download = status && status.throughput[exchange.name] && Utils.getFriendlySize(status.throughput[exchange.name].download)
+
+    const upload = status && Utils.getFriendlySize(status.throughputUp)
+    const download = status && Utils.getFriendlySize(status.throughputDown)
 
     function updateField(evt, field, value) {
         exchange[field] = value != undefined ? value : evt.target.value
@@ -31,9 +32,9 @@ function S3Exchange(props) {
                 <Box flex="1" textAlign="left">
                     S3 - {exchange.name}
                 </Box>
-                {connected ?
+                {connectErr == null ?
                     <Tag colorScheme="green" title={`U:${upload}-D:${download}`}><T>connected</T></Tag> :
-                    <Tag colorScheme="red"><T>disconnected</T></Tag>}
+                    <Tag colorScheme="red">{connectErr && connectErr.Msg ? connectErr.Msg : <T>disconnected</T> }</Tag>}
                 <AccordionIcon />
             </AccordionButton>
         </h2>

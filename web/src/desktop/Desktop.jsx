@@ -103,7 +103,7 @@ function Desktop(props) {
             {/* <Center p="1em" style={{ position: "fixed", bottom: 0 }}>
             <Text size="sm" color="gray">
                 {info && `${info.loginUser}@${project}.${info.host}`}
-             - Almost Scrum 0.5 - Open Source since 2020</Text>
+             - Scrum To Go 0.5 - Open Source since 2020</Text>
         </Center> */}
         </Flex>
     </div>

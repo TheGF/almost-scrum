@@ -23,7 +23,7 @@ function Login(props) {
 
     return <Modal isOpen={isOpen} >
         <ModalContent>
-            <ModalHeader>Welcome to Almost Scrum</ModalHeader>
+            <ModalHeader>Welcome to Scrum To Go</ModalHeader>
             <ModalBody>
                 <form onSubmit={authenticate}>
                     <FormControl required>

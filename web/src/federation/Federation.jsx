@@ -96,7 +96,9 @@ function Federation(props) {
             return
         }
 
-        setStrength(Object.keys(status.netStats).length)
+        const strenght = Object.entries(status.netStats).filter(([_, stat]) => stat.connectErr == null).length
+
+        setStrength(strenght)
         notifyChanges(status.updates || [])
     }
 

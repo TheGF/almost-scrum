@@ -164,6 +164,7 @@ func StartServer(port string, logLevel string, autoExit_ bool, args []string) {
 	gitRoute(v1)
 	fedRoute(v1)
 	ganttRoute(v1)
+	queryRoute(v1)
 
 	ashUrl = fmt.Sprintf("http://127.0.0.1:%s", port)
 	if false {open.Start(ashUrl)}

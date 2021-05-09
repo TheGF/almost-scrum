@@ -20,7 +20,6 @@ function Progress(props) {
 
             part.description = value
             setDescription(value)
-            saveTask(task)
         }
 
         function onDoneChange(evt) {
@@ -54,7 +53,7 @@ function Progress(props) {
             <Td>
                 <Input value={description} readOnly={readOnly}
                     placeholder="Describe a required action"
-                    onChange={onDescriptionChange} />
+                    onChange={onDescriptionChange} onBlur={_=>saveTask(task)} />
             </Td>
             <Td w="2em">
                 <Switch isChecked={done} isReadOnly={readOnly}
@@ -78,10 +77,10 @@ function Progress(props) {
         Change owner if you want to edit the content
     </Center> : null
 
-    return <>
+    return <div className="panel2" >
         {editMessage}
         {add}
-        <Table colorScheme="teal" size="sm">
+        <Table size="sm">
             <TableCaption w="100%">
                 <HStack spacing={3}>
                     <Center>Track your progress and acceptance criteria</Center>
@@ -92,6 +91,6 @@ function Progress(props) {
                 {rows}
             </Tbody>
         </Table>
-    </>;
+    </div>;
 }
 export default Progress;

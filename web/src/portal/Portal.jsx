@@ -3,7 +3,7 @@ import {
     HStack, IconButton, Input, Link, Spacer, Text, VStack
 } from "@chakra-ui/react";
 import { React, useEffect, useState } from "react";
-import { BiLockOpen } from "react-icons/bi";
+import { BiCoffee, BiCoffeeTogo, BiLockOpen } from "react-icons/bi";
 import { FiHelpCircle } from "react-icons/fi";
 import { GiGrapes } from "react-icons/gi";
 import { GrLogout, GrNewWindow } from "react-icons/gr";
@@ -87,7 +87,7 @@ function Portal(props) {
             <Box w="12em" h="12em" bg="blue.500" >
                 <VStack textAlign="center" spacing="24px" >
                     <Spacer />
-                    <GiGrapes size="50" />
+                    <BiCoffee size="50" />
                     <Text w="11em" color="white" isTruncated>{project}</Text>
                 </VStack>
             </Box>
@@ -160,7 +160,7 @@ function Portal(props) {
 
 
 
-    document.title = activeProject ? `Almost Scrum: ${activeProject}` : 'Almost Scrum';
+    document.title = activeProject ? `Scrum To Go: ${activeProject}` : 'Scrum To Go';
     return <Flex 
         direction="column"
         height="100%"

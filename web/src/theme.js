@@ -26,11 +26,13 @@ const styles = {
         },
         ".panel1": {
             background: color(props.colorMode, 'panel1bg'),
+            color: color(props.colorMode, 'panel1color'),
             marginTop: "4px",
             borderRadius: '5px',
         },
         ".panel2": {
             background: color(props.colorMode, 'panel2bg'),
+            color: color(props.colorMode, 'panel2color'),
             borderRadius: '2px',
         },
         ".te-editor": {

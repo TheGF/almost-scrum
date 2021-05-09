@@ -79,6 +79,12 @@ func FindStringInSlice(slice []string, val string) (int, bool) {
 	return -1, false
 }
 
+func HasStringInSlice(slice []string, val string) bool {
+	_, found := FindStringInSlice(slice, val)
+	return found
+}
+
+
 func GenerateRandomString(n int) string {
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 

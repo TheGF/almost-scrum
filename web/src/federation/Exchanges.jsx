@@ -50,16 +50,16 @@ function Exchanges(props) {
     let exchangesUI = transport ? [
         ...transport.s3.map(
             (exchange, i) => <S3Exchange exchange={exchange} update={v => updateExchange(transport.s3, i, v)}
-                status={status} />),
+                status={status && status.netStats[exchange.name]} />),
         ...transport.webDAV.map(
             (exchange, i) => <WebDAVExchange exchange={exchange} update={v => updateExchange(transport.webDAV, i, v)}
-                connected={status && status.netStats[exchange.name]} />),
+                status={status && status.netStats[exchange.name]} />),
         ...transport.ftp.map(
             (exchange, i) => <FTPExchange exchange={exchange} update={v => updateExchange(transport.ftp, i, v)}
-                connected={status && status.netStats[exchange.name]} />),
+                status={status && status.netStats[exchange.name]} />),
         ...transport.usb.map(
             (exchange, i) => <USBExchange exchange={exchange} update={v => updateExchange(transport.usb, i, v)}
-                connected={status && status.netStats[exchange.name]} />),
+                status={status && status.netStats[exchange.name]} />),
     ] : []
 
     function addS3() {

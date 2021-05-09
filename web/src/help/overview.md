@@ -1,12 +1,13 @@
-# Almost Scrum 0.5
+# Scrum To Go 0.5
+![](/scrum-to-go2.svg#size=20,align=center)
 
 ## What is it?
 It is a tool to manage your IT work in an almost agile approach
 
-## Why "almost"?
-Because nobody is perfect. Because, while Agile is important, other things matter:
-- keep it simple
-- allow decentralized if you want, meaning *no server*
+## Why "to go"?
+Because:
+- simple
+- decentralized if you want, meaning *no server*
 - hackable for hackers: cmd line tool and store data to Markdown files
 - documentation: come with embedded library  
 - Git's lover
