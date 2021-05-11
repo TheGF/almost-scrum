@@ -24,7 +24,15 @@ function Gantt(props) {
     }
 
     function getTasks() {
-        Server.getGanttTasks(project)
+        const q = {
+            select: {
+                properties: true,
+            },
+            whereTypes: [
+                {hasPropertiesAll: ['Start', 'End']}
+            ]
+        }
+        Server.postQueryTasks(project, q)
             .then(tasks => setTasks(tasks || []))
     }
     useEffect(getTasks, [])
@@ -184,7 +192,7 @@ function Gantt(props) {
             .filter(t => t)
             .sort(sortByDependency)
     return ganttTasks ?
-        <Stack className="panel1" w="100%" direction="column" spacing={2} p={2}>
+        <Stack className="yellowPanel" w="100%" direction="column" spacing={2} p={2}>
             <HStack>
                 <ButtonGroup size="sm" >
                     {viewModesUI}

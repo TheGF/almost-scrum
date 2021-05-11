@@ -94,7 +94,7 @@ function Library(props) {
         {breadcrumbs}
     </Breadcrumb>
 
-    return <VStack className="panel1" id="test-pdf" w="100%" align="left" >
+    return <VStack className="yellowPanel" id="test-pdf" w="100%" align="left" >
         <PageEditor page={page} setPage={setPage} />
         <Bar path={path} changePath={changePath} getNextVersion={getNextVersion}
             favorites={favorites} files={files} listFolder={listFolder} />

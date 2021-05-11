@@ -65,6 +65,7 @@ func getFedConnection(path string) (fed.Connection, error) {
 
 	f.Mount(filepath.Join(path, ProjectBoardsFolder), fed.TrackByDefault)
 	f.Mount(filepath.Join(path, ProjectModelsFolder), fed.TrackByDefault)
+	f.Mount(filepath.Join(path, ProjectChatFolder), fed.TrackByDefault)
 	f.Mount(filepath.Join(path, ProjectLibraryFolder))
 	return f, nil
 }

@@ -12,6 +12,7 @@ var queryCache = cache.New(5*time.Minute, 10*time.Minute)
 
 func filterByBoard(infos []core.TaskInfo, whereBoardIs []string) []core.TaskInfo {
 	var r []core.TaskInfo
+
 	for _, info := range infos {
 		if _, found := core.FindStringInSlice(whereBoardIs, info.Board); found {
 			r = append(r, info)
@@ -46,7 +47,7 @@ func getTaskRef(project *core.Project, info core.TaskInfo) (*TaskRef, error) {
 }
 
 func hasValidType(taskRef *TaskRef, types []string) bool {
-	return core.HasStringInSlice(types, taskRef.Task.Properties["type"])
+	return core.HasStringInSlice(types, taskRef.Task.Properties["Type"])
 }
 
 func hasRequiredProperties(taskRef *TaskRef, whereProperties []WhereProperty) bool {
@@ -103,7 +104,9 @@ func QueryTasks(project *core.Project, params Query) ([]TaskRef, error) {
 	}
 
 	validTypes := QueryTypes(project, params.WhereTypes)
-	infos = filterByBoard(infos, params.WhereBoardIs)
+	if params.WhereBoardIs != nil {
+		infos = filterByBoard(infos, params.WhereBoardIs)
+	}
 
 	var refs []*TaskRef
 	for _, info := range infos {

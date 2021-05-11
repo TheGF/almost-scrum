@@ -2,7 +2,6 @@ package web
 
 import (
 	"almost-scrum/core"
-	"almost-scrum/gantt"
 	"almost-scrum/query"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -20,7 +19,7 @@ func postQueryTasksAPI(c *gin.Context) {
 		return
 	}
 
-	if err := c.BindJSON(q); err != nil {
+	if err := c.BindJSON(&q); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -32,11 +31,5 @@ func postQueryTasksAPI(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, ts)
-
-	if tasks, err := gantt.GetTasks(project); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-	} else {
-		c.JSON(http.StatusOK, tasks)
-	}
 }
 

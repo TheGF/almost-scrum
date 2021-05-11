@@ -35,6 +35,11 @@ const styles = {
             color: color(props.colorMode, 'panel2color'),
             borderRadius: '2px',
         },
+        ".yellowPanel": {
+            background: color(props.colorMode, 'yellowPanelBg'),
+            color: color(props.colorMode, 'yellowPanelColor'),
+            borderRadius: '2px',
+        },
         ".te-editor": {
             background: color(props.colorMode, 'input'),
         },

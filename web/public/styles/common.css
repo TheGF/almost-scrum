@@ -1,13 +1,13 @@
-body {
+/* body {
     counter-reset: h1num figurenum;
     font-family: Georgia, "Times New Roman", Times, serif;
     line-height: 1.5;
     font-size: 12pt;
     background: #fff !important;
     color: #000;
-}
+} */
 
-.leftImage {
+/* .leftImage {
     display: block;
     margin-left: auto
 }
@@ -16,4 +16,12 @@ body {
     display: block;
     margin-left: auto;
     margin-right: auto
+} */
+
+.grid-header {
+    width: 100%;
+}
+
+.grid-row {
+    width: 100%;
 }

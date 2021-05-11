@@ -14,6 +14,7 @@ import Portal from '../portal/Portal';
 import TodoList from './TodoList';
 import TodoEdit from './TodoEdit';
 import Server from "../server";
+import Chat from '../chat/Chat';
 
 
 function Header(props) {
@@ -150,7 +151,7 @@ function Header(props) {
             {library}
             {toolsMenu}
             <Spacer />
-            <IconButton><BiUserVoice /></IconButton>
+            <Chat/>
             <Federation />
         </Stack>
     </Box>

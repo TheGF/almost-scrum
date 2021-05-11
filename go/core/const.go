@@ -27,6 +27,9 @@ const ProjectFedFilesFolder = "fed/files"
 // ProjectUsersFolder the folder containing users
 const ProjectArchiveFolder = "archive"
 
+const ProjectChatFolder = "chat"
+
+
 // ProjectUsersFolder the folder containing users
 const ProjectModelsFolder = "models"
 
@@ -47,7 +50,7 @@ var (
 	ProjectFolders = []string{ProjectBoardsFolder,
 		ProjectLibraryFolder, ProjectUsersFolder,
 		ProjectLibraryInlineImagesFolder, ProjectModelsFolder,
-		ProjectFedFolder, ProjectFedFilesFolder}
+		ProjectFedFolder, ProjectFedFilesFolder, ProjectChatFolder}
 
 	ProjectTemplatesPath = "assets/templates/"
 

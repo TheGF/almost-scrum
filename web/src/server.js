@@ -572,6 +572,29 @@ class Server {
             .catch(errorHandler);
     }
 
+    static postQueryTasks(project, query) {
+        return axios.post(`/api/v1/projects/${project}/query/tasks`, query, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static postChatMsg(project, file) {
+        const token = localStorage.token
+        const config = getConfig();
+        let formData = null;
+
+        formData = new FormData();
+        formData.append("file", file);
+        config.headers = config.headers || {};
+        config.headers['Content-Type'] = 'multipart/form-data';
+
+        return axios.post(`/api/v1/projects/${project}/chat?token=${token}`,
+            formData, { config })
+            .then(r => r.data)
+            .catch(errorHandler);
+
+    }
+
 }
 
 export default Server;

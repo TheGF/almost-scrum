@@ -12,9 +12,11 @@ const colors = {
     light: {
         background: 'linear-gradient(to right bottom, #909ea0, #606070, #303040)',
         color: 'gray.900',    
-        input: 'white',
-        panel1bg: 'linear-gradient(to right bottom, #51a2fe, #4192ee)',
+        panel1bg: 'linear-gradient(to right bottom, #3182ce, #2172be)',
+//        panel1bg: 'linear-gradient(to right bottom, #51a2fe, #4192ee)',
         panel1color: 'white',
+        yellowPanelBg: 'linear-gradient(to right bottom, #ecc94b, #dcb93b)',
+        yellowPanelColor: '#505050',
 //        panel1bg: 'linear-gradient(to right bottom, #f8deda, #b89e9a)',
         panel2bg: '#fafafa', //'linear-gradient(to right bottom, #f1f1f1, #c1c1c1)',
         panel2color: '#505050',

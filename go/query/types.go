@@ -21,13 +21,13 @@ type Select struct {
 
 type WhereType struct {
 	Is               []string `json:"is"`
-	HasPropertiesAll []string `json:"hasProperties"`
+	HasPropertiesAll []string `json:"hasPropertiesAll"`
 }
 
 type WhereProperty struct {
-	Name          string   `json:"property"`
-	ValueIsAnyOf  []string `json:"is"`
-	ValueIsNoneOf []string `json:"isNot"`
+	Name          string   `json:"name"`
+	ValueIsAnyOf  []string `json:"valueIsAnyOf"`
+	ValueIsNoneOf []string `json:"valueIsNoneOf"`
 }
 
 type Query struct {
