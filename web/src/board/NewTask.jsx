@@ -29,10 +29,10 @@ function NewTask(props) {
     </MenuItem>)
 
     return types.length == 1 ?
-        <IconButton title="New Task" icon={<RiChatNewLine />}
+        <IconButton title="New Post" icon={<RiChatNewLine />}
             onClick={_ => onNewTask(types[0])} /> :
         <Menu>
-            <MenuButton as={Button} title="New Task">
+            <MenuButton as={Button} title="New Post">
                 <RiChatNewLine />
             </MenuButton>
             <MenuList>

@@ -578,13 +578,22 @@ class Server {
             .catch(errorHandler);
     }
 
-    static postChatMsg(project, file) {
+    static getChatMsgs(project, start, end) {
+        return axios.get(`/api/v1/projects/${project}/chat?start=${start}&end=${end}`, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static postChatMsg(project, text, files=[]) {
         const token = localStorage.token
         const config = getConfig();
         let formData = null;
 
         formData = new FormData();
-        formData.append("file", file);
+        formData.append("text", text);
+        files.forEach((file, idx) => {
+            formData.append(`file-${idx}`, file);
+        })
         config.headers = config.headers || {};
         config.headers['Content-Type'] = 'multipart/form-data';
 
@@ -593,6 +602,32 @@ class Server {
             .then(r => r.data)
             .catch(errorHandler);
 
+    }
+
+    static getChatAttachment(project, id) {
+        return axios.get(`/api/v1/projects/${project}/chat/${id}`, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static getChatAttachmentURL(project, id, idx) {
+        return `/api/v1/projects/${project}/chat/${id}/${idx}`
+    }
+
+    static postChatAttachmentAction(project, id, idx, action, board=null, title=null, type=null) {
+        let url = `/api/v1/projects/${project}/chat/${id}/${idx}?action=${action}`
+        if (board) {url += `&board=${board}`}
+        if (title) {url += `&title=${title}`}
+        if (type) {url += `&type=${type}`}
+
+        return axios.post(url, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static deleteChatMsgs(project, id) {
+        return axios.delete(`/api/v1/projects/${project}/chat/${id}`, getConfig())
+            .catch(errorHandler);
     }
 
 }

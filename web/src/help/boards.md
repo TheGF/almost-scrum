@@ -13,7 +13,7 @@ The board contains a filter panel and a list of tasks.
 
 ![](/help/board.png#size=90,align=left)
 The filter panel includes:
-- a button to create a new task
+- a button to create a new post
 - a search field to filter the tasks
 - a button to show/hide the content of tasks
 - a button to choose filter criterias

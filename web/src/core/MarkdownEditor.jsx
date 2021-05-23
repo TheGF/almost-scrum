@@ -17,11 +17,11 @@ import chart from '@toast-ui/editor-plugin-chart';
 
 function MarkdownEditor(props) {
     const { project } = useContext(UserContext);
-    const { imageFolder, height, onSave, disablePreview, readOnly, ...more } = props
+    const { imageFolder, height, disablePreview, readOnly, hideModeSwitch, toolbarItems } = props
     const projectPath = `/api/v1/projects/${project}`
 
-    const [value, setValue] = useState(props.value && `${props.value}`
-                                        .replaceAll('~', projectPath) || null);
+    
+    const [value, setValue] = useState(props.value != null ? `${props.value}`.replaceAll('~', projectPath) : null);
     const editorRef = useRef(null)
     const [editImage, setEditImage] = useState(null)
     const [refresh, setRefresh] = useState(false)
@@ -63,7 +63,7 @@ function MarkdownEditor(props) {
             clearTimeout(editor.pendingSave)
         }
 
-        if (content && value && content.trim() != value.trim()) {
+        if (content != null && value != null && content.trim() != value.trim()) {
             setValue(content)
             const toSave = content.replaceAll(projectPath, '~')
             if (async) {
@@ -121,6 +121,8 @@ function MarkdownEditor(props) {
 
     const plugins = [chart, codeSyntaxHighlight, colorSyntax, tableMergedCell, uml]
 
+    const toolbar = toolbarItems ? {toolbarItems: toolbarItems} : {}
+
     const gap = disablePreview ? 120 : 20
     return readOnly ? <Viewer
         initialValue={value}
@@ -128,6 +130,7 @@ function MarkdownEditor(props) {
         height={height - 40}
         initialEditType="wysiwyg"
         useCommandShortcut={true}
+        hideModeSwitch={hideModeSwitch}
         ref={editorRef}
         customHTMLRenderer={{
             image: renderImage,
@@ -140,6 +143,10 @@ function MarkdownEditor(props) {
             initialValue={value}
             previewStyle="tab"
             height={height - 40}
+            width="100%"
+            className="test"
+            {...toolbar}
+            hideModeSwitch={hideModeSwitch}
             initialEditType="wysiwyg"
             useCommandShortcut={true}
             ref={editorRef}

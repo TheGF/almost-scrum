@@ -46,12 +46,12 @@ function TodoList(props) {
     function changeTodo() {
     }
 
-    const items = value && value.map(item => <TodoItem item={item}/>)
+    const items = value && value.map(item => <TodoItem key={item.action} item={item}/>)
 
     return <>
         <MenuGroup title={
             <HStack>
-                <Text>TODO</Text>
+                <span>TODO</span>
                 <Spacer />
                 <IconButton size="sm" onClick={addItem}><GrFormAdd /></IconButton>
             </HStack>} >

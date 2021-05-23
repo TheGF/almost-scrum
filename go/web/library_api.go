@@ -194,7 +194,7 @@ func uploadFileAPI(c *gin.Context) {
 			c.String(http.StatusInternalServerError, "Cannot upload to %s", path)
 			return
 		}
-		logrus.Infof("File %s uploaded in %s, owner %s, public %t",
+		logrus.Infof("Name %s uploaded in %s, owner %s, public %t",
 			file.Filename, path, owner, public)
 		getLibraryAPI(c)
 	default:

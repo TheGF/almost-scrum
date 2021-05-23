@@ -39,16 +39,6 @@ function Bar(props) {
     }
 
     function newBook() {
-        // doc.fromHTML(document.getElementById("test-pdf"), // page element which you want to print as PDF
-        //     15,
-        //     15,
-        //     {
-        //         'width': 170  //set width
-        //     },
-        //     function (a) {
-        //         doc.save("HTML2PDF.pdf"); // save file name as HTML2PDF.pdf
-        //     })
-
         Server.postNewBook2(project, path)
             .then(html => {
                 const opt = {
@@ -69,33 +59,6 @@ function Bar(props) {
                     }
                 };
                 html2pdf().from(html).set(opt).save();
-
-                // const pdf = new jsPDF('p', 'pt', 'letter');;  //create jsPDF object
-                // const margin = [40, 80, 40, 80]
-
-                // const body = html.match(/<body[^>]*>([\w|\W]*)<\/body>/im)[0];
-
-                // pdf.html(html, // HTML string or DOM elem ref.
-                //     {
-                //         margin: margin,
-                //         callback: _ => pdf.save('Test.pdf')
-                //     }
-                // );
-
-                //body = document.getElementById('document');
-                // const body = html.match(/<body[^>]*>([\w|\W]*)<\/body>/im)[0];
-
-                // const anchor = document.createElement("div");
-                // anchor.innerHTML = body
-
-                // var opt = {
-                //     margin:       [10, 0, 10, 0],
-                //     filename:     `document.pdf`,
-                //     image:        { type: 'jpeg', quality: 0.98 },
-                //     html2canvas:  { scale: 2, useCORS: false },
-                //     jsPDF:        { unit: 'mm', format: 'A4', orientation: 'portrait' }
-                // };
-                // html2pdf().from(anchor).set(opt).save();
             })
     }
 

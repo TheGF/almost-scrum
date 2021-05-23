@@ -60,7 +60,7 @@ func ReadModels(path string) ([]Model, error) {
 				}
 				logrus.Debugf("Loaded template %s: %s", filePath, template)
 			} else {
-				logrus.Warnf("File %s contains an invalid template", filePath)
+				logrus.Warnf("Name %s contains an invalid template", filePath)
 			}
 		case ".yaml":
 			{
@@ -74,7 +74,7 @@ func ReadModels(path string) ([]Model, error) {
 					}
 					logrus.Debugf("Loaded model file %s: %v", filePath, properties)
 				} else {
-					logrus.Warnf("File %s contains an invalid model", filePath)
+					logrus.Warnf("Name %s contains an invalid model", filePath)
 				}
 			}
 		}

@@ -14,8 +14,6 @@ function S3Exchange(props) {
     const [exchange, setExchange] = useState(props.exchange)
     const { update, status } = props
     const connectErr = status && status.connectErr    
-
-
     const upload = status && Utils.getFriendlySize(status.throughputUp)
     const download = status && Utils.getFriendlySize(status.throughputDown)
 

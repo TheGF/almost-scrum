@@ -57,38 +57,38 @@ function Federation(props) {
             .then(notifyChanges)
     }
 
-    function exportSince(time) {
-        let d = new Date()
+    // function exportSince(time) {
+    //     let d = new Date()
 
-        switch (time) {
-            case 'today': d.setDate(d.getDate() - 1); break
-            case 'week': d.setDate(d.getDate() - 7); break
-            case 'month': d.setMonth(d.getMonth() - 1); break
-            case 'all': d.setYear(0); break
-            default: d = null; break
-        }
+    //     switch (time) {
+    //         case 'today': d.setDate(d.getDate() - 1); break
+    //         case 'week': d.setDate(d.getDate() - 7); break
+    //         case 'month': d.setMonth(d.getMonth() - 1); break
+    //         case 'all': d.setYear(0); break
+    //         default: d = null; break
+    //     }
 
-        Server.postFedExport(project, d)
-            .then(files => {
-                Server.postFedPush(project)
-                    .then(_ => {
-                        if (files) {
-                            let description = files.join(',')
-                            if (description.length > 256) {
-                                description = `${description.substr(0, 253)}...`
-                            }
+    //     Server.postFedExport(project, d)
+    //         .then(files => {
+    //             Server.postFedPush(project)
+    //                 .then(_ => {
+    //                     if (files) {
+    //                         let description = files.join(',')
+    //                         if (description.length > 256) {
+    //                             description = `${description.substr(0, 253)}...`
+    //                         }
 
-                            toast({
-                                title: `Successful Export`,
-                                description: description,
-                                status: "success",
-                                duration: 9000,
-                                isClosable: true,
-                            })
-                        }
-                    })
-            })
-    }
+    //                         toast({
+    //                             title: `Successful Export`,
+    //                             description: description,
+    //                             status: "success",
+    //                             duration: 9000,
+    //                             isClosable: true,
+    //                         })
+    //                     }
+    //                 })
+    //         })
+    // }
 
     function onFedState(status) {
         if (!status || !status.netStats) {
@@ -103,7 +103,7 @@ function Federation(props) {
     }
 
     function closeModal() {
-        exportSince()
+        // exportSince()
         onClose()
     }
 
@@ -152,7 +152,7 @@ function Federation(props) {
 
                         <TabPanels>
                             <TabPanel>
-                                <Updates key={isOpen} onClose={closeModal} exportSince={exportSince} />
+                                <Updates key={isOpen} onClose={closeModal} />
                             </TabPanel>
                             <TabPanel>
                                 <Exchanges onClose={closeModal}/>

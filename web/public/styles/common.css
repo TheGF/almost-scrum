@@ -1,22 +1,6 @@
-/* body {
-    counter-reset: h1num figurenum;
-    font-family: Georgia, "Times New Roman", Times, serif;
-    line-height: 1.5;
-    font-size: 12pt;
-    background: #fff !important;
-    color: #000;
-} */
-
-/* .leftImage {
-    display: block;
-    margin-left: auto
+.react-kanban-card__title>span {
+    width: 100%;
 }
-
-.centerImage {
-    display: block;
-    margin-left: auto;
-    margin-right: auto
-} */
 
 .grid-header {
     width: 100%;
@@ -24,4 +8,16 @@
 
 .grid-row {
     width: 100%;
+}
+
+.player-wrapper {
+    position: relative;
+    padding-top: 56.25%;
+    /* 720 / 1280 = 0.5625 */
+}
+
+.react-player {
+    position: absolute;
+    top: 0;
+    left: 0;
 }

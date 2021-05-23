@@ -9,7 +9,8 @@ import UserContext from '../UserContext';
 import AskBoardName from './AskBoardName';
 import Header from './Header';
 import NoAccess from './NoAccess';
-import Kanban from '../extensions/Kanban';
+import Kanban from '../kanban/Kanban';
+import ReactPlayer from 'react-player';
 
 
 function Desktop(props) {
@@ -99,6 +100,7 @@ function Desktop(props) {
             <Box w="90%" mt={5}>
                 {getContent()}
             </Box>
+
 
             {/* <Center p="1em" style={{ position: "fixed", bottom: 0 }}>
             <Text size="sm" color="gray">
