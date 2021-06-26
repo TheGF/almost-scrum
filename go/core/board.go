@@ -50,6 +50,7 @@ type BoardProperties struct {
 func GetBoardProperties(project *Project, name string) (BoardProperties, error) {
 	var boardProperties BoardProperties = BoardProperties{TaskTypes: make([]string, 0)}
 
+
 	p := filepath.Join(project.Path, "boards", name, ".board.yaml")
 	fs.ReadYaml(p, &boardProperties)
 	return boardProperties, nil

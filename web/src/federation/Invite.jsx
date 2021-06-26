@@ -34,7 +34,7 @@ function Invite(props) {
         while (second == first) second = Math.floor(Math.random() * images.length)
 
         const keys = [images[first], images[second]].sort()
-        Server.postFedShare(project, keys.join(','), selection, removeCredentials)
+        Server.postFedInvite(project, keys.join(','), selection, removeCredentials)
             .then(invite => {
                 setInvite(invite)
                 setKeys(keys)
@@ -44,26 +44,23 @@ function Invite(props) {
 
     function chooseExchange(exchange) {
         function change() {
-            if (selection.includes(exchange.name)) {
-                setSelection(selection.filter(s => s != exchange.name));
+            if (selection.includes(exchange)) {
+                setSelection(selection.filter(s => s != exchange));
             } else {
-                setSelection([...selection, exchange.name])
+                setSelection([...selection, exchange])
             }
         }
 
         return <Tr>
-            <Td>{exchange.name}</Td>
-            <Td><Switch isChecked={selection.includes(exchange.name)}
+            <Td>{exchange}</Td>
+            <Td><Switch isChecked={selection.includes(exchange)}
                 onChange={change} /></Td>
         </Tr>
 
     }
 
-    let exchangesUI = config ? [
-        ...config.s3,
-        ...config.webDAV,
-        ...config.ftp,
-    ].map(exchange => chooseExchange(exchange)) : []
+    let exchangesUI = config ? Object.keys(config)
+        .map(exchange => chooseExchange(exchange)) : []
 
     function multiline(s) {
         let r = ''
@@ -138,13 +135,13 @@ function Invite(props) {
 
     function createInviteUI() {
         return <VStack>
-            <HStack>
+            {/* <HStack>
                 <span>Remove credentials (password and secrets) from the invite</span>
                 <Switch isChecked={removeCredentials}
                     onChange={_ => setRemoveCredentials(!removeCredentials)} />
             </HStack>
 
-            <br />
+            <br /> */}
             <Table size="sm" padding="0" spacing="0">
                 <Thead>
                     <Tr>

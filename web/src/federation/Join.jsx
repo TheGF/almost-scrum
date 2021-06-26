@@ -1,12 +1,7 @@
 import {
-    Box, Button, ButtonGroup, FormControl, FormLabel, Image, Input, Link, Modal,
-    ModalBody, ModalCloseButton, ModalContent, ModalHeader, Spacer,
-    Stack,
-    Text, Textarea, useDisclosure, useToast, VStack, Wrap, WrapItem
+    Box, Button, ButtonGroup, FormControl, FormLabel, Image, Textarea, useToast, VStack, Wrap, WrapItem
 } from "@chakra-ui/react";
-import { React, useEffect, useState } from "react";
-import { BiWorld } from "react-icons/bi";
-import T from "../core/T";
+import { React, useContext, useEffect, useState } from "react";
 import Server from "../server";
 
 const images = ['banana', 'beer', 'burger', 'chocolate', 'coke', 'cornflakes',
@@ -16,7 +11,6 @@ const images = ['banana', 'beer', 'burger', 'chocolate', 'coke', 'cornflakes',
 
 
 function Join(props) {
-    const { reload } = useContext(UserContext)
     const { onClose, project } = props
     const [token, setToken] = useState(props.token || null)
     const [selected, setSelected] = useState([])
@@ -80,7 +74,7 @@ function Join(props) {
             <Textarea rows={12} value={token} onChange={e => setToken(e.target.value)} />
         </FormControl>
         <ButtonGroup>
-            <Button colorScheme="blue" isDisabled={token == null || token.length == 0 || selected.length != 2} 
+            <Button colorScheme="blue" isDisabled={token == null || token.length == 0 || selected.length != 2}
                 onClick={join}>Confirm</Button>
             <Button onClick={onClose}>Close</Button>
         </ButtonGroup>

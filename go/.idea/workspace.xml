@@ -5,31 +5,35 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c52cf1ef-ba6a-44a0-983b-f8caeee38f66" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/chat/chat_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum-setup_0.5.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum-setup_0.5.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum_0.5_amd64.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum_0.5_amd64.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/almost-scrum_0.5_arm64.deb" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/almost-scrum_0.5_arm64.deb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chat/chat.go" beforeDir="false" afterPath="$PROJECT_DIR$/chat/chat.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cli/fed.go" beforeDir="false" afterPath="$PROJECT_DIR$/cli/fed.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/board.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/board.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/task.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/task.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fs/attributes.go" beforeDir="false" afterPath="$PROJECT_DIR$/fs/attributes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fs/attributes_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/fs/attributes_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/chat_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/chat_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/iconunix.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/iconunix.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/library_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/library_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/library.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/library.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/library_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/library_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/versions.go" beforeDir="false" afterPath="$PROJECT_DIR$/library/versions.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/fed_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/fed_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/project_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/web/project_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../sdist/debian/almost-scrum_0.5_arm64/usr/share/doc/almost-scrum/changelog.gz" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/debian/almost-scrum_0.5_arm64/usr/share/doc/almost-scrum/changelog.gz" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../sdist/debian/almost-scrum_0.5_arm64/usr/share/doc/almost-scrum/copyright" beforeDir="false" afterPath="$PROJECT_DIR$/../sdist/debian/almost-scrum_0.5_arm64/usr/share/doc/almost-scrum/copyright" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/../web/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../web/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/public/styles/common.css" beforeDir="false" afterPath="$PROJECT_DIR$/../web/public/styles/common.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/chat/Chat.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/chat/Chat.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/core/MarkdownEditor.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/chat/ImageViewer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/chat/ImageViewer.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/src/desktop/Desktop.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Desktop.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/desktop/TodoList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/TodoList.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/extensions/Kanban.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/desktop/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/desktop/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Exchanges.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Exchanges.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Federation.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/federation/exchanges/S3Exchange.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/exchanges/S3Exchange.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../web/src/library/Bar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/library/Bar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Invite.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Invite.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Join.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Join.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/federation/Updates.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/federation/Updates.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../web/src/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -101,7 +105,16 @@
       <recent name="$PROJECT_DIR$/attributes" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.TestChat in almost-scrum/chat">
+  <component name="RunManager" selected="Go Build.go build almost-scrum">
+    <configuration name="go build almost-scrum" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="go" />
+      <working_directory value="$PROJECT_DIR$" />
+      <parameters value="-vv web $USER_HOME$/Desktop" />
+      <kind value="PACKAGE" />
+      <package value="almost-scrum" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="TestChat in almost-scrum/chat" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
       <working_directory value="$PROJECT_DIR$/chat" />
@@ -137,17 +150,6 @@
       <pattern value="^\QTestQueryTasks\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestUSBPull in almost-scrum/fed/transport" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="go" />
-      <working_directory value="$PROJECT_DIR$/fed/transport" />
-      <kind value="PACKAGE" />
-      <package value="almost-scrum/fed/transport" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <pattern value="^\QTestUSBPull\E$" />
-      <method v="2" />
-    </configuration>
     <configuration name="TestUSBPush in almost-scrum/fed/transport" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go" />
       <working_directory value="$PROJECT_DIR$/fed/transport" />
@@ -160,19 +162,19 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Go Build.go build almost-scrum" />
       <item itemvalue="Go Test.TestPush in almost-scrum/fed" />
-      <item itemvalue="Go Test.TestUSBPull in almost-scrum/fed/transport" />
       <item itemvalue="Go Test.TestUSBPush in almost-scrum/fed/transport" />
       <item itemvalue="Go Test.TestQueryTasks in almost-scrum/query" />
       <item itemvalue="Go Test.TestChat in almost-scrum/chat" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build almost-scrum" />
         <item itemvalue="Go Test.TestChat in almost-scrum/chat" />
         <item itemvalue="Go Test.TestQueryTasks in almost-scrum/query" />
         <item itemvalue="Go Test.TestPush in almost-scrum/fed" />
         <item itemvalue="Go Test.TestUSBPush in almost-scrum/fed/transport" />
-        <item itemvalue="Go Test.TestUSBPull in almost-scrum/fed/transport" />
       </list>
     </recent_temporary>
   </component>
@@ -482,6 +484,21 @@
           <url>file://$PROJECT_DIR$/chat/chat_test.go</url>
           <line>12</line>
           <option name="timeStamp" value="278" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$USER_HOME$/go/pkg/mod/github.com/code-to-go/fed@v0.0.0-20210613090914-0efb8fddec1a/transport/transport.go</url>
+          <line>131</line>
+          <option name="timeStamp" value="279" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$USER_HOME$/go/pkg/mod/github.com/code-to-go/fed@v0.0.0-20210613090914-0efb8fddec1a/transport/transport.go</url>
+          <line>156</line>
+          <option name="timeStamp" value="280" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$USER_HOME$/go/pkg/mod/github.com/code-to-go/fed@v0.0.0-20210615191748-4615ff0126ec/transport/transport.go</url>
+          <line>75</line>
+          <option name="timeStamp" value="282" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

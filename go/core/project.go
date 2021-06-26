@@ -16,6 +16,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type FileAttr struct {
+	Owner  string `json:"owner"`
+	Public bool   `json:"public_"`
+}
+
+
 // Project is the basic information about a scrum project.
 type Project struct {
 	Path   string
@@ -57,8 +63,8 @@ func FindProject(path string) (*Project, error) {
 	return nil, os.ErrNotExist
 }
 
-func getFedConnection(path string) (fed.Connection, error) {
-	f, err := fed.Open(filepath.Join(path, "fed"))
+func getFedConnection(path string, fedId string) (fed.Connection, error) {
+	f, err := fed.Open(filepath.Join(path, "fed"), FileAttr{}, fed.WithFedID(fedId))
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +88,7 @@ func OpenProject(path string) (*Project, error) {
 		return nil, err
 	}
 
-	fedConnection, err := getFedConnection(path)
+	fedConnection, err := getFedConnection(path, projectConfig.UUID)
 	if err != nil {
 		return nil, err
 	}
@@ -290,28 +296,7 @@ func ShredProject(project *Project) error {
 }
 
 func JoinFed(project *Project, key string, token string) error{
-	folder := filepath.Join(project.Path, "fed")
-	if err := fed.Join(key, token, folder); err != nil {
-		return err
-	}
-
-	project.Fed.Close()
-	f, err := fed.Open(folder)
-	if err != nil {
-		return err
-	}
-	project.Fed = f
-	return nil
+	c, err := project.Fed.Join(key, token)
+	project.Fed = c
+	return err
 }
-
-//func NameProject(project *Project, name string) {
-//	config := ReadConfig()
-//
-//	path, found := config.Projects[name]
-//	if !found || path != project.Path {
-//		config.Projects[name] = project.Path
-//		WriteConfig(config)
-//	}
-//}
-//
-//

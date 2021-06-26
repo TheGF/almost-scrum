@@ -249,15 +249,6 @@ class Server {
             .catch(errorHandler);
     }
 
-    // static setTaskLater(project, board, name, content) {
-    //     return new Promise(function (resolve, reject) {
-    //         const k = `setTask:${project}/${board}/${name}`
-    //         pendingSet[k] = [Date.now() + setDelay, [resolve, reject], Server.setTask, project, board, name, content]
-    //         if (pendingInterval == null) {
-    //             pendingInterval = setInterval(Server.sendPendingTasks, setDelay)
-    //         }
-    //     })
-    // }
 
     static setTask(project, board, name, content) {
         name = encodeURIComponent(name)
@@ -456,20 +447,28 @@ class Server {
             .catch(errorHandler);
     }
 
-    static postFedTransport(project, config) {
-        let url = `/api/v1/projects/${project}/fed/transport`
-        return axios.post(url, config, getConfig())
+
+    static getFedTransportExchange(project, id) {
+        let url = `/api/v1/projects/${project}/fed/transport/${id}`
+        return axios.get(url, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
 
-    static postFedShare(project, key, exchanges, removeCredentials) {
+    static putFedTransportExchange(project, id, content) {
+        let url = `/api/v1/projects/${project}/fed/transport/${id}`
+        return axios.put(url, content, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
+    static postFedInvite(project, key, exchanges, removeCredentials) {
         const c = {
             key: key,
             exchanges: exchanges,
             removeCredentials: removeCredentials,
         }
-        let url = `/api/v1/projects/${project}/fed/share`
+        let url = `/api/v1/projects/${project}/fed/invite`
         return axios.post(url, c, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
@@ -487,12 +486,20 @@ class Server {
     }
 
 
-    static getFedState(project) {
-        let url = `/api/v1/projects/${project}/fed/state`
+    static getFedState(project, time) {
+        let url = `/api/v1/projects/${project}/fed/state/${time}`
         return axios.get(url, getConfig())
             .then(r => r.data)
             .catch(errorHandler);
     }
+
+    static getFedExchangeList(project) {
+        let url = `/api/v1/projects/${project}/fed/transport`
+        return axios.get(url, getConfig())
+            .then(r => r.data)
+            .catch(errorHandler);
+    }
+
 
     static postFedSync(project, period=1) {
         let url = `/api/v1/projects/${project}/fed/sync?period=${period}`

@@ -1,110 +1,41 @@
 import {
-    Accordion, Button, ButtonGroup, FormLabel, Input, Spacer, Table, Td, Tr, useToast, VStack
+    Accordion, Button, ButtonGroup, FormLabel, Input, Spacer, Table, Td, Tr, VStack
 } from '@chakra-ui/react';
 import { React, useContext, useEffect, useState } from "react";
 import T from '../core/T';
 import Server from '../server';
 import UserContext from '../UserContext';
+import Exchange from './Exchange';
 import FTPExchange from './exchanges/FTPExchange';
 import S3Exchange from './exchanges/S3Exchange';
-import WebDAVExchange from './exchanges/WebDAVExchange';
 import USBExchange from './exchanges/USBExchange';
+import WebDAVExchange from './exchanges/WebDAVExchange';
+import models from './models';
 
 
 function Exchanges(props) {
     const { project } = useContext(UserContext)
     const { onClose } = props
     const [transport, setTransport] = useState(null)
-    const [status, setStatus] = useState(null)
-    const toast = useToast()
 
-
-    function getConfig() {
+    function init() {
         Server.getFedTransport(project)
             .then(setTransport)
-        Server.getFedState(project)
-            .then(setStatus)
     }
-    useEffect(getConfig, [])
+    useEffect(init, [])
 
-    function saveTransport() {
-        Server.postFedTransport(project, transport)
-            .then(_ => toast({
-                title: `Config Saved`,
-                description: 'The federation configuration has been saved',
-                status: "success",
-                duration: 9000,
-                isClosable: true,
-            }))
+    function addExchange(modelId) {
+        const model = models[modelId]
+        Server.putFedTransportExchange(project, `${modelId}/${new Date().getTime()}`, model)
+            .then(init)
     }
 
-    function updateExchange(l, idx, value) {
-        if (value) {
-            l[idx] = value
-        } else {
-            l.splice(idx, 1)
-            setConfig({ ...config })
-        }
-    }
+    let exchangesUI = transport && Object.keys(transport)
+                            .sort()
+                            .map(k => <Exchange id={k} status={transport[k]} />) || []
 
-    let exchangesUI = transport ? [
-        ...transport.s3.map(
-            (exchange, i) => <S3Exchange exchange={exchange} update={v => updateExchange(transport.s3, i, v)}
-                status={status && status.netStats[exchange.name]} />),
-        ...transport.webDAV.map(
-            (exchange, i) => <WebDAVExchange exchange={exchange} update={v => updateExchange(transport.webDAV, i, v)}
-                status={status && status.netStats[exchange.name]} />),
-        ...transport.ftp.map(
-            (exchange, i) => <FTPExchange exchange={exchange} update={v => updateExchange(transport.ftp, i, v)}
-                status={status && status.netStats[exchange.name]} />),
-        ...transport.usb.map(
-            (exchange, i) => <USBExchange exchange={exchange} update={v => updateExchange(transport.usb, i, v)}
-                status={status && status.netStats[exchange.name]} />),
-    ] : []
+    const addButtons = Object.keys(models).map(k => <Button onClick={_ => addExchange(k)}><T>{`add ${k}`}</T></Button>)
 
-    function addS3() {
-        transport.s3.push({
-            name: '',
-            endpoint: '',
-            bucket: '',
-            accessKey: '',
-            secret: '',
-            useSSL: false,
-            location: '',
-        })
-        setTransport({ ...transport })
-    }
-
-    function addFTP() {
-        transport.ftp.push({
-            name: '',
-            url: '',
-            username: '',
-            password: '',
-            secret: '',
-            timeout: 10,
-        })
-        setTransport({ ...transport })
-    }
-
-
-    function addUSBMedia() {
-        transport.usb.push({
-        })
-        setTransport({ ...transport })
-    }
-
-    function addWebDAV() {
-        transport.webDAV.push({
-            name: '',
-            url: '',
-            username: '',
-            password: '',
-            secret: '',
-            timeout: 10,
-        })
-        setTransport({ ...transport })
-    }
 
     return transport ? <VStack>
         <Table size="sm" padding="0" spacing="0">
@@ -119,12 +50,8 @@ function Exchanges(props) {
         </Table>
         <Spacer minHeight="1em" />
         <ButtonGroup>
-            <Button onClick={_ => addS3()}><T>add S3</T></Button>
-            <Button onClick={_ => addWebDAV()}><T>add WebDAV</T></Button>
-            <Button onClick={_ => addFTP()}><T>add FTP</T></Button>
-            <Button onClick={_ => addUSBMedia()}><T>add USB Media</T></Button>
+            {addButtons}
             <Spacer minW="2em" />
-            <Button colorScheme="blue" onClick={saveTransport}>Save</Button>
             <Button onClick={onClose}>Close</Button>
         </ButtonGroup>
         <Accordion w="100%" allowToggle>

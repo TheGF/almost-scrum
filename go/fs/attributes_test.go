@@ -1,3 +1,6 @@
+// +build skip
+
+
 package fs
 
 import (

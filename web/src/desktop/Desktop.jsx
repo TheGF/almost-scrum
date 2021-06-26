@@ -23,6 +23,7 @@ function Desktop(props) {
     const [noAccess, setNoAccess] = useState(null)
     const askBoardName = useDisclosure(false)
     const [refreshId, setRefreshId] = useState(false)
+    const [fedState, setFedState] = useState(null)
 
     function checkNoAccess(r) {
         if (r.response && r.response.status == 403 && r.response.data.users && r.response.data.message) {
@@ -79,7 +80,8 @@ function Desktop(props) {
 
     const reload = () => window.location.reload();
     const username = info && info.systemUser
-    const userContext = { project, info, username, reload }
+
+    const userContext = { project, info, username, reload, fedState, setFedState }
 
     const desktop = <div key={refreshId} >
         <AskBoardName {...askBoardName} boards={boards} onCreate={createBoard} />

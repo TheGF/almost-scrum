@@ -62,6 +62,10 @@ func getProject(c *gin.Context) *core.Project {
 }
 
 func openProject(name string, path string) (*core.Project, error) {
+	if p, found := projectMapping[name]; found {
+		return p, nil
+	}
+
 	project, err := core.FindProject(path)
 	if core.IsErr(err, "cannot open project %s from %s", name, path) {
 		return nil, err

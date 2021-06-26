@@ -4,17 +4,16 @@ import (
 	"almost-scrum/core"
 	"almost-scrum/fs"
 	"fmt"
+	"github.com/code-to-go/fed/extfs"
 	"github.com/hashicorp/go-version"
 	"github.com/sirupsen/logrus"
 	"io"
-	"regexp"
-	"strconv"
-	"time"
-
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
+	"strconv"
 )
 
 type versionInfo struct {
@@ -24,22 +23,15 @@ type versionInfo struct {
 
 func archiveFile(project *core.Project, path string) (string, error) {
 	source := filepath.Join(project.Path, core.ProjectLibraryFolder, path)
-	attr, err := fs.GetExtendedAttr(source)
-	if err != nil {
-		return "", err
-	}
-
 	dest := filepath.Join(project.Path, core.ProjectArchiveFolder, path)
-	err = os.Rename(source, dest)
-	if err != nil {
+	if err := os.Rename(source, dest); err != nil {
 		logrus.Errorf("Cannot archive file %s: %v", source, err)
 		return "", err
 	}
+	extfs.Move(source, dest)
 
-	_ = fs.SetExtendedAttr(dest, attr)
-	_ = fs.SetExtendedAttr(source, nil)
 	logrus.Debugf("Archived file %s to %s", source, dest)
-	return dest, err
+	return dest, nil
 }
 
 func filterVersioned(project *core.Project, parent string, fileInfo os.FileInfo, latest map[string]versionInfo) {
@@ -154,12 +146,11 @@ func IncreaseVersion(project *core.Project, path string, owner string, public bo
 	}
 
 	_, _ = archiveFile(project, path)
-	_ = fs.SetExtendedAttr(fullPath_, &fs.ExtendedAttr{
-		Owner:      owner,
-		Public:     public,
-		ImportHash: nil,
-		Modified:   time.Time{},
-	})
+	_ = extfs.Set(fullPath_, core.FileAttr{
+		Owner:  owner,
+		Public: public,
+	}, true)
+	_ = project.Fed.SetTracked(fullPath_, public)
 
 	archivePath := filepath.Join(project.Path, core.ProjectArchiveFolder, path)
 	_ = os.MkdirAll(filepath.Dir(archivePath), 0755)

@@ -36,7 +36,7 @@ function ImageViewer(props) {
         setIdx(indexes[i + step])
     }
 
-    return <Modal isOpen={value != null} onClose={onClose} size="xl">
+    return <Modal isOpen={value != null} onClose={onClose} size="2xl">
         <ModalOverlay />
         <ModalContent>
             <ModalHeader>{name}</ModalHeader>

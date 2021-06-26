@@ -2,26 +2,36 @@ package web
 
 import (
 	"almost-scrum/core"
-	"github.com/code-to-go/fed"
+	"bytes"
+	"encoding/json"
 	"github.com/code-to-go/fed/transport"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strconv"
+	"strings"
 	"time"
 )
 
 //fedRoute add fed related api routes
 func fedRoute(group *gin.RouterGroup) {
-	group.GET("/projects/:project/fed/transport", getTransportAPI)
-	group.POST("/projects/:project/fed/transport", setTransportAPI)
-	group.GET("/projects/:project/fed/state", getStateAPI)
-	group.POST("/projects/:project/fed/merge", postMergeAPI)
-	group.POST("/projects/:project/fed/sync", postAutoSyncAPI)
+	group.GET("/projects/:project/fed/transport", getTransportListAPI)
+	group.GET("/projects/:project/fed/transport/*id", getTransportAPI)
+	group.PUT("/projects/:project/fed/transport/*id", putTransportAPI)
+	group.GET("/projects/:project/fed/state/:after", getStateAPI)
+	group.POST("/projects/:project/fed/resolve", postResolveAPI)
+	group.POST("/projects/:project/fed/sync", postSyncAPI)
 	group.POST("/projects/:project/fed/invite", postCreateInviteAPI)
 	group.POST("/projects/:project/fed/join", postJoinAPI)
+}
+
+func getTransportListAPI(c *gin.Context) {
+	var project *core.Project
+	if project = getProject(c); project == nil {
+		return
+	}
+
+	c.JSON(http.StatusOK, transport.ListExchanges(project.Fed.GetTransport()))
 }
 
 func getTransportAPI(c *gin.Context) {
@@ -30,22 +40,28 @@ func getTransportAPI(c *gin.Context) {
 		return
 	}
 
-	config := project.Fed.GetTransport()
-	c.JSON(http.StatusOK, config)
+	id := c.Param("id")
+	d, err := transport.GetExchange(project.Fed.GetTransport(), id)
+	if err != nil {
+		c.String(http.StatusNotFound, "no exchange %s: %v", id, err)
+		return
+	}
+
+	c.String(http.StatusOK, string(d))
 }
 
-func setTransportAPI(c *gin.Context) {
+
+func putTransportAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	var config transport.Config
-	if err := c.BindJSON(&config); core.IsErr(err, "Invalid JSON") {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-	project.Fed.SetTransport(&config)
+	id := c.Param("id")
+	id = strings.TrimPrefix(id, "/")
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(c.Request.Body)
+	transport.SetExchange(project.Fed.GetTransport(), id, buf.Bytes())
 
 	c.JSON(http.StatusOK, "")
 }
@@ -56,38 +72,52 @@ func getStateAPI(c *gin.Context) {
 		return
 	}
 
-	s := project.Fed.GetState()
+	tm := time.Time{}
+	after := c.Param("after")
+	if after != "" {
+		if err := json.Unmarshal([]byte(after), &tm); err != nil {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+//		tm, _ = time.Parse("2006-01-02T15:04:05.999Z07:00", after)
+	}
+
+	s := project.Fed.GetState(tm)
 	logrus.Debugf("Fed status in project: %v", s)
 	c.JSON(http.StatusOK, s)
 }
 
-func postMergeAPI(c *gin.Context) {
+type Resolve struct {
+	Extract []string `json:"extract"`
+	Ignore []string `json:"ignore"`
+}
+
+func postResolveAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	var actions []fed.Action
-	stateId,_ := strconv.Atoi(c.Query("id"))
+	var resolve Resolve
 
-	if err := c.BindJSON(&actions); core.IsErr(err, "Invalid JSON") {
+	if err := c.BindJSON(&resolve); core.IsErr(err, "Invalid JSON") {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	ok := project.Fed.Merge(int64(stateId), actions)
-	c.JSON(http.StatusOK, ok)
+	if err := project.Fed.Resolve(resolve.Extract, resolve.Ignore); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, "")
 }
 
-func postAutoSyncAPI(c *gin.Context) {
+func postSyncAPI(c *gin.Context) {
 	var project *core.Project
 	if project = getProject(c); project == nil {
 		return
 	}
 
-	p, _ := strconv.Atoi(c.Query("period"))
-	period := time.Duration(p) * time.Minute
-	project.Fed.AutoSync(period, getWebUser(c))
-
+	project.Fed.Sync()
 	c.JSON(http.StatusOK, "")
 }
 
@@ -134,12 +164,14 @@ func postJoinAPI(c *gin.Context) {
 		return
 	}
 
-	if err := fed.Join(request.Key, request.Token, filepath.Join(project.Path, "fed")); err == os.ErrInvalid {
+	if f, err := project.Fed.Join(request.Key, request.Token); err == os.ErrInvalid {
 		c.String(http.StatusBadRequest, "Invalid token or key")
 	} else if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
+	} else {
+		project.Fed = f
+		c.JSON(http.StatusOK, "")
 	}
 
-	c.JSON(http.StatusOK, "")
 }

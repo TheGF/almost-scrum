@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"github.com/code-to-go/fed/extfs"
 	rand2 "math/rand"
 	"os"
 	"path/filepath"
@@ -43,6 +44,12 @@ type Config struct {
 	LdapConfig   *LdapConfig
 }
 
+func init() {
+	home, _ := os.UserHomeDir()
+	extfsFolder := filepath.Join(home, ".config", "extfs-to-go")
+	extfs.Init(extfsFolder)
+}
+
 func getSecret() string {
 	key := [48]byte{}
 	_, err := rand.Read(key[:])
@@ -61,7 +68,7 @@ func getConfigPath() string {
 	home, _ := os.UserHomeDir()
 	configFolder := filepath.Join(home, ".config")
 	_ = os.MkdirAll(configFolder, os.FileMode(0755))
-	return filepath.Join(configFolder, "almost-scrum.yaml")
+	return filepath.Join(configFolder, "stg.yaml")
 }
 
 

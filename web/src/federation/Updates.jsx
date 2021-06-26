@@ -1,6 +1,6 @@
 import {
     Button, ButtonGroup, Center, CircularProgress, Flex, Menu,
-    MenuButton, MenuItem, MenuList, Switch, Table, Tbody, Td, Th, Thead, Tr,
+    MenuButton, MenuItem, MenuList, Switch, Table, Tbody, Td, Text, Th, Thead, Tr,
     useToast,
     VStack
 } from '@chakra-ui/react';
@@ -9,33 +9,22 @@ import { BiChevronDown } from 'react-icons/bi';
 import T from '../core/T';
 import Server from '../server';
 import UserContext from '../UserContext';
+import Utils from '../core/utils';
 
 
 function Updates(props) {
-    const { project, reload } = useContext(UserContext)
-    const [updates, setUpdates] = useState(null)
-    const [importing, setImporting] = useState(false)
-    const { onClose, exportSince } = props
-    const toast = useToast()
+    const { project } = useContext(UserContext)
+    const [range, setRange] = useState(1)
+    const [state, setState] = useState(null)
+    const { onClose } = props
 
-    function getStatus() {
-        Server.getFedState(project, true)
-            .then(status => setUpdates(status.updates || []))
+    function getState() {
+        const time = new Date()
+        time.setDate(time.getDate() - range)
+        Server.getFedState(project, JSON.stringify(time))
+            .then(setState)
     }
-    useEffect(getStatus, [])
-
-    function importFiles() {
-        setImporting(true)
-
-        const filtered = updates.filter(u=>u.update)
-                                .map(u=> ({...u, update: undefined}))
-
-        if (filtered.length) {
-            Server.postFedImport(project, filtered)
-            .then(_ => setImporting(false))
-            .then(reload)
-        }
-    }
+    useEffect(getState, [range])
 
     function Row(props) {
         const { item } = props
@@ -48,64 +37,75 @@ function Updates(props) {
         }
 
         return <Tr>
-            <Td>{item.loc}</Td>
-            <Td>{item.owner}</Td>
-            <Td>{item.state}</Td>
-            <Td><Switch isChecked={update} onChange={switchUpdate} /></Td>
+            <Td>{item.path}</Td>
+            <Td>{Utils.getFriendlyDate(item.modTime)}</Td>
+            <Td>{item.user}</Td>
         </Tr>
     }
 
 
+    const updates = state && state.updates && state.updates
+        .sort((a, b) => (a.path.localeCompare(b.path)))
+        .map(s => <Row key={s.path} item={s} />) || []
+    const sent = state && state.sent && state.sent
+        .sort((a, b) => (a.path.localeCompare(b.path)))
+        .map(s => <Row key={s.path} item={s} />) || []
 
-    const rows = []
-    // updates && updates.filter(update => update.state != 'older')
-    //     .sort((a, b) => a.loc.localeCompare(b.loc))
-    //     .map(update => <Row key={update.loc} item={update} />)
-
-
-    const exportSinceButton = <Menu>
+    const rangeButton = <Menu>
         <MenuButton colorScheme="blue" as={Button} rightIcon={<BiChevronDown />}>
-            Export Since
+            Range
         </MenuButton>
         <MenuList>
-            <MenuItem onClick={_ => exportSince('today')}>
+            <MenuItem onClick={_ => setRange(1)}>
                 Today
             </MenuItem>
-            <MenuItem onClick={_ => exportSince('week')}>
+            <MenuItem onClick={_ => setRange(7)}>
                 One Week
             </MenuItem>
-            <MenuItem onClick={_ => exportSince('month')}>
-                One Month
+            <MenuItem onClick={_ => setRange(30)}>
+                30 Days
             </MenuItem>
-            <MenuItem onClick={_ => exportSince('all')}>
-                The Big Bang
+            <MenuItem onClick={_ => setRange(356)}>
+                One Year
             </MenuItem>
         </MenuList>
     </Menu>
 
 
-    return updates != null ? <VStack>
-        {rows.length ? <Flex overflow="auto" w="100%">
+    return state != null ? <VStack>
+        <Text fontSize="xl" as="b">Received</Text>
+        <Flex overflow="auto" w="100%">
             <Table overflow="auto" >
                 <Thead>
                     <Tr>
                         <Th>File</Th>
-                        <Th>From</Th>
-                        <Th>State</Th>
-                        <Th>Update</Th>
+                        <Th>Changed On</Th>
+                        <Th>By</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {rows}
+                    {updates}
                 </Tbody>
             </Table>
-        </Flex> : <h1>No updates</h1>}
+        </Flex>
+        <Text fontSize="xl" as="b">Sent</Text>
+        <Flex overflow="auto" w="100%">
+            <Table overflow="auto" >
+                <Thead>
+                    <Tr>
+                        <Th>File</Th>
+                        <Th>Changed On</Th>
+                        <Th>By</Th>
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    {sent}
+                </Tbody>
+            </Table>
+        </Flex>
         <ButtonGroup>
-            <Button colorScheme="blue" onClick={importFiles} isLoading={importing}
-                isDisabled={!rows.length}><T>import</T></Button>
-            {exportSinceButton}
+            {rangeButton}
             <Button onClick={onClose}><T>close</T></Button>
-
         </ButtonGroup>
 
     </VStack> :

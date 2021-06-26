@@ -13,110 +13,59 @@ import { MdSignalCellular0Bar, MdSignalCellular1Bar, MdSignalCellular2Bar, MdSig
 import Exchanges from "./Exchanges";
 import Invite from "./Invite";
 import Join from './Join';
+import Parked from './Parked';
 
 let monitorInterval = null
 
 function Federation(props) {
-    const { project } = useContext(UserContext)
+    const { project, fedState, setFedState } = useContext(UserContext)
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [strenght, setStrength] = useState(0)
     const [updates, setUpdates] = useState(0)
     const toast = useToast()
+    const [lastCheck, setLastCheck] = useState(
+        localStorage.getItem(`stg-${project}-lastCheck`) || JSON.stringify(new Date(0))
+    )
 
+    function notifyChanges(state, time) {
+        localStorage.setItem(`stg-${project}-lastCheck`, JSON.stringify(time))
+        setLastCheck(JSON.stringify(time))
+        const parked = state.parked && state.parked.length || 0
+        const updates = state.updates && state.updates.length || 0
+        const sent = state.sent && state.sent.length || 0
 
-    function notifyChanges(diffs) {
-        return
-        const lastChange = new Date(localStorage.getItem('ash-fed-newest-fed-log'))
-
-        for (const log of diffs) {
-            const creationTime = new Date(log.creationTime)
-            if (creationTime < lastChange) {
-                continue
-            }
-
-            const stat = { outdated: 0, update: 0, new: 0, conflict: 0 }
-            for (const item of Object.values(log.items)) {
-                stat[item.match] += 1
-            }
-
-            if (stat['new'] || stat['update'] || stat['conflict']) {
-                setUpdates(stat['new'] + stat['update'] + stat['conflict'])
-                toast({
-                    title: `Update from ${log.header.user}@${log.header.hostname}`,
-                    description: `${stat['new']} new files, ${stat['update']} updates and ${stat['conflict']} conflicts` +
-                        '; click on federation button to synchronize',
-                    status: "success",
-                    duration: 9000,
-                    isClosable: true,
-                })
-            }
-        }
-    }
-    function getDiffs() {
-        Server.getFedDiffs(project, true)
-            .then(notifyChanges)
-    }
-
-    // function exportSince(time) {
-    //     let d = new Date()
-
-    //     switch (time) {
-    //         case 'today': d.setDate(d.getDate() - 1); break
-    //         case 'week': d.setDate(d.getDate() - 7); break
-    //         case 'month': d.setMonth(d.getMonth() - 1); break
-    //         case 'all': d.setYear(0); break
-    //         default: d = null; break
-    //     }
-
-    //     Server.postFedExport(project, d)
-    //         .then(files => {
-    //             Server.postFedPush(project)
-    //                 .then(_ => {
-    //                     if (files) {
-    //                         let description = files.join(',')
-    //                         if (description.length > 256) {
-    //                             description = `${description.substr(0, 253)}...`
-    //                         }
-
-    //                         toast({
-    //                             title: `Successful Export`,
-    //                             description: description,
-    //                             status: "success",
-    //                             duration: 9000,
-    //                             isClosable: true,
-    //                         })
-    //                     }
-    //                 })
-    //         })
-    // }
-
-    function onFedState(status) {
-        if (!status || !status.netStats) {
-            setStrength(0)
+        if (updates == 0 && sent == 0) {
             return
         }
 
-        const strenght = Object.entries(status.netStats).filter(([_, stat]) => stat.connectErr == null).length
+        const description = `${updates} updated, ${sent} sent and ${parked} parked files;` +
+        ' click on federation for information and conflict resolution'
 
-        setStrength(strenght)
-        notifyChanges(status.updates || [])
+        toast({
+            title: `Federation updates`,
+            description: description,
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+        })
     }
 
     function closeModal() {
-        // exportSince()
         onClose()
     }
 
     function check() {
-        Server.postFedSync(project)
-        Server.getFedState(project).then(onFedState)
-        // Server.postFedPull(project)
-        //     .then(_ => Server.getFedState(project).then(onFedState))
+        Server.getFedExchangeList(project).then(
+            ls => {
+                ls && setStrength(Object.keys(ls).filter(k => !ls[k]).length)
+                Server.getFedState(project, lastCheck)
+                    .then(s => notifyChanges(s, new Date()))
+            })       
     }
 
     function startMonitoring() {
         check()
-        setInterval(check, 5 * 60000)
+        setInterval(check, 30 * 1000)
     }
     useEffect(startMonitoring, [])
 
@@ -144,6 +93,7 @@ function Federation(props) {
                 <ModalBody>
                     <Tabs isLazy>
                         <TabList>
+                            <Tab isDisabled={strenght == 0}><T>parked</T></Tab>
                             <Tab isDisabled={strenght == 0}><T>updates</T></Tab>
                             <Tab><T>exchanges</T></Tab>
                             <Tab><T>join</T></Tab>
@@ -151,6 +101,9 @@ function Federation(props) {
                         </TabList>
 
                         <TabPanels>
+                            <TabPanel>
+                                <Parked key={isOpen} onClose={closeModal} />
+                            </TabPanel>
                             <TabPanel>
                                 <Updates key={isOpen} onClose={closeModal} />
                             </TabPanel>

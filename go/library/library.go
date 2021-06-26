@@ -2,7 +2,7 @@ package library
 
 import (
 	"almost-scrum/core"
-	"almost-scrum/fs"
+	"github.com/code-to-go/fed/extfs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -15,7 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// LibraryItem contains basic information about items in the library.
+// Item contains basic information about items in the library.
 type Item struct {
 	Name    string    `json:"name"`
 	Size    int64     `json:"size"`
@@ -23,9 +23,8 @@ type Item struct {
 	Mime    string    `json:"mime"`
 	Dir     bool      `json:"dir"`
 	Empty   bool      `json:"empty"`
-	Public  bool      `json:"public_"`
-	Owner   string    `json:"owner"`
 	Parent  string    `json:"parent"`
+	core.FileAttr
 }
 
 func getItem(path string, fileInfo os.FileInfo) Item {
@@ -46,19 +45,15 @@ func getItem(path string, fileInfo os.FileInfo) Item {
 		size = fileInfo.Size()
 	}
 
-	extendedAttr, err := fs.GetExtendedAttr(path)
-	if err != nil {
-		logrus.Warnf("Cannot get extended attr for %s: %v", path, err)
-		return Item{}
-	}
+	var attr core.FileAttr
+	extfs.Get(path, attr)
 	return Item{
-		Name:    fileInfo.Name(),
-		Size:    size,
-		ModTime: fileInfo.ModTime(),
-		Mime:    mime.String(),
-		Public:  extendedAttr.Public,
-		Owner:   extendedAttr.Owner,
-		Dir:     fileInfo.IsDir(),
+		Name:     fileInfo.Name(),
+		Size:     size,
+		ModTime:  fileInfo.ModTime(),
+		Mime:     mime.String(),
+		FileAttr: attr,
+		Dir:      fileInfo.IsDir(),
 	}
 }
 
@@ -86,9 +81,7 @@ func List(project *core.Project, path string) ([]Item, error) {
 
 	versions := make(map[string]versionInfo)
 	for _, file := range files {
-		if file.Name() != fs.AttrsFileName {
-			filterVersioned(project, path, file, versions)
-		}
+		filterVersioned(project, path, file, versions)
 	}
 
 	items := make([]Item, 0, len(files))
@@ -110,18 +103,11 @@ func MoveFile(project *core.Project, oldPath string, path string) error {
 	if oldPath, err = AbsPath(project, oldPath); err != nil {
 		return err
 	}
-	xAttr, err := fs.GetExtendedAttr(oldPath)
-	if err != nil {
-		return err
-	}
-
 	err = os.Rename(oldPath, path)
 	if err != nil {
 		return err
 	}
-	xAttr.Modified = time.Now()
-	_ = fs.SetExtendedAttr(path, xAttr)
-	_ = fs.SetExtendedAttr(oldPath, xAttr )
+	extfs.Move(oldPath, path)
 	return nil
 }
 
@@ -130,24 +116,18 @@ func CreateFolder(project *core.Project, path string, owner string) error {
 	if err := os.MkdirAll(path, 0755); err != nil {
 		return err
 	}
-	return fs.SetExtendedAttr(path, &fs.ExtendedAttr{
-		Owner: owner,
-	})
+	return extfs.Set(path, &core.FileAttr{Owner: owner}, true)
 }
 
 func DeleteFile(project *core.Project, path string) error {
 	path = filepath.Join(project.Path, core.ProjectLibraryFolder, path)
-	//if recursive {
-	//	_ = fs.SetExtendedAttr(path, nil)
-	//	return os.RemoveAll(path)
-	//} else {
 	err := os.Remove(path)
 	if err != nil {
 		return err
 	}
-	attr, _ := fs.GetExtendedAttr(path)
-	attr.Modified = time.Now()
-	_ = fs.SetExtendedAttr(path, attr)
+	//attr, _ := fs.GetExtendedAttr(path)
+	//attr.Modified = time.Now()
+	//_ = fs.SetExtendedAttr(path, attr)
 	return nil
 }
 
@@ -163,7 +143,7 @@ func ArchivePath(project *core.Project, path string) (string, error) {
 }
 
 func SetFileInLibrary(project *core.Project, path string, reader io.ReadCloser,
-		owner string, public bool) (string, error) {
+	owner string, public bool) (string, error) {
 	var err error
 	path = filepath.Join(project.Path, core.ProjectLibraryFolder, path)
 
@@ -181,12 +161,14 @@ func SetFileInLibrary(project *core.Project, path string, reader io.ReadCloser,
 	}
 	logrus.Debugf("successfully set file %s in library", path)
 
-	if err := fs.SetExtendedAttr(path, &fs.ExtendedAttr{
-		Owner:      owner,
-		ImportHash: nil,
-		Public:     public,
-		Modified:   time.Now(),
-	}); err != nil {
+	if err := project.Fed.SetTracked(path, public); err != nil {
+		logrus.Warnf("Cannot set tracker for file %s: %v", path, err)
+	}
+
+	if err := extfs.Set(path, core.FileAttr{
+		Owner:  owner,
+		Public: public,
+	}, true); err != nil {
 		logrus.Warnf("Cannot set owner for file %s: %v", path, owner)
 	}
 	logrus.Debugf("set owner of file %s tp %s", path, owner)
@@ -209,8 +191,6 @@ func SetVisibility(project *core.Project, path string, public bool) error {
 	return err
 }
 
-
-// AbsPath returns the absolute path for a resource stored in the library.
 func GetItems(project *core.Project, paths []string) ([]Item, error) {
 	items := make([]Item, 0, len(paths))
 

@@ -47,8 +47,7 @@ func TestNextVersion(t *testing.T) {
 }
 
 func TestExport(t *testing.T) {
-	html, _ := ExportMarkdownToHTML("../../web/src/help/portal.md", "/tmp/export.html",
-		"../../web/public")
+	html, _ := ExportMarkdownToHTML("../../web/src/help/portal.md", "/tmp/export.html")
 
 	print(html)
 }

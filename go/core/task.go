@@ -2,7 +2,6 @@
 package core
 
 import (
-	"almost-scrum/fs"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -176,9 +175,6 @@ func SetTask(project *Project, board string, id string, task *Task) error {
 		return err
 	}
 
-	attr, _ := fs.GetExtendedAttr(p)
-	attr.Modified = time.Now()
-	_ = fs.SetExtendedAttr(p, attr)
 	return nil
 }
 
@@ -188,10 +184,6 @@ func DeleteTask(project *Project, board string, name string) (task Task, err err
 	if err = os.Remove(p); IsErr(err, "Cannot delete task %s/%s", board, name) {
 		return task, err
 	}
-
-	attr, _ := fs.GetExtendedAttr(p)
-	attr.Modified = time.Now()
-	_ = fs.SetExtendedAttr(p, attr)
 
 	return task, nil
 }
@@ -203,10 +195,6 @@ func TouchTask(project *Project, board string, name string) error {
 	if err := os.Chtimes(p, currentTime, currentTime); IsErr(err, "cannot touch %s/%s", board, name) {
 		return err
 	}
-
-	attr, _ := fs.GetExtendedAttr(p)
-	attr.Modified = time.Now()
-	_ = fs.SetExtendedAttr(p, attr)
 
 	return nil
 }
@@ -221,10 +209,6 @@ func MoveTask(project *Project, oldBoard string, oldName string, board string, n
 
 	currentTime := time.Now().Local()
 	_ = os.Chtimes(target, currentTime, currentTime)
-
-	attr, _ := fs.GetExtendedAttr(source)
-	attr.Modified = time.Now()
-	_ = fs.SetExtendedAttr(target, attr)
 
 	return nil
 }

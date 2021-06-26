@@ -119,8 +119,8 @@ function Header(props) {
         </MenuItem>
             {onExit ? <>
                 <MenuDivider />
-                <MenuItem onClick={onExit}><T>back to portal</T></MenuItem>
-            </> : null}
+                <MenuItem onClick={onExit}><T>{`leave ${project}`}</T></MenuItem>
+            </> : null}e
         </MenuList>
     </Menu>
 

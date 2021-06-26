@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/appleboy/gin-jwt/v2 v2.6.4
-	github.com/code-to-go/fed v0.0.0-20210523070834-e7dc38af30ac
+	github.com/code-to-go/fed v0.0.0-20210624200342-fe6b407cb136
 	github.com/fatih/color v1.10.0
 	github.com/gabriel-vasile/mimetype v1.3.0
 	github.com/getlantern/golog v0.0.0-20201105130739-9586b8bde3a9 // indirect
@@ -28,6 +28,7 @@ require (
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/manifoldco/promptui v0.8.0
 	github.com/minio/md5-simd v1.1.2 // indirect
+	github.com/minio/minio-go/v7 v7.0.11 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/monirz/gotri v0.0.0-20200219181904-dacfb98c509f
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -38,9 +39,9 @@ require (
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/stretchr/testify v1.7.0
 	github.com/ugorji/go v1.2.5 // indirect
-	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
-	golang.org/x/net v0.0.0-20210521195947-fe42d452be8f // indirect
-	golang.org/x/sys v0.0.0-20210521203332-0cec03c779c1
+	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
+	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
+	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22
 	golang.org/x/text v0.3.6
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect

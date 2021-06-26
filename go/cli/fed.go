@@ -2,51 +2,52 @@ package cli
 
 import (
 	"almost-scrum/core"
-	"github.com/code-to-go/fed"
+	"github.com/code-to-go/fed/transport"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"os"
+	"time"
 )
 
-func printEvent(event fed.Event) {
-	switch event.EventType {
-	case fed.ExportLog:
-		color.Green("-> %s", event.Loc)
-	case fed.MergeEvent:
-		color.Green("<- %s", event.Loc)
-	}
-}
 
 func syncCommand(projectPath string, args []string) {
 	project := getProject(projectPath)
+	now := time.Now()
 
 	f := project.Fed
-	f.Watch(printEvent)
-	f.Pull()
-	f.Push(core.GetSystemUser())
 
-	state := f.GetState()
-	if len(state.NetStats) == 0 {
+	connected := false
+	for _, c := range transport.ListExchanges(f.GetTransport()) {
+		connected = connected || c == ""
+	}
+	if !connected {
 		color.Red("The project has no active transport. Use 'scrum fed claim' to add exchanges")
 		os.Exit(0)
 	}
 
-	color.Green("Available updates")
-	for loc, update := range state.Updates {
+	f.Sync()
+	state := f.GetState(now)
 
-		if update.Delete {
-			color.Green("%s > Deletion", loc)
-			continue
+	color.Green("Updates")
+	for _, update := range state.Updates {
+		if update.Deleted {
+			color.Green("%s > Deleted by %s", update.Path, update.User)
+		} else {
+			color.Green("%s > Updated by %s", update.Path, update.User)
 		}
+	}
 
-		switch update.State {
-		case fed.New:
-			color.Green("%s > New file", loc)
-		case fed.Newer:
-			color.Green("%s > Updated file", loc)
-		case fed.Conflict:
-			color.Green("%s > Conflict", loc)
+	for _, parked := range state.Parked {
+		if parked.Deleted {
+			color.Red("%s > Deletion by %s parked", parked.Path, parked.User)
+		} else {
+			color.Red("%s > Update by %s parked", parked.Path, parked.User)
 		}
+	}
+
+	color.Green("Sent")
+	for _, sent := range state.Sent {
+		color.Green("%s > Update by %s sent to the federation", sent.Path, sent.User)
 	}
 
 }
